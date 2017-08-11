@@ -7,9 +7,6 @@
 
 #[macro_use]
 extern crate log;
-#[macro_use]
-extern crate serde_derive;
-extern crate serde;
 
 extern crate docopt;
 extern crate env_logger;
@@ -28,18 +25,6 @@ use std::str::FromStr;
 
 const USAGE: &'static str = include_str!("../usage.txt");
 
-#[derive(Debug, Deserialize)]
-struct Args {
-    flag_version: bool,
-    flag_quiet: bool,
-    flag_verbose: bool,
-    flag_host: String,
-    flag_port: String,
-    flag_base_path: String,
-    flag_security_level: String,
-    flag_chain: String,
-    cmd_server: bool,
-}
 
 fn main() {
     env::set_var("RUST_BACKTRACE", "1");
@@ -101,22 +86,7 @@ fn main() {
     info!("Security level set to '{}'", sec_level);
 
     if args.cmd_server {
-        let addr = format!("{}:{}", args.flag_host, args.flag_port)
-            .parse::<SocketAddr>()
-            .expect("Expect to parse address");
 
-        let base_path_str = args.flag_base_path.parse::<String>().expect(
-            "Expect to parse base \
-             path",
-        );
-
-        let base_path = if !base_path_str.is_empty() {
-            Some(PathBuf::from(&base_path_str))
-        } else {
-            None
-        };
-
-        emerald::rpc::start(&addr, &chain, base_path, Some(sec_level));
     }
 
 }

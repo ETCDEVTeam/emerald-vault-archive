@@ -34,7 +34,7 @@ emerald server --host 127.0.0.1 --port 1920
 === How to show all available accounts
 
 ----
-emerald account list --chain testnet --all
+emerald list --chain testnet
 ----
 
 === How to exclude some accounts from the showing list

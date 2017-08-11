@@ -1,11 +1,21 @@
 Emerald offline wallet command line interface.
 
 Usage:
-  emerald server [options] [--port <port>] [--host <host>]
+  emerald server [--port <port>] [--host <host>]
+  emerald new --chain <name> --security-level <level>
+  emerald export
+  emerald import
+  emerald list --chain <name>
+  emerald hide --chain <name> <address>
+  emerald unhide --chain <name> [-a | --all]
+  emerald strip
+  emerald update
+  emerald transaction
   emerald -V | --version
   emerald -h | --help
 
 Options:
+  -a, --all                                   Apply action to all accounts
   -h, --help                                  Show this message
   -V, --version                               Show current version
   -q, --quiet                                 Only errors printed to the output
