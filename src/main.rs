@@ -8,20 +8,23 @@
 #[macro_use]
 extern crate log;
 
+#[macro_use]
+extern crate serde_derive;
+extern crate serde;
 extern crate docopt;
 extern crate env_logger;
 extern crate emerald_core as emerald;
 extern crate regex;
 
+mod ctrl;
+
+use ctrl::{Args, CmdExecutor};
 use docopt::Docopt;
 use emerald::keystore::KdfDepthLevel;
 use env_logger::LogBuilder;
-use log::{LogLevel, LogRecord};
+use log::LogRecord;
 use std::env;
-use std::net::SocketAddr;
-use std::path::PathBuf;
 use std::process::*;
-use std::str::FromStr;
 
 const USAGE: &'static str = include_str!("../usage.txt");
 
@@ -58,35 +61,11 @@ fn main() {
         exit(0);
     }
 
-    if log_enabled!(LogLevel::Info) {
-        info!("Starting Emerald Connector - v{}", emerald::version());
-    }
-
-    let chain = match args.flag_chain.parse::<String>() {
-        Ok(c) => c,
+    match CmdExecutor::run(&args) {
+        Ok(_) => exit(0),
         Err(e) => {
-            error!("{}", e.to_string());
-            "mainnet".to_string()
+            error!("Can't execute command: {}", e.to_string());
+            exit(1);
         }
-    };
-    info!("Chain set to '{}'", chain);
-
-    let sec_level_str: &str = &args.flag_security_level.parse::<String>().expect(
-        "Expect to parse \
-         security level",
-    );
-
-    let sec_level = match KdfDepthLevel::from_str(sec_level_str) {
-        Ok(sec) => sec,
-        Err(e) => {
-            error!("{}", e.to_string());
-            KdfDepthLevel::default()
-        }
-    };
-    info!("Security level set to '{}'", sec_level);
-
-    if args.cmd_server {
-
     }
-
 }

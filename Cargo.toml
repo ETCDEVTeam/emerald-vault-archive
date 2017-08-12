@@ -16,7 +16,7 @@ travis-ci = { repository = "ethereumproject/emerald-cli" }
 appveyor = { repository = "ethereumproject/emerald-cli" }
 
 [[bin]]
-name = "emerald"
+    name = "emerald"
 path = "src/main.rs"
 
 [dependencies]
