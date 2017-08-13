@@ -1,10 +1,2 @@
-# emerald-cli
-[soon to be] Console tool for link:https://github.com/ethereumproject/emerald-rs/[Emerald Vault]
-
-ifndef::badges[]
-= Emerald-rs
-endif::[]
-
-ifdef::badges[]
 = Emerald-cli image:https://img.shields.io/travis/ethereumproject/emerald-cli/master.svg?style=flat-square["Build Status", link="https://travis-ci.org/ethereumproject/emerald-rs"] image:https://img.shields.io/appveyor/ci/r8d8/emerald-cli/master.svg?style=flat-square["Build Status", link="https://ci.appveyor.com/project/dulanov/emerald-rs"] image:https://img.shields.io/crates/v/emerald-cli.svg?style=flat-square["Crates", link="https://crates.io/crates/emerald-cli"] image:https://img.shields.io/badge/License-Apache%202.0-blue.svg?style=flat-square&maxAge=2592000["License", link="https://github.com/ethereumproject/emerald-cli/blob/master/LICENSE"]
-endif::[]
+[soon to be] Console tool for link:https://github.com/ethereumproject/emerald-rs/[Emerald Vault]
