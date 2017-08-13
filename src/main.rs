@@ -20,7 +20,6 @@ mod ctrl;
 
 use ctrl::{Args, CmdExecutor};
 use docopt::Docopt;
-use emerald::keystore::KdfDepthLevel;
 use env_logger::LogBuilder;
 use log::LogRecord;
 use std::env;
@@ -61,7 +60,15 @@ fn main() {
         exit(0);
     }
 
-    match CmdExecutor::run(&args) {
+    let cmd = match CmdExecutor::new(&args) {
+        Ok(c) => c,
+        Err(e) => {
+            error!("{}", e.to_string());
+            exit(1);
+        }
+    };
+
+    match cmd.run() {
         Ok(_) => exit(0),
         Err(e) => {
             error!("Can't execute command: {}", e.to_string());

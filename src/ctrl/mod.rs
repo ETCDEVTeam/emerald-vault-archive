@@ -2,8 +2,9 @@
 
 mod error;
 
-use super::KdfDepthLevel;
+use super::emerald::keystore::KdfDepthLevel;
 use super::emerald;
+use super::emerald::storage::{KeyfileStorage, build_storage, default_keystore_path};
 use super::log::LogLevel;
 use self::error::Error;
 use std::path::PathBuf;
@@ -11,7 +12,7 @@ use std::net::SocketAddr;
 use std::str::FromStr;
 
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Clone)]
 pub struct Args {
     pub flag_version: bool,
     pub flag_quiet: bool,
@@ -35,45 +36,17 @@ pub struct Args {
 
 type ExecResult<Error> = Result<(), Error>;
 
-pub struct CmdExecutor;
+pub struct CmdExecutor {
+    chain: String,
+    sec_level: KdfDepthLevel,
+    base_path: Option<PathBuf>,
+    storage: Box<KeyfileStorage>,
+    args: Args,
+}
 
 impl CmdExecutor {
     ///
-    pub fn run(args: &Args) -> ExecResult<Error> {
-        if args.cmd_server {
-            CmdExecutor::server(&args)
-        } else if args.cmd_list {
-            CmdExecutor::list()
-        } else if args.cmd_new {
-            CmdExecutor::new_account()
-        } else if args.cmd_hide {
-            CmdExecutor::hide()
-        } else if args.cmd_unhide {
-            CmdExecutor::unhide()
-        } else if args.cmd_update {
-            CmdExecutor::update()
-        } else if args.cmd_strip {
-            CmdExecutor::strip()
-        } else if args.cmd_import {
-            CmdExecutor::import()
-        } else if args.cmd_export {
-            CmdExecutor::export()
-        } else if args.cmd_transaction {
-            CmdExecutor::sign_transaction()
-        } else {
-            Err(Error::ExecError(
-                "No command selected. Use `-h` to see help menu".to_string(),
-            ))
-        }
-
-    }
-
-    ///
-    fn server(args: &Args) -> ExecResult<Error> {
-        if log_enabled!(LogLevel::Info) {
-            info!("Starting Emerald Connector - v{}", emerald::version());
-        }
-
+    pub fn new(args: &Args) -> Result<Self, Error> {
         let chain = match args.flag_chain.parse::<String>() {
             Ok(c) => c,
             Err(e) => {
@@ -81,7 +54,6 @@ impl CmdExecutor {
                 "mainnet".to_string()
             }
         };
-        info!("Chain set to '{}'", chain);
 
         let sec_level_str: &str = &args.flag_security_level.parse::<String>().expect(
             "Expect to parse \
@@ -95,16 +67,12 @@ impl CmdExecutor {
                 KdfDepthLevel::default()
             }
         };
-        info!("Security level set to '{}'", sec_level);
-
-        let addr = format!("{}:{}", args.flag_host, args.flag_port)
-            .parse::<SocketAddr>()
-            .expect("Expect to parse address");
 
         let base_path_str = args.flag_base_path.parse::<String>().expect(
             "Expect to parse base \
              path",
         );
+
 
         let base_path = if !base_path_str.is_empty() {
             Some(PathBuf::from(&base_path_str))
@@ -112,13 +80,74 @@ impl CmdExecutor {
             None
         };
 
-        emerald::rpc::start(&addr, &chain, base_path, Some(sec_level));
+        let keystore_path = default_keystore_path(&chain);
+        let storage = build_storage(keystore_path)?;
+
+        Ok(CmdExecutor {
+            args: args.clone(),
+            chain: chain,
+            base_path: base_path,
+            sec_level: sec_level,
+            storage: storage,
+        })
+    }
+
+    ///
+    pub fn run(&self) -> ExecResult<Error> {
+        if self.args.cmd_server {
+            self.server()
+        } else if self.args.cmd_list {
+            CmdExecutor::list()
+        } else if self.args.cmd_new {
+            CmdExecutor::new_account()
+        } else if self.args.cmd_hide {
+            CmdExecutor::hide()
+        } else if self.args.cmd_unhide {
+            CmdExecutor::unhide()
+        } else if self.args.cmd_update {
+            CmdExecutor::update()
+        } else if self.args.cmd_strip {
+            CmdExecutor::strip()
+        } else if self.args.cmd_import {
+            CmdExecutor::import()
+        } else if self.args.cmd_export {
+            CmdExecutor::export()
+        } else if self.args.cmd_transaction {
+            CmdExecutor::sign_transaction()
+        } else {
+            Err(Error::ExecError(
+                "No command selected. Use `-h` to see help menu".to_string(),
+            ))
+        }
+
+    }
+
+    ///
+    fn server(&self) -> ExecResult<Error> {
+        if log_enabled!(LogLevel::Info) {
+            info!("Starting Emerald Connector - v{}", emerald::version());
+        }
+
+        info!("Chain set to '{}'", self.chain);
+        info!("Security level set to '{}'", self.sec_level);
+
+        let addr = format!("{}:{}", self.args.flag_host, self.args.flag_port)
+            .parse::<SocketAddr>()
+            .expect("Expect to parse address");
+
+        emerald::rpc::start(
+            &addr,
+            &self.chain,
+            self.base_path.clone(),
+            Some(self.sec_level),
+        );
 
         Ok(())
     }
 
     ///
     fn list() -> ExecResult<Error> {
+
         Ok(())
     }
 

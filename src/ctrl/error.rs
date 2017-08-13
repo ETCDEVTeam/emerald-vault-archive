@@ -1,6 +1,7 @@
 //! # Errors for command executor
 
 use std::{error, fmt, io, str};
+use emerald::storage::KeyStorageError;
 
 ///
 #[derive(Debug)]
@@ -11,6 +12,12 @@ pub enum Error {
 
 impl From<io::Error> for Error {
     fn from(err: io::Error) -> Self {
+        Error::ExecError(err.to_string())
+    }
+}
+
+impl From<KeyStorageError> for Error {
+    fn from(err: KeyStorageError) -> Self {
         Error::ExecError(err.to_string())
     }
 }
