@@ -1,13 +1,13 @@
 Emerald offline wallet command line interface.
 
 Usage:
-  emerald server [--port <port>] [--host <host>]
-  emerald new --chain <name> --security-level <level>
-  emerald export
+  emerald server    [--port <port>] [--host <host>]
+  emerald new       --chain <name>  [--security-level <level>] [--name <name>]  [--description <description>]
+  emerald list      --chain <name>  [--show-hidden]
+  emerald hide      --chain <name>  <address>
+  emerald unhide    --chain <name>  (<address> | [-a | --all])
   emerald import
-  emerald list --chain <name>
-  emerald hide --chain <name> <address>
-  emerald unhide --chain <name> [-a | --all]
+  emerald export
   emerald strip
   emerald update
   emerald transaction
@@ -28,3 +28,4 @@ Options:
                                                   + Windows: %USERDIR%\.emerald
       --security-level <normal|high|ultra>    Level of security for cryptographic operations [default: ultra]
   -c, --chain <mainnet|testnet>               Chain name [default: mainnet]
+  --show-hidden                               Include hidden keyfiles
