@@ -1,9 +1,11 @@
 //! # Command executor
 
 mod error;
+mod util;
 
 use super::emerald::keystore::{KeyFile, KdfDepthLevel};
 use super::emerald::{self, Address};
+use super::emerald::PrivateKey;
 use super::emerald::storage::{KeyfileStorage, build_storage, default_keystore_path};
 use super::log::LogLevel;
 use self::error::Error;
@@ -12,12 +14,14 @@ use std::net::SocketAddr;
 use std::str::FromStr;
 use std::io::{self, Write};
 
-
 #[derive(Debug, Deserialize, Clone)]
 pub struct Args {
     pub arg_address: String,
+    pub arg_path: String,
     pub arg_name: String,
     pub arg_description: String,
+    pub arg_key: String,
+    pub flag_raw: bool,
     pub flag_version: bool,
     pub flag_quiet: bool,
     pub flag_verbose: bool,
@@ -147,10 +151,13 @@ impl CmdExecutor {
     fn list(&self) -> ExecResult<Error> {
         let accounts = self.storage.list_accounts(self.args.flag_show_hidden)?;
 
-        io::stdout().write(&format!("Total: {}\n", accounts.len())
-            .into_bytes())?;
-        for v in accounts.into_iter() {
-            io::stdout().write(&format!(
+        io::stdout().write_all(
+            &format!("Total: {}\n", accounts.len())
+                .into_bytes(),
+        )?;
+
+        for v in accounts {
+            io::stdout().write_all(&format!(
                 "Account: {}, name: {}, description: {}\n",
                 &v.1,
                 &v.0,
@@ -165,30 +172,40 @@ impl CmdExecutor {
     ///
     fn new_account(&self) -> ExecResult<Error> {
         let mut out = io::stdout();
-        out.write(
+        out.write_all(
             b"! Warning: passphrase can't be restored. Don't forget it !\n",
         )?;
-        out.write(b"Enter strong password: \n")?;
+        out.write_all(b"Enter passphrase: \n")?;
         out.flush()?;
 
         let mut passphrase = String::new();
         io::stdin().read_line(&mut passphrase)?;
 
         let name_str = self.args.arg_name.parse::<String>()?;
-        let name = match name_str.is_empty() {
-            true => None,
-            _ => Some(name_str),
+        let name = if name_str.is_empty() {
+            None
+        } else {
+            Some(name_str)
         };
 
         let desc_str = self.args.arg_description.parse::<String>()?;
-        let desc = match desc_str.is_empty() {
-            true => None,
-            _ => Some(desc_str),
+        let desc = if desc_str.is_empty() {
+            None
+        } else {
+            Some(desc_str)
         };
 
-        let kf = KeyFile::new(&passphrase, &self.sec_level, name, desc)?;
+        let kf = if self.args.flag_raw {
+            let pk = self.parse_pk()?;
+            let mut kf = KeyFile::new(&passphrase, &self.sec_level, name, desc)?;
+            kf.encrypt_key(pk, &passphrase);
+            kf
+        } else {
+            KeyFile::new(&passphrase, &self.sec_level, name, desc)?
+        };
+
         self.storage.put(&kf)?;
-        io::stdout().write(&format!(
+        io::stdout().write_all(&format!(
             "Created new account: {}",
             &kf.address.to_string()
         ).into_bytes())?;
@@ -215,16 +232,35 @@ impl CmdExecutor {
 
     ///
     fn strip(&self) -> ExecResult<Error> {
+        let address = self.parse_address()?;
+        let kf = self.storage.search_by_address(&address)?;
+        let passphrase = CmdExecutor::request_passphrase()?;
+        let pk = kf.decrypt_key(&passphrase)?;
+
+        io::stdout().write_all(
+            &format!("Private key: {}", &pk.to_string())
+                .into_bytes(),
+        )?;
+        io::stdout().flush()?;
+
         Ok(())
     }
 
     ///
     fn export(&self) -> ExecResult<Error> {
+        let path = self.parse_path()?;
+
         Ok(())
     }
 
     ///
     fn import(&self) -> ExecResult<Error> {
+        let path = self.parse_path()?;
+        match path.is_file() {
+            true => {}
+            _ => {}
+        }
+
         Ok(())
     }
 
@@ -236,13 +272,5 @@ impl CmdExecutor {
     ///
     fn sign_transaction(&self) -> ExecResult<Error> {
         Ok(())
-    }
-
-    ///
-    fn parse_address(&self) -> Result<Address, Error> {
-        let addr_str = self.args.arg_address.parse::<String>()?;
-        let add = Address::from_str(&addr_str)?;
-
-        Ok(add)
     }
 }
