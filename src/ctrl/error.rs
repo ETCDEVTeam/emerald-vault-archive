@@ -1,7 +1,9 @@
 //! # Errors for command executor
 
-use std::{error, fmt, io, str};
+use std::{error, fmt, io, str, string};
 use emerald::storage::KeyStorageError;
+use emerald::{self, keystore};
+use std::net::AddrParseError;
 
 ///
 #[derive(Debug)]
@@ -18,6 +20,30 @@ impl From<io::Error> for Error {
 
 impl From<KeyStorageError> for Error {
     fn from(err: KeyStorageError) -> Self {
+        Error::ExecError(err.to_string())
+    }
+}
+
+impl From<string::ParseError> for Error {
+    fn from(err: string::ParseError) -> Self {
+        Error::ExecError(err.to_string())
+    }
+}
+
+impl From<emerald::Error> for Error {
+    fn from(err: emerald::Error) -> Self {
+        Error::ExecError(err.to_string())
+    }
+}
+
+impl From<AddrParseError> for Error {
+    fn from(err: AddrParseError) -> Self {
+        Error::ExecError(format!("Can't parse host/port args: {}", err.to_string()))
+    }
+}
+
+impl From<keystore::Error> for Error {
+    fn from(err: keystore::Error) -> Self {
         Error::ExecError(err.to_string())
     }
 }
