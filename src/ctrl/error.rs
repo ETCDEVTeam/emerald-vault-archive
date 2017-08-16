@@ -4,6 +4,7 @@ use std::{error, fmt, io, str, string};
 use emerald::storage::KeyStorageError;
 use emerald::{self, keystore};
 use std::net::AddrParseError;
+use rustc_serialize::json;
 
 ///
 #[derive(Debug)]
@@ -44,6 +45,18 @@ impl From<AddrParseError> for Error {
 
 impl From<keystore::Error> for Error {
     fn from(err: keystore::Error) -> Self {
+        Error::ExecError(err.to_string())
+    }
+}
+
+impl From<keystore::SerializeError> for Error {
+    fn from(err: keystore::SerializeError) -> Self {
+        Error::ExecError(err.to_string())
+    }
+}
+
+impl From<json::EncoderError> for Error {
+    fn from(err: json::EncoderError) -> Self {
         Error::ExecError(err.to_string())
     }
 }

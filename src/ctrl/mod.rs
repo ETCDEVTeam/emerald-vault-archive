@@ -6,13 +6,17 @@ mod util;
 use super::emerald::keystore::{KeyFile, KdfDepthLevel};
 use super::emerald::{self, Address};
 use super::emerald::PrivateKey;
-use super::emerald::storage::{KeyfileStorage, build_storage, default_keystore_path};
+use super::emerald::storage::{KeyfileStorage, build_storage, default_keystore_path,
+                              generate_filename};
 use super::log::LogLevel;
 use self::error::Error;
 use std::path::PathBuf;
 use std::net::SocketAddr;
 use std::str::FromStr;
 use std::io::{self, Write};
+use std::fs;
+use rustc_serialize::json;
+
 
 #[derive(Debug, Deserialize, Clone)]
 pub struct Args {
@@ -149,19 +153,19 @@ impl CmdExecutor {
 
     ///
     fn list(&self) -> ExecResult<Error> {
-        let accounts = self.storage.list_accounts(self.args.flag_show_hidden)?;
+        let accounts_info = self.storage.list_accounts(self.args.flag_show_hidden)?;
 
         io::stdout().write_all(
-            &format!("Total: {}\n", accounts.len())
+            &format!("Total: {}\n", accounts_info.len())
                 .into_bytes(),
         )?;
 
-        for v in accounts {
+        for info in accounts_info {
             io::stdout().write_all(&format!(
                 "Account: {}, name: {}, description: {}\n",
-                &v.1,
-                &v.0,
-                &v.2
+                &info.address,
+                &info.name,
+                &info.description
             ).into_bytes())?;
         }
         io::stdout().flush()?;
@@ -250,15 +254,47 @@ impl CmdExecutor {
     fn export(&self) -> ExecResult<Error> {
         let path = self.parse_path()?;
 
+        if self.args.flag_all {
+            if !path.is_dir() {
+                return Err(Error::ExecError(
+                    "`export`: invalid args. Use `-h` for help.".to_string(),
+                ));
+            }
+
+            let accounts_info = self.storage.list_accounts(true)?;
+            for info in accounts_info {
+                let address = Address::from_str(&info.address)?;
+                let kf = self.storage.search_by_address(&address)?;
+
+                let mut p = path.clone();
+                p.push(&generate_filename(&kf.uuid.to_string()));
+
+                let json = json::encode(&kf).and_then(|s| Ok(s.into_bytes()))?;
+                let mut f = fs::File::create(p)?;
+                f.write_all(&json)?;
+            }
+        }
+
+        if path.is_file() {};
+
         Ok(())
     }
 
     ///
     fn import(&self) -> ExecResult<Error> {
         let path = self.parse_path()?;
-        match path.is_file() {
-            true => {}
-            _ => {}
+
+        if path.is_file() {
+            self.import_keyfile(path)?;
+        } else {
+            let entries = fs::read_dir(&path)?;
+            for entry in entries {
+                let path = entry?.path();
+                if path.is_dir() {
+                    continue;
+                }
+                self.import_keyfile(path)?;
+            }
         }
 
         Ok(())

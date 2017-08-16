@@ -2,7 +2,7 @@
 
 
 use super::Error;
-use super::{CmdExecutor, Address, PrivateKey};
+use super::{CmdExecutor, Address, PrivateKey, KeyFile};
 use std::path::{Path, PathBuf};
 use std::io::{self, Read, Write};
 use std::fs::File;
@@ -10,6 +10,22 @@ use std::str::FromStr;
 
 
 impl CmdExecutor {
+    ///
+    pub fn import_keyfile<P: AsRef<Path>>(&self, path: P) -> Result<(), Error> {
+        let mut json = String::new();
+        File::open(path).and_then(
+            |mut f| f.read_to_string(&mut json),
+        )?;
+
+        let kf = KeyFile::decode(json)?;
+        self.storage.put(&kf)?;
+        //        io::stdout().write_all(
+        //            &format!("kf: {:?}\n", kf).into_bytes(),
+        //        )?;
+
+        Ok(())
+    }
+
     ///
     pub fn parse_address(&self) -> Result<Address, Error> {
         let addr_str = self.args.arg_address.parse::<String>()?;
@@ -34,6 +50,7 @@ impl CmdExecutor {
         Ok(pk)
     }
 
+    ///
     pub fn request_passphrase() -> Result<String, Error> {
         let mut out = io::stdout();
         out.write_all(b"Enter passphrase: \n")?;
@@ -43,15 +60,5 @@ impl CmdExecutor {
         io::stdin().read_line(&mut passphrase)?;
 
         Ok(passphrase)
-    }
-
-    pub fn file_content<P: AsRef<Path>>(path: P) -> Result<String, Error> {
-        let mut text = String::new();
-
-        File::open(path).and_then(
-            |mut f| f.read_to_string(&mut text),
-        )?;
-
-        Ok(text)
     }
 }
