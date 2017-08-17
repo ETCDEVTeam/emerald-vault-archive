@@ -8,6 +8,17 @@ use std::io::{self, Read, Write};
 use std::fs::File;
 use std::str::FromStr;
 
+#[macro_export]
+macro_rules! arg_to_opt {
+    ( $arg:expr ) => {{
+        let str = $arg.parse::<String>()?;
+        if str.is_empty() {
+            None
+        } else {
+            Some(str)
+        }
+    }};
+}
 
 impl CmdExecutor {
     ///

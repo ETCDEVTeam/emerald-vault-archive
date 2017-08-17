@@ -1,13 +1,13 @@
 //! # Command executor
 
 mod error;
+#[macro_use]
 mod util;
 
 use super::emerald::keystore::{KeyFile, KdfDepthLevel};
 use super::emerald::{self, Address};
 use super::emerald::PrivateKey;
-use super::emerald::storage::{KeyfileStorage, build_storage, default_keystore_path,
-                              generate_filename};
+use super::emerald::storage::{KeyfileStorage, build_storage, default_keystore_path};
 use super::log::LogLevel;
 use self::error::Error;
 use std::path::PathBuf;
@@ -185,19 +185,8 @@ impl CmdExecutor {
         let mut passphrase = String::new();
         io::stdin().read_line(&mut passphrase)?;
 
-        let name_str = self.args.arg_name.parse::<String>()?;
-        let name = if name_str.is_empty() {
-            None
-        } else {
-            Some(name_str)
-        };
-
-        let desc_str = self.args.arg_description.parse::<String>()?;
-        let desc = if desc_str.is_empty() {
-            None
-        } else {
-            Some(desc_str)
-        };
+        let name = arg_to_opt!(self.args.arg_name);
+        let desc = arg_to_opt!(self.args.arg_description);
 
         let kf = if self.args.flag_raw {
             let pk = self.parse_pk()?;
@@ -267,7 +256,7 @@ impl CmdExecutor {
                 let kf = self.storage.search_by_address(&address)?;
 
                 let mut p = path.clone();
-                p.push(&generate_filename(&kf.uuid.to_string()));
+                p.push(&info.filename);
 
                 let json = json::encode(&kf).and_then(|s| Ok(s.into_bytes()))?;
                 let mut f = fs::File::create(p)?;
@@ -302,6 +291,12 @@ impl CmdExecutor {
 
     ///
     fn update(&self) -> ExecResult<Error> {
+        let address = self.parse_address()?;
+        let name = arg_to_opt!(self.args.arg_name);
+        let desc = arg_to_opt!(self.args.arg_description);
+
+        self.storage.update(&address, name, desc)?;
+
         Ok(())
     }
 
