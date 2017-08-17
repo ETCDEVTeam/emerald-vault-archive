@@ -5,7 +5,7 @@ mod error;
 mod util;
 
 use super::emerald::keystore::{KeyFile, KdfDepthLevel};
-use super::emerald::{self, Address};
+use super::emerald::{self, Address, Transaction, to_32bytes, to_chain_id};
 use super::emerald::PrivateKey;
 use super::emerald::storage::{KeyfileStorage, build_storage, default_keystore_path};
 use super::log::LogLevel;
@@ -24,7 +24,12 @@ pub struct Args {
     pub arg_path: String,
     pub arg_name: String,
     pub arg_description: String,
-    pub arg_key: String,
+    pub arg_gas: u64,
+    pub arg_gas_price: String,
+    pub arg_from: String,
+    pub arg_nonce: String,
+    pub arg_to: String,
+    pub arg_value: String,
     pub flag_raw: bool,
     pub flag_version: bool,
     pub flag_quiet: bool,
@@ -198,7 +203,7 @@ impl CmdExecutor {
         };
 
         self.storage.put(&kf)?;
-        io::stdout().write_all(&format!(
+        out.write_all(&format!(
             "Created new account: {}",
             &kf.address.to_string()
         ).into_bytes())?;
@@ -302,6 +307,36 @@ impl CmdExecutor {
 
     ///
     fn sign_transaction(&self) -> ExecResult<Error> {
-        Ok(())
+        let from = self.parse_from()?;
+        let kf = self.storage.search_by_address(&from)?;
+        let gas_price = self.args.arg_gas_price.parse::<String>()?;
+        let value = self.args.arg_value.parse::<String>()?;
+
+        let tr = Transaction {
+            nonce: self.get_nonce()?,
+            gas_price: to_32bytes(&gas_price),
+            gas_limit: self.args.arg_gas,
+            to: self.parse_to()?,
+            value: to_32bytes(&value),
+            data: Vec::new(),
+        };
+
+        let pass = CmdExecutor::request_passphrase()?;
+        let pk = kf.decrypt_key(&pass)?;
+
+        if let Some(chain_id) = to_chain_id(&self.chain) {
+            let raw = tr.to_signed_raw(pk, chain_id)?;
+            io::stdout().write_all(b"Signed transaction: ")?;
+            io::stdout().write_all(&raw)?;
+            io::stdout().flush()?;
+
+            Ok(())
+        } else {
+            Err(Error::ExecError("Invalid chain name".to_string()))
+        }
+    }
+
+    fn get_nonce(&self) -> Result<u64, Error> {
+        Ok(0u64)
     }
 }

@@ -10,12 +10,13 @@ Usage:
   emerald import    --chain <name>  [-a | --all] <path>
   emerald export    --chain <name>  [-a | --all] <path>
   emerald update    --chain <name>  <address> [--name <name>] [--description <description>]
-  emerald transaction
+  emerald transaction --chain <name> <gas> <gas_price> <from> <nonce> <to> <value> [-d|--data <data>]
   emerald -V | --version
   emerald -h | --help
 
 Options:
   -a, --all                                   Apply action to all accounts
+  -d, --data                                  Optional data included in a transaction
   -h, --help                                  Show this message
   -V, --version                               Show current version
   -r, --raw                                   Create Keyfile directly from a private key

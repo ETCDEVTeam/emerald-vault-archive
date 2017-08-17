@@ -20,6 +20,14 @@ macro_rules! arg_to_opt {
     }};
 }
 
+
+macro_rules! arg_to_address {
+    ( $arg:expr ) => {{
+        let str = $arg.parse::<String>()?;
+        Address::from_str(&str)?
+    }};
+}
+
 impl CmdExecutor {
     ///
     pub fn import_keyfile<P: AsRef<Path>>(&self, path: P) -> Result<(), Error> {
@@ -39,10 +47,24 @@ impl CmdExecutor {
 
     ///
     pub fn parse_address(&self) -> Result<Address, Error> {
-        let addr_str = self.args.arg_address.parse::<String>()?;
-        let add = Address::from_str(&addr_str)?;
+        Ok(arg_to_address!(self.args.arg_address))
+    }
 
-        Ok(add)
+    ///
+    pub fn parse_from(&self) -> Result<Address, Error> {
+        Ok(arg_to_address!(self.args.arg_from))
+    }
+
+    ///
+    pub fn parse_to(&self) -> Result<Option<Address>, Error> {
+        let str = self.args.arg_to.parse::<String>()?;
+        let val = if str.is_empty() {
+            None
+        } else {
+            Some(Address::from_str(&str)?)
+        };
+
+        Ok(val)
     }
 
     ///
