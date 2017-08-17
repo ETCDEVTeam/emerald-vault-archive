@@ -15,6 +15,8 @@ extern crate docopt;
 extern crate env_logger;
 extern crate emerald_core as emerald;
 extern crate regex;
+extern crate rustc_serialize;
+
 
 mod ctrl;
 
@@ -71,7 +73,7 @@ fn main() {
     match cmd.run() {
         Ok(_) => exit(0),
         Err(e) => {
-            error!("Can't execute command: {}", e.to_string());
+            error!("{}", e.to_string());
             exit(1);
         }
     }
