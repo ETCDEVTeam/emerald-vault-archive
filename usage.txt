@@ -1,7 +1,7 @@
 Emerald offline wallet command line interface.
 
 Usage:
-  emerald server    [--port <port>] [--host <host>]
+  emerald server    [--port <port>] [--host <host>] [--base-path <path>]
   emerald new       --chain <name>  [[--security-level <level>] [--name <name>] [--description <description>]] | (-r | --raw) <key>
   emerald list      --chain <name>  [--show-hidden]
   emerald hide      --chain <name>  <address>
@@ -10,7 +10,8 @@ Usage:
   emerald import    --chain <name>  [-a | --all] <path>
   emerald export    --chain <name>  [-a | --all] <path>
   emerald update    --chain <name>  <address> [--name <name>] [--description <description>]
-  emerald transaction --chain <name> <gas> <gas_price> <from> <nonce> <to> <value> [-d|--data <data>]
+  emerald transaction --chain <name> <gas> <gas-price>\
+                                <from> <nonce> <to> <value> [-d|--data <data>]
   emerald -V | --version
   emerald -h | --help
 

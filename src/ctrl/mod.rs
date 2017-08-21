@@ -10,12 +10,12 @@ use super::emerald::PrivateKey;
 use super::emerald::storage::{KeyfileStorage, build_storage, default_keystore_path};
 use super::log::LogLevel;
 use self::error::Error;
-use std::path::PathBuf;
 use std::net::SocketAddr;
 use std::str::FromStr;
 use std::io::{self, Write};
 use std::fs;
 use rustc_serialize::json;
+use std::sync::Arc;
 
 
 #[derive(Debug, Deserialize, Clone)]
@@ -60,8 +60,7 @@ type ExecResult<Error> = Result<(), Error>;
 pub struct CmdExecutor {
     chain: String,
     sec_level: KdfDepthLevel,
-    base_path: Option<PathBuf>,
-    storage: Box<KeyfileStorage>,
+    storage: Arc<Box<KeyfileStorage>>,
     args: Args,
 }
 
@@ -85,22 +84,14 @@ impl CmdExecutor {
             }
         };
 
-        let base_path_str = args.flag_base_path.parse::<String>()?;
-        let base_path = if !base_path_str.is_empty() {
-            Some(PathBuf::from(&base_path_str))
-        } else {
-            None
-        };
-
         let keystore_path = default_keystore_path(&chain);
         let storage = build_storage(keystore_path)?;
 
         Ok(CmdExecutor {
             args: args.clone(),
             chain: chain,
-            base_path: base_path,
             sec_level: sec_level,
-            storage: storage,
+            storage: Arc::new(storage),
         })
     }
 
@@ -149,7 +140,7 @@ impl CmdExecutor {
         emerald::rpc::start(
             &addr,
             &self.chain,
-            self.base_path.clone(),
+            self.storage.clone(),
             Some(self.sec_level),
         );
 
@@ -184,12 +175,7 @@ impl CmdExecutor {
         out.write_all(
             b"! Warning: passphrase can't be restored. Don't forget it !\n",
         )?;
-        out.write_all(b"Enter passphrase: \n")?;
-        out.flush()?;
-
-        let mut passphrase = String::new();
-        io::stdin().read_line(&mut passphrase)?;
-
+        let passphrase = CmdExecutor::request_passphrase()?;
         let name = arg_to_opt!(self.args.arg_name);
         let desc = arg_to_opt!(self.args.arg_description);
 
