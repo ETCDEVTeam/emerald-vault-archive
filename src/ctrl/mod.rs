@@ -16,6 +16,7 @@ use std::io::{self, Write};
 use std::fs;
 use rustc_serialize::json;
 use std::sync::Arc;
+use self::util::EnvVars;
 
 
 #[derive(Debug, Deserialize, Clone)]
@@ -62,10 +63,11 @@ pub struct CmdExecutor {
     sec_level: KdfDepthLevel,
     storage: Arc<Box<KeyfileStorage>>,
     args: Args,
+    vars: EnvVars,
 }
 
 impl CmdExecutor {
-    ///
+    /// Create new command executor
     pub fn new(args: &Args) -> Result<Self, Error> {
         let chain = match args.flag_chain.parse::<String>() {
             Ok(c) => c,
@@ -92,10 +94,11 @@ impl CmdExecutor {
             chain: chain,
             sec_level: sec_level,
             storage: Arc::new(storage),
+            vars: EnvVars::new(),
         })
     }
 
-    ///
+    /// Dispatch command to proper handler
     pub fn run(&self) -> ExecResult<Error> {
         if self.args.cmd_server {
             self.server()
@@ -119,13 +122,13 @@ impl CmdExecutor {
             self.sign_transaction()
         } else {
             Err(Error::ExecError(
-                "No command selected. Use `-h` to see help menu".to_string(),
+                "No command selected. Use `-h` for help".to_string(),
             ))
         }
 
     }
 
-    ///
+    /// Launch connector in a `server` mode
     fn server(&self) -> ExecResult<Error> {
         if log_enabled!(LogLevel::Info) {
             info!("Starting Emerald Connector - v{}", emerald::version());
@@ -147,7 +150,7 @@ impl CmdExecutor {
         Ok(())
     }
 
-    ///
+    /// List all accounts
     fn list(&self) -> ExecResult<Error> {
         let accounts_info = self.storage.list_accounts(self.args.flag_show_hidden)?;
 
@@ -169,7 +172,7 @@ impl CmdExecutor {
         Ok(())
     }
 
-    ///
+    /// Creates new account
     fn new_account(&self) -> ExecResult<Error> {
         let mut out = io::stdout();
         out.write_all(
@@ -198,7 +201,7 @@ impl CmdExecutor {
         Ok(())
     }
 
-    ///
+    /// Hide account from being listed
     fn hide(&self) -> ExecResult<Error> {
         let address = self.parse_address()?;
         self.storage.hide(&address)?;
@@ -206,7 +209,7 @@ impl CmdExecutor {
         Ok(())
     }
 
-    ///
+    /// Unhide account from being listed
     fn unhide(&self) -> ExecResult<Error> {
         let address = self.parse_address()?;
         self.storage.unhide(&address)?;
@@ -214,7 +217,7 @@ impl CmdExecutor {
         Ok(())
     }
 
-    ///
+    /// Extract private key from a keyfile
     fn strip(&self) -> ExecResult<Error> {
         let address = self.parse_address()?;
         let kf = self.storage.search_by_address(&address)?;
@@ -230,7 +233,7 @@ impl CmdExecutor {
         Ok(())
     }
 
-    ///
+    /// Export accounts
     fn export(&self) -> ExecResult<Error> {
         let path = self.parse_path()?;
 
@@ -260,7 +263,7 @@ impl CmdExecutor {
         Ok(())
     }
 
-    ///
+    /// Import accounts
     fn import(&self) -> ExecResult<Error> {
         let path = self.parse_path()?;
 
@@ -280,7 +283,7 @@ impl CmdExecutor {
         Ok(())
     }
 
-    ///
+    /// Update `name` and `description` for existing account
     fn update(&self) -> ExecResult<Error> {
         let address = self.parse_address()?;
         let name = arg_to_opt!(self.args.arg_name);
@@ -291,7 +294,7 @@ impl CmdExecutor {
         Ok(())
     }
 
-    ///
+    /// Sign transaction
     fn sign_transaction(&self) -> ExecResult<Error> {
         let from = self.parse_from()?;
         let kf = self.storage.search_by_address(&from)?;
@@ -320,9 +323,5 @@ impl CmdExecutor {
         } else {
             Err(Error::ExecError("Invalid chain name".to_string()))
         }
-    }
-
-    fn get_nonce(&self) -> Result<u64, Error> {
-        Ok(0u64)
     }
 }

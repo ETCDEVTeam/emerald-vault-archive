@@ -22,6 +22,7 @@ Environment variables allow you to redefine the default settings:
 * `EMERALD_GAS` - maximum gas limit to use by transaction
 * `EMERALD_GAS_COST` - gas cost to use by transaction (in Gwei)
 * `EMERALD_SECURITY_LEVEL` - security level (`normal` | `high` | `ultra`)
+* `EMERALD_NODE` - url to node. Used for sign and send of transactions
 
 == HOWTO
 

@@ -16,9 +16,11 @@ extern crate env_logger;
 extern crate emerald_core as emerald;
 extern crate regex;
 extern crate rustc_serialize;
+extern crate serde_json;
 
 
 mod ctrl;
+mod rpc;
 
 use ctrl::{Args, CmdExecutor};
 use docopt::Docopt;

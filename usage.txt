@@ -10,13 +10,13 @@ Usage:
   emerald import    --chain <name>  [-a | --all] <path>
   emerald export    --chain <name>  [-a | --all] <path>
   emerald update    --chain <name>  <address> [--name <name>] [--description <description>]
-  emerald transaction --chain <name> <gas> <gas-price>\
-                                <from> <nonce> <to> <value> [-d|--data <data>]
+  emerald transaction --chain <name> <gas> <from> <to> <value> [-d | --data <data>] [-u | --upstream <upstream>]
   emerald -V | --version
   emerald -h | --help
 
 Options:
   -a, --all                                   Apply action to all accounts
+  -c, --chain <mainnet|testnet>               Chain name [default: mainnet]
   -d, --data                                  Optional data included in a transaction
   -h, --help                                  Show this message
   -V, --version                               Show current version
@@ -30,5 +30,5 @@ Options:
                                                   + Linux: ~/.emerald
                                                   + Windows: %USERDIR%\.emerald
       --security-level <normal|high|ultra>    Level of security for cryptographic operations [default: ultra]
-  -c, --chain <mainnet|testnet>               Chain name [default: mainnet]
-  --show-hidden                               Include hidden keyfiles
+      --show-hidden                           Include hidden keyfiles
+  -u, --upstream                              URL to ethereum node [default: localhost:8545]
