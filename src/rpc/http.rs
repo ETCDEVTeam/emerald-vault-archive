@@ -1,11 +1,11 @@
 //! # Send JSON encoded HTTP requests
 
-use super::{Error, MethodParams};
 use hyper::Url;
 use hyper::client::IntoUrl;
-use jsonrpc_core::{self, Params};
+use jsonrpc_core::Params;
 use reqwest::Client;
-use serde_json::Map;
+use serde_json::Value;
+use ctrl::Error;
 
 
 lazy_static! {
@@ -16,9 +16,6 @@ lazy_static! {
 /// RPC methods
 #[derive(Clone, Copy, Debug, Hash, PartialEq, Eq)]
 pub enum ClientMethod {
-    /// [eth_blockNumber](https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_blocknumber)
-    EthBlockNumber,
-
     /// [eth_gasPrice](https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_gasprice)
     EthGasPrice,
 
@@ -49,9 +46,10 @@ impl Connector {
     }
 
     /// Send and JSON RPC HTTP post request
-    pub fn send_post(&self, params: &MethodParams) -> Result<serde_json::Value, Error> {
+    pub fn send_post(&self, params: &MethodParams) -> Result<Value, Error> {
         let mut res = CLIENT.post(self.url.clone()).json(params).send()?;
         let json: Value = res.json()?;
+
         Ok(json["result"].clone())
     }
 }

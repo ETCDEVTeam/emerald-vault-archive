@@ -9,6 +9,9 @@
 extern crate log;
 
 #[macro_use]
+extern crate lazy_static;
+
+#[macro_use]
 extern crate serde_derive;
 extern crate serde;
 extern crate docopt;
@@ -17,6 +20,9 @@ extern crate emerald_core as emerald;
 extern crate regex;
 extern crate rustc_serialize;
 extern crate serde_json;
+extern crate jsonrpc_core;
+extern crate hyper;
+extern crate reqwest;
 
 
 mod ctrl;

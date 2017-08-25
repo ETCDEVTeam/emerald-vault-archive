@@ -8,8 +8,10 @@ use std::io::{self, Read, Write};
 use std::fs::File;
 use std::str::FromStr;
 use std::env;
-use rpc::{ClientMethod, MethodParams, ClientMethod};
+use rpc::{ClientMethod, MethodParams};
 use jsonrpc_core::Params;
+use serde_json::{Map, Value};
+use rustc_serialize::hex::ToHex;
 
 
 #[macro_export]
@@ -34,7 +36,7 @@ macro_rules! arg_to_address {
 
 /// Environment variables used to change default variables
 #[derive(Default, Debug)]
-struct EnvVars {
+pub struct EnvVars {
     emerald_base_path: Option<String>,
     emerald_host: Option<String>,
     emerald_port: Option<String>,
@@ -141,16 +143,46 @@ impl CmdExecutor {
     ///
     /// * addr - target address
     ///
-    pub fn get_nonce(&self, client_addr: &SocketAddr) -> Result<u64, Error> {
-        let url = Connector::new(&format!("http://{}", client_addr));
+    pub fn get_nonce(&self, addr: &Address) -> Result<u64, Error> {
+        match self.connector {
+            Some(ref conn) => {
+                let data = vec![Value::String(addr.to_string()), Value::String("latest".to_string())];
+                let params = Params::Array(data);
 
-        url.send_post(&MethodParams(ClientMethod::EthGetTxCount, &p));
-        Ok(0u64)
+                conn.send_post(&MethodParams(ClientMethod::EthGetTxCount, &params))
+                    .and_then(|v| v.as_u64().ok_or_else(|| Error::ExecError("Can't parse tx count".to_string())))
+            }
+            None => Err(Error::ExecError("Can't connect to client".to_string())),
+        }
     }
 
 
+    /// Send signed raw transaction to the remote client
     ///
-    pub fn send_transaction() -> Result<(), Error> {
+    /// # Arguments:
+    ///
+    /// * raw - signed tx
+    ///
+    /// # Return:
+    ///
+    /// * String - transaction hash
+    ///
+    pub fn send_transaction(&self, raw: Vec<u8>) -> Result<String, Error> {
+        match self.connector {
+            Some(ref conn) => {
+                let mut data = Map::new();
+                data.insert("data".to_string(), Value::String(format!("0x{}", raw.to_hex())));
+                let params = Params::Map(data);
 
+                conn.send_post(&MethodParams(ClientMethod::EthSendRawTransaction, &params))
+                    .and_then(|v| {
+                        match v.as_str() {
+                            Some(str) => Ok(str.to_string()),
+                            None => Err(Error::ExecError("Can't parse tx hash".to_string())),
+                        }
+                    })
+            }
+            None => Err(Error::ExecError("Can't connect to client".to_string())),
+        }
     }
 }

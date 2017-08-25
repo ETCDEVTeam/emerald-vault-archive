@@ -4,12 +4,12 @@ mod error;
 #[macro_use]
 mod util;
 
+pub use self::error::Error;
 use super::emerald::keystore::{KeyFile, KdfDepthLevel};
 use super::emerald::{self, Address, Transaction, to_32bytes, to_chain_id};
 use super::emerald::PrivateKey;
 use super::emerald::storage::{KeyfileStorage, build_storage, default_keystore_path};
 use super::log::LogLevel;
-use self::error::Error;
 use std::net::SocketAddr;
 use std::str::FromStr;
 use std::io::{self, Write};
@@ -17,6 +17,7 @@ use std::fs;
 use rustc_serialize::json;
 use std::sync::Arc;
 use self::util::EnvVars;
+use rpc::Connector;
 
 
 #[derive(Debug, Deserialize, Clone)]
@@ -31,6 +32,7 @@ pub struct Args {
     pub arg_nonce: String,
     pub arg_to: String,
     pub arg_value: String,
+    pub arg_upstream: String,
     pub flag_raw: bool,
     pub flag_version: bool,
     pub flag_quiet: bool,
@@ -44,6 +46,7 @@ pub struct Args {
     pub flag_description: String,
     pub flag_show_hidden: bool,
     pub flag_all: bool,
+    pub flag_upstream: bool,
     pub cmd_server: bool,
     pub cmd_list: bool,
     pub cmd_new: bool,
@@ -64,6 +67,7 @@ pub struct CmdExecutor {
     storage: Arc<Box<KeyfileStorage>>,
     args: Args,
     vars: EnvVars,
+    connector: Option<Connector>,
 }
 
 impl CmdExecutor {
@@ -89,12 +93,20 @@ impl CmdExecutor {
         let keystore_path = default_keystore_path(&chain);
         let storage = build_storage(keystore_path)?;
 
+        let connector = if args.flag_upstream {
+            let addr = args.arg_upstream.parse::<SocketAddr>()?;
+            Some(Connector::new(&format!("http://{}", addr)))
+        } else {
+            None
+        };
+
         Ok(CmdExecutor {
             args: args.clone(),
             chain: chain,
             sec_level: sec_level,
             storage: Arc::new(storage),
             vars: EnvVars::new(),
+            connector: connector
         })
     }
 
@@ -302,7 +314,7 @@ impl CmdExecutor {
         let value = self.args.arg_value.parse::<String>()?;
 
         let tr = Transaction {
-            nonce: self.get_nonce()?,
+            nonce: self.get_nonce(&from)?,
             gas_price: to_32bytes(&gas_price),
             gas_limit: self.args.arg_gas,
             to: self.parse_to()?,
@@ -315,8 +327,15 @@ impl CmdExecutor {
 
         if let Some(chain_id) = to_chain_id(&self.chain) {
             let raw = tr.to_signed_raw(pk, chain_id)?;
+
             io::stdout().write_all(b"Signed transaction: ")?;
             io::stdout().write_all(&raw)?;
+
+            if self.args.flag_upstream {
+                let tx_hash = self.send_transaction(raw)?;
+                io::stdout().write_all(b"Tx hash: ")?;
+                io::stdout().write_all(&tx_hash.into_bytes())?;
+            }
             io::stdout().flush()?;
 
             Ok(())

@@ -1,9 +1,10 @@
 //! # Serialize JSON RPC parameters
 
-use super::{ClientMethod, Error, MethodParams};
-use rustc_serialize::hex::FromHex;
+use super::{ClientMethod, MethodParams};
 use serde::{Serialize, Serializer};
-use serde_json::{self, Map};
+use std::sync::Arc;
+use std::sync::atomic::{AtomicUsize, Ordering};
+use jsonrpc_core::Params;
 
 
 lazy_static! {
@@ -20,10 +21,10 @@ struct JsonData<'a> {
 
 impl<'a> Serialize for MethodParams<'a> {
     fn serialize<S>(&self, s: S) -> Result<S::Ok, S::Error>
-        where S: Serializer
+    where
+        S: Serializer,
     {
         match self.0 {
-            ClientMethod::EthBlockNumber => serialize("eth_blockNumber", self.1, s),
             ClientMethod::EthGasPrice => serialize("eth_gasPrice", self.1, s),
             ClientMethod::EthGetTxCount => serialize("eth_getTransactionCount", self.1, s),
             ClientMethod::EthGetTxByHash => serialize("eth_getTransactionByHash", self.1, s),
@@ -33,7 +34,8 @@ impl<'a> Serialize for MethodParams<'a> {
 }
 
 fn serialize<S>(method: &'static str, params: &Params, serializer: S) -> Result<S::Ok, S::Error>
-    where S: Serializer
+where
+    S: Serializer,
 {
     to_json_data(method, params).serialize(serializer)
 }
