@@ -146,11 +146,18 @@ impl CmdExecutor {
     pub fn get_nonce(&self, addr: &Address) -> Result<u64, Error> {
         match self.connector {
             Some(ref conn) => {
-                let data = vec![Value::String(addr.to_string()), Value::String("latest".to_string())];
+                let data = vec![
+                    Value::String(addr.to_string()),
+                    Value::String("latest".to_string()),
+                ];
                 let params = Params::Array(data);
 
                 conn.send_post(&MethodParams(ClientMethod::EthGetTxCount, &params))
-                    .and_then(|v| v.as_u64().ok_or_else(|| Error::ExecError("Can't parse tx count".to_string())))
+                    .and_then(|v| {
+                        v.as_u64().ok_or_else(|| {
+                            Error::ExecError("Can't parse tx count".to_string())
+                        })
+                    })
             }
             None => Err(Error::ExecError("Can't connect to client".to_string())),
         }
@@ -171,15 +178,16 @@ impl CmdExecutor {
         match self.connector {
             Some(ref conn) => {
                 let mut data = Map::new();
-                data.insert("data".to_string(), Value::String(format!("0x{}", raw.to_hex())));
+                data.insert(
+                    "data".to_string(),
+                    Value::String(format!("0x{}", raw.to_hex())),
+                );
                 let params = Params::Map(data);
 
                 conn.send_post(&MethodParams(ClientMethod::EthSendRawTransaction, &params))
-                    .and_then(|v| {
-                        match v.as_str() {
-                            Some(str) => Ok(str.to_string()),
-                            None => Err(Error::ExecError("Can't parse tx hash".to_string())),
-                        }
+                    .and_then(|v| match v.as_str() {
+                        Some(str) => Ok(str.to_string()),
+                        None => Err(Error::ExecError("Can't parse tx hash".to_string())),
                     })
             }
             None => Err(Error::ExecError("Can't connect to client".to_string())),

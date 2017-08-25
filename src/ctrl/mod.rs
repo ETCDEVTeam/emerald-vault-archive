@@ -106,7 +106,7 @@ impl CmdExecutor {
             sec_level: sec_level,
             storage: Arc::new(storage),
             vars: EnvVars::new(),
-            connector: connector
+            connector: connector,
         })
     }
 
