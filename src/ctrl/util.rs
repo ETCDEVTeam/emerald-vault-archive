@@ -37,20 +37,20 @@ macro_rules! arg_to_address {
 /// Environment variables used to change default variables
 #[derive(Default, Debug)]
 pub struct EnvVars {
-    emerald_base_path: Option<String>,
-    emerald_host: Option<String>,
-    emerald_port: Option<String>,
-    emerald_chain: Option<String>,
-    emerald_chain_id: Option<String>,
-    emerald_gas: Option<String>,
-    emerald_gas_cost: Option<String>,
-    emerald_security_level: Option<String>,
-    emerald_node: Option<String>,
+    pub emerald_base_path: Option<String>,
+    pub emerald_host: Option<String>,
+    pub emerald_port: Option<String>,
+    pub emerald_chain: Option<String>,
+    pub emerald_chain_id: Option<String>,
+    pub emerald_gas: Option<String>,
+    pub emerald_gas_cost: Option<String>,
+    pub emerald_security_level: Option<String>,
+    pub emerald_node: Option<String>,
 }
 
 impl EnvVars {
     /// Collect environment variables to overwrite default values
-    pub fn new() -> EnvVars {
+    pub fn parse() -> EnvVars {
         let mut vars = EnvVars::default();
         for (key, value) in env::vars() {
             match key.as_ref() {
@@ -69,6 +69,28 @@ impl EnvVars {
         vars
     }
 }
+
+/// Try to parse argument
+/// If no `arg` was supplied, try to get environment variable
+///
+/// # Arguments:
+///
+/// * arg - provided argument
+/// * env - optional environment variadble
+///
+pub fn arg_or_default(arg: &str, env: &Option<String>) -> Result<String, Error> {
+    match arg.parse::<String>() {
+        Ok(a) => Ok(a),
+        Err(e) => {
+            if let Some(e) = env.clone() {
+                Ok(e)
+            } else {
+                Err(Error::ExecError(e.to_string()))
+            }
+        }
+    }
+}
+
 
 impl CmdExecutor {
     /// Import Keyfile into storage
@@ -119,7 +141,7 @@ impl CmdExecutor {
 
     /// Parse path for accounts import/export
     pub fn parse_path(&self) -> Result<PathBuf, Error> {
-        let pk_str = self.args.arg_path.parse::<String>()?;
+        let pk_str = arg_or_default(&self.args.arg_path, &self.vars.emerald_base_path)?;
         let pk = PathBuf::from(&pk_str);
 
         Ok(pk)

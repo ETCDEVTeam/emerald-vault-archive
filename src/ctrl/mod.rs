@@ -14,9 +14,10 @@ use std::net::SocketAddr;
 use std::str::FromStr;
 use std::io::{self, Write};
 use std::fs;
+use std::path::PathBuf;
 use rustc_serialize::json;
 use std::sync::Arc;
-use self::util::EnvVars;
+use self::util::{EnvVars, arg_or_default};
 use rpc::Connector;
 
 
@@ -73,7 +74,9 @@ pub struct CmdExecutor {
 impl CmdExecutor {
     /// Create new command executor
     pub fn new(args: &Args) -> Result<Self, Error> {
-        let chain = match args.flag_chain.parse::<String>() {
+        let env = EnvVars::parse();
+
+        let chain = match arg_or_default(&args.flag_chain, &env.emerald_chain) {
             Ok(c) => c,
             Err(e) => {
                 error!("{}", e.to_string());
@@ -81,8 +84,8 @@ impl CmdExecutor {
             }
         };
 
-        let sec_level_str: &str = &args.flag_security_level.parse::<String>()?;
-        let sec_level = match KdfDepthLevel::from_str(sec_level_str) {
+        let sec_level_str = arg_or_default(&args.flag_security_level, &env.emerald_security_level)?;
+        let sec_level = match KdfDepthLevel::from_str(&sec_level_str) {
             Ok(sec) => sec,
             Err(e) => {
                 error!("{}", e.to_string());
@@ -90,7 +93,10 @@ impl CmdExecutor {
             }
         };
 
-        let keystore_path = default_keystore_path(&chain);
+        let keystore_path = match env.emerald_base_path {
+            Some(ref path) => PathBuf::from(path),
+            None => default_keystore_path(&chain),
+        };
         let storage = build_storage(keystore_path)?;
 
         let connector = if args.flag_upstream {
@@ -105,7 +111,7 @@ impl CmdExecutor {
             chain: chain,
             sec_level: sec_level,
             storage: Arc::new(storage),
-            vars: EnvVars::new(),
+            vars: env,
             connector: connector,
         })
     }
