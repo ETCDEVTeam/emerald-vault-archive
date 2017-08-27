@@ -316,7 +316,7 @@ impl CmdExecutor {
     fn sign_transaction(&self) -> ExecResult<Error> {
         let from = self.parse_from()?;
         let kf = self.storage.search_by_address(&from)?;
-        let gas_price = arg_or_default(self.args.arg_gas_price, &self.vars.emerald_gas_price)?;
+        let gas_price = arg_or_default(&self.args.arg_gas_price, &self.vars.emerald_gas_price)?;
         let value = self.args.arg_value.parse::<String>()?;
 
         let tr = Transaction {

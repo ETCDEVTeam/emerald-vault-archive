@@ -60,7 +60,7 @@ impl EnvVars {
                 "EMERALD_CHAIN" => vars.emerald_chain = Some(value),
                 "EMERALD_CHAIN_ID" => vars.emerald_chain_id = Some(value),
                 "EMERALD_GAS" => vars.emerald_gas = Some(value),
-                "EMERALD_GAS_PRICE" => vars.emerald_gas_cost = Some(value),
+                "EMERALD_GAS_PRICE" => vars.emerald_gas_price = Some(value),
                 "EMERALD_SECURITY_LEVEL" => vars.emerald_security_level = Some(value),
                 "EMERALD_NODE" => vars.emerald_node = Some(value),
                 _ => (),
