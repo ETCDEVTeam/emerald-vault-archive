@@ -16,7 +16,7 @@ travis-ci = { repository = "ethereumproject/emerald-cli" }
 appveyor = { repository = "ethereumproject/emerald-cli" }
 
 [[bin]]
-    name = "emerald"
+name = "emerald-cli"
 path = "src/main.rs"
 
 [dependencies]
@@ -27,8 +27,8 @@ serde = "1.0"
 lazy_static = "0.2"
 serde_json = "1.0"
 serde_derive = "1.0"
-emerald-core = { git = "https://github.com/r8d8/emerald-rs", branch = "feature/cli_interface" }
-#emerald-core = { path = "../emerald-rs/emerald-core"}
+emerald-core = { git = "https://github.com/r8d8/emerald-rs", branch = "master" }
+#emerald-rs = { path = "../emerald-rs"}
 regex = "0.2"
 rustc-serialize = "0.3"
 hyper = "0.10"

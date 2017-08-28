@@ -16,7 +16,7 @@ extern crate serde_derive;
 extern crate serde;
 extern crate docopt;
 extern crate env_logger;
-extern crate emerald_core as emerald;
+extern crate emerald_rs as emerald;
 extern crate regex;
 extern crate rustc_serialize;
 extern crate serde_json;

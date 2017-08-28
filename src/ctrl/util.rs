@@ -79,15 +79,14 @@ impl EnvVars {
 /// * env - optional environment variadble
 ///
 pub fn arg_or_default(arg: &str, env: &Option<String>) -> Result<String, Error> {
-    match arg.parse::<String>() {
-        Ok(a) => Ok(a),
-        Err(e) => {
-            if let Some(e) = env.clone() {
-                Ok(e)
-            } else {
-                Err(Error::ExecError(e.to_string()))
-            }
-        }
+    let val = arg.parse::<String>()?;
+
+    if val.is_empty() {
+        env.clone().ok_or_else(|| {
+            Error::ExecError("Missed arguments".to_string())
+        })
+    } else {
+        Ok(val)
     }
 }
 
@@ -145,6 +144,14 @@ impl CmdExecutor {
         let pk = PathBuf::from(&pk_str);
 
         Ok(pk)
+    }
+
+    /// Parse gas limit for transaction execution
+    pub fn parse_gas(&self) -> Result<u64, Error> {
+        let gas_str = arg_or_default(&self.args.flag_gas, &self.vars.emerald_gas)?;
+        let gas = gas_str.parse::<u64>()?;
+
+        Ok(gas)
     }
 
     /// Request passphrase

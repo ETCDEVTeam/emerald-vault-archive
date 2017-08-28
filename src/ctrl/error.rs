@@ -6,7 +6,7 @@ use emerald::{self, keystore};
 use std::net::AddrParseError;
 use rustc_serialize::json;
 use reqwest;
-
+use std::num;
 
 ///
 #[derive(Debug)]
@@ -65,6 +65,12 @@ impl From<json::EncoderError> for Error {
 
 impl From<reqwest::Error> for Error {
     fn from(err: reqwest::Error) -> Self {
+        Error::ExecError(err.to_string())
+    }
+}
+
+impl From<num::ParseIntError> for Error {
+    fn from(err: num::ParseIntError) -> Self {
         Error::ExecError(err.to_string())
     }
 }

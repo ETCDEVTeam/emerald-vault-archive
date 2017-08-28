@@ -9,7 +9,6 @@ use super::emerald::keystore::{KeyFile, KdfDepthLevel};
 use super::emerald::{self, Address, Transaction, to_32bytes, to_chain_id};
 use super::emerald::PrivateKey;
 use super::emerald::storage::{KeyfileStorage, build_storage, default_keystore_path};
-use super::log::LogLevel;
 use std::net::SocketAddr;
 use std::str::FromStr;
 use std::io::{self, Write};
@@ -25,29 +24,26 @@ use rpc::Connector;
 pub struct Args {
     pub arg_address: String,
     pub arg_path: String,
-    pub arg_name: String,
-    pub arg_description: String,
-    pub arg_gas: u64,
-    pub arg_gas_price: String,
     pub arg_from: String,
-    pub arg_nonce: String,
     pub arg_to: String,
     pub arg_value: String,
-    pub arg_upstream: String,
     pub flag_raw: bool,
     pub flag_version: bool,
     pub flag_quiet: bool,
     pub flag_verbose: bool,
     pub flag_host: String,
     pub flag_port: String,
+    pub flag_nonce: String,
+    pub flag_gas: String,
+    pub flag_gas_price: String,
     pub flag_base_path: String,
     pub flag_security_level: String,
     pub flag_chain: String,
     pub flag_name: String,
     pub flag_description: String,
+    pub flag_upstream: String,
     pub flag_show_hidden: bool,
     pub flag_all: bool,
-    pub flag_upstream: bool,
     pub cmd_server: bool,
     pub cmd_list: bool,
     pub cmd_new: bool,
@@ -93,18 +89,24 @@ impl CmdExecutor {
             }
         };
 
-        let keystore_path = match env.emerald_base_path {
-            Some(ref path) => PathBuf::from(path),
-            None => default_keystore_path(&chain),
+        println!(">> DEBUG: {:?}", &args.flag_base_path);
+        let keystore_path = match arg_or_default(&args.flag_base_path, &env.emerald_base_path) {
+            Ok(ref path) => PathBuf::from(path),
+            Err(e) => {
+                error!("{}", e.to_string());
+                default_keystore_path(&chain)
+            }
         };
+
+        println!(">> DEBUG: {:?}", keystore_path);
+
         let storage = build_storage(keystore_path)?;
 
-        let connector = if args.flag_upstream {
-            let addr = args.arg_upstream.parse::<SocketAddr>()?;
-            Some(Connector::new(&format!("http://{}", addr)))
-        } else {
-            None
+        let connector = match args.flag_upstream.parse::<SocketAddr>() {
+            Ok(addr) => Some(Connector::new(&format!("http://{}", addr))),
+            Err(_) => None,
         };
+
 
         Ok(CmdExecutor {
             args: args.clone(),
@@ -148,10 +150,7 @@ impl CmdExecutor {
 
     /// Launch connector in a `server` mode
     fn server(&self) -> ExecResult<Error> {
-        if log_enabled!(LogLevel::Info) {
-            info!("Starting Emerald Connector - v{}", emerald::version());
-        }
-
+        info!("Starting Emerald Connector - v{}", emerald::version());
         info!("Chain set to '{}'", self.chain);
         info!("Security level set to '{}'", self.sec_level);
 
@@ -197,8 +196,8 @@ impl CmdExecutor {
             b"! Warning: passphrase can't be restored. Don't forget it !\n",
         )?;
         let passphrase = CmdExecutor::request_passphrase()?;
-        let name = arg_to_opt!(self.args.arg_name);
-        let desc = arg_to_opt!(self.args.arg_description);
+        let name = arg_to_opt!(self.args.flag_name);
+        let desc = arg_to_opt!(self.args.flag_description);
 
         let kf = if self.args.flag_raw {
             let pk = self.parse_pk()?;
@@ -304,8 +303,8 @@ impl CmdExecutor {
     /// Update `name` and `description` for existing account
     fn update(&self) -> ExecResult<Error> {
         let address = self.parse_address()?;
-        let name = arg_to_opt!(self.args.arg_name);
-        let desc = arg_to_opt!(self.args.arg_description);
+        let name = arg_to_opt!(self.args.flag_name);
+        let desc = arg_to_opt!(self.args.flag_description);
 
         self.storage.update(&address, name, desc)?;
 
@@ -316,13 +315,13 @@ impl CmdExecutor {
     fn sign_transaction(&self) -> ExecResult<Error> {
         let from = self.parse_from()?;
         let kf = self.storage.search_by_address(&from)?;
-        let gas_price = arg_or_default(&self.args.arg_gas_price, &self.vars.emerald_gas_price)?;
+        let gas_price = arg_or_default(&self.args.flag_gas_price, &self.vars.emerald_gas_price)?;
         let value = self.args.arg_value.parse::<String>()?;
 
         let tr = Transaction {
             nonce: self.get_nonce(&from)?,
             gas_price: to_32bytes(&gas_price),
-            gas_limit: self.args.arg_gas,
+            gas_limit: self.parse_gas()?,
             to: self.parse_to()?,
             value: to_32bytes(&value),
             data: Vec::new(),
@@ -337,7 +336,7 @@ impl CmdExecutor {
             io::stdout().write_all(b"Signed transaction: ")?;
             io::stdout().write_all(&raw)?;
 
-            if self.args.flag_upstream {
+            if self.connector.is_some() {
                 let tx_hash = self.send_transaction(raw)?;
                 io::stdout().write_all(b"Tx hash: ")?;
                 io::stdout().write_all(&tx_hash.into_bytes())?;
