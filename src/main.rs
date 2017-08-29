@@ -23,6 +23,7 @@ extern crate serde_json;
 extern crate jsonrpc_core;
 extern crate hyper;
 extern crate reqwest;
+extern crate hex;
 
 
 mod ctrl;

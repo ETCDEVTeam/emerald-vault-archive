@@ -2,7 +2,7 @@
 
 
 use super::Error;
-use super::{CmdExecutor, Address, PrivateKey, KeyFile};
+use super::{CmdExecutor, Address, PrivateKey, KeyFile, trim_hex, to_arr, align_bytes};
 use std::path::{Path, PathBuf};
 use std::io::{self, Read, Write};
 use std::fs::File;
@@ -12,6 +12,7 @@ use rpc::{ClientMethod, MethodParams};
 use jsonrpc_core::Params;
 use serde_json::{Map, Value};
 use rustc_serialize::hex::ToHex;
+use hex::FromHex;
 
 
 #[macro_export]
@@ -26,13 +27,13 @@ macro_rules! arg_to_opt {
     }};
 }
 
-
 macro_rules! arg_to_address {
     ( $arg:expr ) => {{
         let str = $arg.parse::<String>()?;
         Address::from_str(&str)?
     }};
 }
+
 
 /// Environment variables used to change default variables
 #[derive(Default, Debug)]
@@ -76,7 +77,7 @@ impl EnvVars {
 /// # Arguments:
 ///
 /// * arg - provided argument
-/// * env - optional environment variadble
+/// * env - optional environment variable
 ///
 pub fn arg_or_default(arg: &str, env: &Option<String>) -> Result<String, Error> {
     let val = arg.parse::<String>()?;
@@ -90,6 +91,10 @@ pub fn arg_or_default(arg: &str, env: &Option<String>) -> Result<String, Error> 
     }
 }
 
+fn hex_to_32bytes(hex: &str) -> Result<[u8; 32], Error> {
+    let bytes = Vec::from_hex(hex)?;
+    Ok(to_arr(&align_bytes(&bytes, 32)))
+}
 
 impl CmdExecutor {
     /// Import Keyfile into storage
@@ -149,9 +154,28 @@ impl CmdExecutor {
     /// Parse gas limit for transaction execution
     pub fn parse_gas(&self) -> Result<u64, Error> {
         let gas_str = arg_or_default(&self.args.flag_gas, &self.vars.emerald_gas)?;
-        let gas = gas_str.parse::<u64>()?;
+        let gas = trim_hex(&gas_str).parse::<u64>()?;
 
         Ok(gas)
+    }
+
+    /// Parse gas limit for transaction execution
+    pub fn parse_gas_price(&self) -> Result<[u8; 32], Error> {
+        let gp_str = arg_or_default(&self.args.flag_gas_price, &self.vars.emerald_gas_price)?;
+        hex_to_32bytes(&gp_str)
+    }
+
+    /// Parse transaction value
+    pub fn parse_value(&self) -> Result<[u8; 32], Error> {
+        let value_str = self.args.arg_value.parse::<String>()?;
+        hex_to_32bytes(&value_str)
+    }
+
+    /// Parse transaction data
+    pub fn parse_data(&self) -> Result<Vec<u8>, Error> {
+        let str = self.args.arg_value.parse::<String>()?;
+        let data = Vec::from_hex(trim_hex(&str))?;
+        Ok(data)
     }
 
     /// Request passphrase
@@ -181,12 +205,13 @@ impl CmdExecutor {
                 ];
                 let params = Params::Array(data);
 
-                conn.send_post(&MethodParams(ClientMethod::EthGetTxCount, &params))
-                    .and_then(|v| {
-                        v.as_u64().ok_or_else(|| {
-                            Error::ExecError("Can't parse tx count".to_string())
-                        })
-                    })
+                let val = conn.send_post(
+                    &MethodParams(ClientMethod::EthGetTxCount, &params),
+                )?;
+                match val.as_str() {
+                    Some(s) => Ok(u64::from_str_radix(trim_hex(s), 16)?),
+                    None => Err(Error::ExecError("Can't parse tx count".to_string())),
+                }
             }
             None => Err(Error::ExecError("Can't connect to client".to_string())),
         }

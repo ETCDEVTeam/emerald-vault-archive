@@ -7,6 +7,7 @@ use std::net::AddrParseError;
 use rustc_serialize::json;
 use reqwest;
 use std::num;
+use hex;
 
 ///
 #[derive(Debug)]
@@ -71,6 +72,12 @@ impl From<reqwest::Error> for Error {
 
 impl From<num::ParseIntError> for Error {
     fn from(err: num::ParseIntError) -> Self {
+        Error::ExecError(err.to_string())
+    }
+}
+
+impl From<hex::FromHexError> for Error {
+    fn from(err: hex::FromHexError) -> Self {
         Error::ExecError(err.to_string())
     }
 }

@@ -6,7 +6,7 @@ mod util;
 
 pub use self::error::Error;
 use super::emerald::keystore::{KeyFile, KdfDepthLevel};
-use super::emerald::{self, Address, Transaction, to_32bytes, to_chain_id};
+use super::emerald::{self, Address, Transaction, to_arr, to_chain_id, trim_hex, align_bytes};
 use super::emerald::PrivateKey;
 use super::emerald::storage::{KeyfileStorage, build_storage, default_keystore_path};
 use std::net::SocketAddr;
@@ -89,17 +89,10 @@ impl CmdExecutor {
             }
         };
 
-        println!(">> DEBUG: {:?}", &args.flag_base_path);
         let keystore_path = match arg_or_default(&args.flag_base_path, &env.emerald_base_path) {
             Ok(ref path) => PathBuf::from(path),
-            Err(e) => {
-                error!("{}", e.to_string());
-                default_keystore_path(&chain)
-            }
+            Err(_) => default_keystore_path(&chain),
         };
-
-        println!(">> DEBUG: {:?}", keystore_path);
-
         let storage = build_storage(keystore_path)?;
 
         let connector = match args.flag_upstream.parse::<SocketAddr>() {
@@ -315,18 +308,16 @@ impl CmdExecutor {
     fn sign_transaction(&self) -> ExecResult<Error> {
         let from = self.parse_from()?;
         let kf = self.storage.search_by_address(&from)?;
-        let gas_price = arg_or_default(&self.args.flag_gas_price, &self.vars.emerald_gas_price)?;
-        let value = self.args.arg_value.parse::<String>()?;
 
         let tr = Transaction {
             nonce: self.get_nonce(&from)?,
-            gas_price: to_32bytes(&gas_price),
+            gas_price: self.parse_gas_price()?,
             gas_limit: self.parse_gas()?,
             to: self.parse_to()?,
-            value: to_32bytes(&value),
-            data: Vec::new(),
+            value: self.parse_value()?,
+            data: self.parse_data()?,
         };
-
+        println!(">> DEBUG: Transaction packed");
         let pass = CmdExecutor::request_passphrase()?;
         let pk = kf.decrypt_key(&pass)?;
 
