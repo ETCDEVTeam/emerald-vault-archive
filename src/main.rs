@@ -1,4 +1,4 @@
-//! # CLI wrapper for `emerald-core`
+//! # CLI wrapper for `emerald-rs`
 
 #![cfg(feature = "cli")]
 
