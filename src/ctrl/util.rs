@@ -2,8 +2,7 @@
 
 
 use super::Error;
-use super::{CmdExecutor, Address, PrivateKey, KeyFile, trim_hex, to_arr, align_bytes, to_u64,
-            to_even_str};
+use super::{CmdExecutor, Address, PrivateKey, KeyFile, trim_hex, to_arr, align_bytes, to_even_str};
 use std::path::{Path, PathBuf};
 use std::io::Read;
 use std::fs::File;
@@ -15,17 +14,6 @@ use serde_json::Value;
 use rustc_serialize::hex::ToHex;
 use hex::FromHex;
 
-#[macro_export]
-macro_rules! arg_to_opt {
-    ( $arg:expr ) => {{
-        let str = $arg.parse::<String>()?;
-        if str.is_empty() {
-            None
-        } else {
-            Some(str)
-        }
-    }};
-}
 
 /// Environment variables used to change default variables
 #[derive(Default, Debug)]
@@ -64,7 +52,7 @@ impl EnvVars {
 }
 
 /// Try to parse argument
-/// If no `arg` was supplied, try to get environment variable
+/// If no `arg` was supplied, try to use environment variable
 ///
 /// # Arguments:
 ///
@@ -83,10 +71,46 @@ pub fn arg_or_default(arg: &str, env: &Option<String>) -> Result<String, Error> 
     }
 }
 
+/// Try to parse argument into optional string
+///
+/// # Arguments:
+///
+/// * arg - provided argument
+///
+pub fn arg_to_opt(arg: &str) -> Result<Option<String>, Error> {
+    let str = arg.parse::<String>()?;
+    if str.is_empty() {
+        Ok(None)
+    } else {
+        Ok(Some(str))
+    }
+}
+
+/// Parse raw hex string arguments from user
+fn parse_arg(raw: &str) -> Result<String, Error> {
+    let s = raw.parse::<String>().and_then(
+        |s| Ok(to_even_str(trim_hex(&s))),
+    )?;
+
+    if s.is_empty() {
+        Err(Error::ExecError(
+            "Invalid parameter: empty string".to_string(),
+        ))
+    } else {
+        Ok(s)
+    }
+}
+
 /// Converts hex string to 32 bytes array
 /// Aligns original `hex` to fit 32 bytes
 fn hex_to_32bytes(hex: &str) -> Result<[u8; 32], Error> {
-    let bytes = Vec::from_hex(to_even_str(trim_hex(hex)))?;
+    if hex.len() == 0 {
+        return Err(Error::ExecError(
+            "Invalid parameter: empty string".to_string(),
+        ));
+    }
+
+    let bytes = Vec::from_hex(hex)?;
     Ok(to_arr(&align_bytes(&bytes, 32)))
 }
 
@@ -106,21 +130,21 @@ pub fn parse_pk(s: &str) -> Result<PrivateKey, Error> {
 
 /// Parse transaction value
 pub fn parse_value(s: &str) -> Result<[u8; 32], Error> {
-    let value_str = s.parse::<String>()?;
+    let value_str = parse_arg(s)?;
     hex_to_32bytes(&value_str)
 }
 
 /// Parse transaction data
 pub fn parse_data(s: &str) -> Result<Vec<u8>, Error> {
-    let str = s.parse::<String>()?;
-    let data = Vec::from_hex(to_even_str(trim_hex(&str)))?;
+    let str = parse_arg(s)?;
+    let data = Vec::from_hex(&str)?;
     Ok(data)
 }
 
 /// Parse transaction data
 pub fn parse_nonce(s: &str) -> Result<u64, Error> {
-    let nonce_str = s.parse::<String>()?;
-    Ok(u64::from_str_radix(&to_even_str(trim_hex(&nonce_str)), 16)?)
+    let nonce_str = parse_arg(s)?;
+    Ok(u64::from_str_radix(&nonce_str, 16)?)
 }
 
 /// Parse path for accounts import/export
@@ -131,14 +155,13 @@ pub fn parse_path_or_default(s: &str, default: &Option<String>) -> Result<PathBu
 
 /// Parse gas limit for transaction execution
 pub fn parse_gas_or_default(s: &str, default: &Option<String>) -> Result<u64, Error> {
-    let gas_str = arg_or_default(s, default)?;
-    let gas = Vec::from_hex(to_even_str(trim_hex(&gas_str)))?;
-    Ok(to_u64(&gas))
+    let gas_str = arg_or_default(s, default).and_then(|s| parse_arg(&s))?;
+    Ok(u64::from_str_radix(&gas_str, 16)?)
 }
 
 /// Parse gas limit for transaction execution
 pub fn parse_gas_price_or_default(s: &str, default: &Option<String>) -> Result<[u8; 32], Error> {
-    let gp_str = arg_or_default(s, default)?;
+    let gp_str = arg_or_default(s, default).and_then(|s| parse_arg(&s))?;
     hex_to_32bytes(&gp_str)
 }
 
@@ -229,7 +252,78 @@ mod tests {
     use super::*;
 
     #[test]
-    fn should_parse_private_key() {}
+    fn should_convert_hex_to_32bytes() {
+        assert_eq!(
+            hex_to_32bytes(
+                "fa384e6fe915747cd13faa1022044b0def5e6bec4238bec53166487a5cca569f",
+            ).unwrap(),
+            [
+                0xfa,
+                0x38,
+                0x4e,
+                0x6f,
+                0xe9,
+                0x15,
+                0x74,
+                0x7c,
+                0xd1,
+                0x3f,
+                0xaa,
+                0x10,
+                0x22,
+                0x04,
+                0x4b,
+                0x0d,
+                0xef,
+                0x5e,
+                0x6b,
+                0xec,
+                0x42,
+                0x38,
+                0xbe,
+                0xc5,
+                0x31,
+                0x66,
+                0x48,
+                0x7a,
+                0x5c,
+                0xca,
+                0x56,
+                0x9f,
+            ]
+        );
+        assert_eq!(hex_to_32bytes("00").unwrap(), [0u8; 32]);
+        assert_eq!(hex_to_32bytes("0000").unwrap(), [0u8; 32]);
+        assert!(hex_to_32bytes("00_10000").is_err());
+        assert!(hex_to_32bytes("01000z").is_err());
+        assert!(hex_to_32bytes("").is_err());
+    }
+
+    #[test]
+    fn should_parse_arg() {
+        assert_eq!(parse_arg("0x1000").unwrap(), "1000");
+        assert_eq!(parse_arg("0x100").unwrap(), "0100");
+        assert_eq!(parse_arg("0x10000").unwrap(), "010000");
+        assert!(parse_arg("0x").is_err());
+        assert!(parse_arg("").is_err());
+    }
+
+    #[test]
+    fn should_convert_arg_to_opt() {
+        assert_eq!(arg_to_opt("").unwrap(), None);
+        assert_eq!(arg_to_opt("test").unwrap(), Some("test".to_string()));
+    }
+
+    #[test]
+    fn should_parse_private_key() {
+        let pk = PrivateKey::try_from(&[0u8; 32]).unwrap();
+        assert_eq!(
+            pk,
+            parse_pk(
+                "0x0000000000000000000000000000000000000000000000000000000000000000",
+            ).unwrap()
+        );
+    }
 
     #[test]
     fn should_parse_address() {
@@ -245,20 +339,43 @@ mod tests {
     }
 
     #[test]
-    fn should_parse_nonce() {}
+    fn should_parse_nonce() {
+        assert_eq!(parse_nonce("0x1000").unwrap(), 4096);
+        assert_eq!(parse_nonce("0x01000").unwrap(), 4096);
+        assert_eq!(parse_nonce("0x100").unwrap(), 256);
+        assert_eq!(parse_nonce("0x0100").unwrap(), 256);
+        assert!(parse_nonce("").is_err());
+    }
 
     #[test]
-    fn should_parse_value() {}
+    fn should_parse_value() {
+        assert_eq!(parse_value("0x00").unwrap(), [0u8; 32]);
+        assert_eq!(parse_value("000").unwrap(), [0u8; 32]);
+        assert!(parse_value("00_10000").is_err());
+        assert!(parse_value("01000z").is_err());
+        assert!(parse_value("").is_err());
+    }
 
     #[test]
-    fn should_parse_gas() {}
+    fn should_parse_gas() {
+        assert_eq!(parse_gas_or_default("0x000", &None).unwrap(), 0);
+        assert_eq!(
+            parse_gas_or_default("", &Some("0x000".to_string())).unwrap(),
+            0
+        );
+        assert!(parse_gas_or_default("", &None).is_err());
+    }
 
     #[test]
-    fn should_parse_gas_price() {}
-
-    #[test]
-    fn should_convert_hex_to_32bytes() {}
-
-    #[test]
-    fn should_convert_arg_to_opt() {}
+    fn should_parse_gas_price() {
+        assert_eq!(
+            parse_gas_price_or_default("0x000", &None).unwrap(),
+            [0u8; 32]
+        );
+        assert_eq!(
+            parse_gas_price_or_default("", &Some("0x000".to_string())).unwrap(),
+            [0u8; 32]
+        );
+        assert!(parse_gas_price_or_default("", &None).is_err());
+    }
 }

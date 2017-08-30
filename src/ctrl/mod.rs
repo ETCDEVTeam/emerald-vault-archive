@@ -7,7 +7,7 @@ mod util;
 pub use self::error::Error;
 use super::emerald::keystore::{KeyFile, KdfDepthLevel};
 use super::emerald::{self, Address, Transaction, to_arr, to_chain_id, trim_hex, align_bytes,
-                     to_u64, to_even_str};
+                     to_even_str};
 use super::emerald::PrivateKey;
 use super::emerald::storage::{KeyfileStorage, build_storage, default_keystore_path};
 use std::net::SocketAddr;
@@ -193,8 +193,8 @@ impl CmdExecutor {
             b"! Warning: passphrase can't be restored. Don't forget it !\n",
         )?;
         let passphrase = request_passphrase()?;
-        let name = arg_to_opt!(self.args.flag_name);
-        let desc = arg_to_opt!(self.args.flag_description);
+        let name = arg_to_opt(&self.args.flag_name)?;
+        let desc = arg_to_opt(&self.args.flag_description)?;
 
         let kf = if self.args.flag_raw {
             let pk = parse_pk(&self.args.arg_key)?;
@@ -300,8 +300,8 @@ impl CmdExecutor {
     /// Update `name` and `description` for existing account
     fn update(&self) -> ExecResult<Error> {
         let address = parse_address(&self.args.arg_address)?;
-        let name = arg_to_opt!(self.args.flag_name);
-        let desc = arg_to_opt!(self.args.flag_description);
+        let name = arg_to_opt(&self.args.flag_name)?;
+        let desc = arg_to_opt(&self.args.flag_description)?;
 
         self.storage.update(&address, name, desc)?;
 
