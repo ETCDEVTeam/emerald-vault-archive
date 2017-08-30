@@ -7,12 +7,12 @@
 
 #[macro_use]
 extern crate log;
-
 #[macro_use]
 extern crate lazy_static;
-
 #[macro_use]
 extern crate serde_derive;
+#[macro_use]
+extern crate text_io;
 extern crate serde;
 extern crate docopt;
 extern crate env_logger;
@@ -24,7 +24,6 @@ extern crate jsonrpc_core;
 extern crate hyper;
 extern crate reqwest;
 extern crate hex;
-
 
 mod ctrl;
 mod rpc;

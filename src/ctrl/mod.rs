@@ -6,7 +6,8 @@ mod util;
 
 pub use self::error::Error;
 use super::emerald::keystore::{KeyFile, KdfDepthLevel};
-use super::emerald::{self, Address, Transaction, to_arr, to_chain_id, trim_hex, align_bytes};
+use super::emerald::{self, Address, Transaction, to_arr, to_chain_id, trim_hex, align_bytes,
+                     to_u64, to_even_str};
 use super::emerald::PrivateKey;
 use super::emerald::storage::{KeyfileStorage, build_storage, default_keystore_path};
 use std::net::SocketAddr;
@@ -16,8 +17,9 @@ use std::fs;
 use std::path::PathBuf;
 use rustc_serialize::json;
 use std::sync::Arc;
-use self::util::{EnvVars, arg_or_default};
+use self::util::*;
 use rpc::Connector;
+use hex::ToHex;
 
 
 #[derive(Debug, Deserialize, Clone)]
@@ -27,6 +29,7 @@ pub struct Args {
     pub arg_from: String,
     pub arg_to: String,
     pub arg_value: String,
+    pub arg_key: String,
     pub flag_raw: bool,
     pub flag_version: bool,
     pub flag_quiet: bool,
@@ -36,6 +39,7 @@ pub struct Args {
     pub flag_nonce: String,
     pub flag_gas: String,
     pub flag_gas_price: String,
+    pub flag_data: String,
     pub flag_base_path: String,
     pub flag_security_level: String,
     pub flag_chain: String,
@@ -188,12 +192,12 @@ impl CmdExecutor {
         out.write_all(
             b"! Warning: passphrase can't be restored. Don't forget it !\n",
         )?;
-        let passphrase = CmdExecutor::request_passphrase()?;
+        let passphrase = request_passphrase()?;
         let name = arg_to_opt!(self.args.flag_name);
         let desc = arg_to_opt!(self.args.flag_description);
 
         let kf = if self.args.flag_raw {
-            let pk = self.parse_pk()?;
+            let pk = parse_pk(&self.args.arg_key)?;
             let mut kf = KeyFile::new(&passphrase, &self.sec_level, name, desc)?;
             kf.encrypt_key(pk, &passphrase);
             kf
@@ -213,7 +217,7 @@ impl CmdExecutor {
 
     /// Hide account from being listed
     fn hide(&self) -> ExecResult<Error> {
-        let address = self.parse_address()?;
+        let address = parse_address(&self.args.arg_address)?;
         self.storage.hide(&address)?;
 
         Ok(())
@@ -221,7 +225,7 @@ impl CmdExecutor {
 
     /// Unhide account from being listed
     fn unhide(&self) -> ExecResult<Error> {
-        let address = self.parse_address()?;
+        let address = parse_address(&self.args.arg_address)?;
         self.storage.unhide(&address)?;
 
         Ok(())
@@ -229,9 +233,9 @@ impl CmdExecutor {
 
     /// Extract private key from a keyfile
     fn strip(&self) -> ExecResult<Error> {
-        let address = self.parse_address()?;
+        let address = parse_address(&self.args.arg_address)?;
         let kf = self.storage.search_by_address(&address)?;
-        let passphrase = CmdExecutor::request_passphrase()?;
+        let passphrase = request_passphrase()?;
         let pk = kf.decrypt_key(&passphrase)?;
 
         io::stdout().write_all(
@@ -245,7 +249,7 @@ impl CmdExecutor {
 
     /// Export accounts
     fn export(&self) -> ExecResult<Error> {
-        let path = self.parse_path()?;
+        let path = parse_path_or_default(&self.args.flag_base_path, &self.vars.emerald_base_path)?;
 
         if self.args.flag_all {
             if !path.is_dir() {
@@ -275,7 +279,7 @@ impl CmdExecutor {
 
     /// Import accounts
     fn import(&self) -> ExecResult<Error> {
-        let path = self.parse_path()?;
+        let path = parse_path_or_default(&self.args.flag_base_path, &self.vars.emerald_base_path)?;
 
         if path.is_file() {
             self.import_keyfile(path)?;
@@ -295,7 +299,7 @@ impl CmdExecutor {
 
     /// Update `name` and `description` for existing account
     fn update(&self) -> ExecResult<Error> {
-        let address = self.parse_address()?;
+        let address = parse_address(&self.args.arg_address)?;
         let name = arg_to_opt!(self.args.flag_name);
         let desc = arg_to_opt!(self.args.flag_description);
 
@@ -306,33 +310,37 @@ impl CmdExecutor {
 
     /// Sign transaction
     fn sign_transaction(&self) -> ExecResult<Error> {
-        let from = self.parse_from()?;
+        let from = parse_address(&self.args.arg_from)?;
         let kf = self.storage.search_by_address(&from)?;
 
         let tr = Transaction {
             nonce: self.get_nonce(&from)?,
-            gas_price: self.parse_gas_price()?,
-            gas_limit: self.parse_gas()?,
-            to: self.parse_to()?,
-            value: self.parse_value()?,
-            data: self.parse_data()?,
+            gas_price: parse_gas_price_or_default(
+                &self.args.flag_gas_price,
+                &self.vars.emerald_gas_price,
+            )?,
+            gas_limit: parse_gas_or_default(&self.args.flag_gas, &self.vars.emerald_gas)?,
+            to: match parse_address(&self.args.arg_to) {
+                Ok(a) => Some(a),
+                Err(_) => None,
+            },
+            value: parse_value(&self.args.arg_value)?,
+            data: parse_data(&self.args.flag_data)?,
         };
-        println!(">> DEBUG: Transaction packed");
-        let pass = CmdExecutor::request_passphrase()?;
+        let pass = request_passphrase()?;
         let pk = kf.decrypt_key(&pass)?;
 
         if let Some(chain_id) = to_chain_id(&self.chain) {
             let raw = tr.to_signed_raw(pk, chain_id)?;
 
-            io::stdout().write_all(b"Signed transaction: ")?;
-            io::stdout().write_all(&raw)?;
+            println!("Signed transaction: ");
+            println!("{}", raw.to_hex());
 
             if self.connector.is_some() {
                 let tx_hash = self.send_transaction(raw)?;
-                io::stdout().write_all(b"Tx hash: ")?;
-                io::stdout().write_all(&tx_hash.into_bytes())?;
+                println!("Tx hash: ");
+                println!("{}", tx_hash);
             }
-            io::stdout().flush()?;
 
             Ok(())
         } else {
