@@ -84,6 +84,7 @@ impl CmdExecutor {
     }
 
     ///
+    /// 
     pub fn request_passphrase() -> Result<String, Error> {
         let mut out = io::stdout();
         out.write_all(b"Enter passphrase: \n")?;
