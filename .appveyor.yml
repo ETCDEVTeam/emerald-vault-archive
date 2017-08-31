@@ -68,6 +68,7 @@ branches:
 # default-toolchain and default-host manually here.
 install:
   # Install janus.
+  - set PATH=C:\msys64\mingw64\bin;C:\msys64\usr\bin\;%PATH%
   - curl -sL https://raw.githubusercontent.com/ethereumproject/janus/master/get-windows.sh | bash
   - set PATH=./janusbin;%PATH%
   - ps: $env:VERSION_BASE = "$(janus.exe version -format='v%M.%m.x')"
