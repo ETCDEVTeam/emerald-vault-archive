@@ -33,20 +33,21 @@ image: Visual Studio 2015
 # channels to enable unstable features when building for nightly. Or you could add additional
 # matrix entries to test different combinations of features.
 environment:
+  GCP_PASSWD:
+    secure: erzLJz7qT0kCJa+jZG6Sf9wwkfLYO2UDLzydkKTdwqA=
+
   matrix:
-
-### MSVC Toolchains ###
-
-  # Stable 64-bit MSVC
+    ### MSVC Toolchains ###
+    # Stable 64-bit MSVC
     - channel: stable
       target: x86_64-pc-windows-msvc
-  # Stable 32-bit MSVC
+    # Stable 32-bit MSVC
     - channel: stable
       target: i686-pc-windows-msvc
-  # Beta 64-bit MSVC
+    # Beta 64-bit MSVC
     - channel: beta
       target: x86_64-pc-windows-msvc
-  # Beta 32-bit MSVC
+    # Beta 32-bit MSVC
     - channel: beta
       target: i686-pc-windows-msvc
 
@@ -66,6 +67,12 @@ branches:
 # For simple configurations, instead of using the build matrix, you can simply set the
 # default-toolchain and default-host manually here.
 install:
+  # Install janus.
+  - curl -sL https://raw.githubusercontent.com/ethereumproject/janus/master/get-windows.sh | bash
+  - set PATH=./janusbin;%PATH%
+  - ps: $env:VERSION_BASE = "$(janus.exe version -format='v%M.%m.x')"
+  - ps: $env:VERSION = "$(janus.exe version -format='TAG_OR_NIGHTLY')"
+
   - appveyor DownloadFile https://win.rustup.rs/ -FileName rustup-init.exe
   - rustup-init -yv --default-toolchain %channel% --default-host %target%
   - cmd: set PATH=%PATH%;%USERPROFILE%\.cargo\bin
@@ -86,7 +93,7 @@ cache:
 # build commands. Rust will automatically be placed in the PATH environment variable.
 build_script:
   - cargo build --all --verbose --release
-
+  - 7z a emerald-win64-%VERSION%.zip emerald.exe
 # Uses 'cargo test' to run tests and build. Alternatively, the project may call compiled programs
 # directly or perform other testing commands. Rust will automatically be placed in the PATH
 # environment variable.
@@ -94,5 +101,14 @@ test_script:
   - cargo test --all --verbose %cargoflags%
 
 artifacts:
-  - path: target\release\emerald.exe
-    name: emerald-cli
+  - path: '*.zip'
+    name: emerald
+before_deploy:
+  # Set up GCP upload.
+  - nuget install secure-file -ExcludeVersion
+  - secure-file\tools\secure-file -decrypt gcloud-appveyor.json.enc -secret %GCP_PASSWD% -out .gcloud.json
+deploy_script:
+  - ps: >-
+      If ($env:APPVEYOR_REPO_BRANCH -eq 'master') {
+        janus.exe deploy -to="builds.etcdevteam.com/go-ethereum/$env:VERSION_BASE/" -files="./*.zip" -key="./.gcloud.json"
+      }
