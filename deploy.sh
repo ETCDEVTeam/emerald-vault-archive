@@ -8,4 +8,4 @@ mkdir deploy
 mv *.zip *.tar.gz deploy/
 ls -l deploy/
 
-janus deploy -to="builds.etcdevteam.com/go-ethereum/$(janus version -format='v%M.%m.x')/" -files="./deploy/*" -key="./gcloud-travis.json.enc"
+janus deploy -to="builds.etcdevteam.com/emerald-cli/$(janus version -format='v%M.%m.x')/" -files="./deploy/*" -key="./gcloud-travis.json.enc"
