@@ -111,5 +111,5 @@ before_deploy:
 deploy_script:
   - ps: >-
       If ($env:APPVEYOR_REPO_BRANCH -eq 'master') {
-        janus.exe deploy -to="builds.etcdevteam.com/ethereum-cli/$env:VERSION_BASE/" -files="./*.zip" -key="./.gcloud.json"
+        janus.exe deploy -to="builds.etcdevteam.com/emerald-cli/$env:VERSION_BASE/" -files="./*.zip" -key="./.gcloud.json"
       }
