@@ -38,6 +38,6 @@ deploy:
   skip_cleanup: true
   provider: script
   script: ./deploy.sh
-#  on:
-#    branch: issue/ci_builds
+  on:
+    branch: issue/ci_builds
   tags: true
