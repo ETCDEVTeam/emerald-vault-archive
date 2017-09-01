@@ -5,6 +5,9 @@ use emerald::storage::KeyStorageError;
 use emerald::{self, keystore};
 use std::net::AddrParseError;
 use rustc_serialize::json;
+use reqwest;
+use std::num;
+use hex;
 
 ///
 #[derive(Debug)]
@@ -57,6 +60,24 @@ impl From<keystore::SerializeError> for Error {
 
 impl From<json::EncoderError> for Error {
     fn from(err: json::EncoderError) -> Self {
+        Error::ExecError(err.to_string())
+    }
+}
+
+impl From<reqwest::Error> for Error {
+    fn from(err: reqwest::Error) -> Self {
+        Error::ExecError(err.to_string())
+    }
+}
+
+impl From<num::ParseIntError> for Error {
+    fn from(err: num::ParseIntError) -> Self {
+        Error::ExecError(err.to_string())
+    }
+}
+
+impl From<hex::FromHexError> for Error {
+    fn from(err: hex::FromHexError) -> Self {
         Error::ExecError(err.to_string())
     }
 }
