@@ -34,10 +34,10 @@ script:
 - cargo test --all --verbose
 - cargo build --all --verbose --release
 
-deploy:
-  skip_cleanup: true
-  provider: script
-  script: ./deploy.sh
-  on:
-    branch: issue/ci_builds
-  tags: true
+# deploy:
+#   skip_cleanup: true
+#   provider: script
+#   script: ./deploy.sh
+#   on:
+#     branch: issue/ci_builds
+#   tags: true
