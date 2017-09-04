@@ -1,34 +1,39 @@
 Emerald offline wallet command line interface.
 
 Usage:
-  emerald server    [--port <port>] [--host <host>] [--base-path <path>]
-  emerald new       --chain <name>  [[--security-level <level>] [--name <name>] [--description <description>]] | (-r | --raw) <key>
-  emerald list      --chain <name>  [--show-hidden]
-  emerald hide      --chain <name>  <address>
-  emerald unhide    --chain <name>  (<address> | [-a | --all])
-  emerald strip     --chain <name>  <address>
-  emerald import    --chain <name>  [-a | --all] <path>
-  emerald export    --chain <name>  [-a | --all] <path>
-  emerald update    --chain <name>  <address> [--name <name>] [--description <description>]
-  emerald transaction --chain <name> <gas> <gas-price>\
-                                <from> <nonce> <to> <value> [-d|--data <data>]
+  emerald server    [--port=<port>] [--host=<host>] [--base-path=<path>]
+  emerald new       --chain=<chain>  ([[--security-level=<level>] [--name=<name>] [--description=<description>]] | --raw <key>)
+  emerald list      --chain=<chain>  [--show-hidden]
+  emerald hide      --chain=<chain>  <address>
+  emerald unhide    --chain=<chain>  ([-a | --all] | <address>)
+  emerald strip     --chain=<chain>  <address>
+  emerald import    --chain=<chain>  [-a | --all] <path>
+  emerald export    --chain=<chain>  [-a | --all] <path>
+  emerald update    --chain=<chain>  <address> [--name=<name>] [--description=<description>]
+  emerald transaction --chain=<chain> <from> <to> <value> [--gas=<gas>] [--gas-price=<price>] [--data=<data>] (--nonce=<nonce> | --upstream=<upstream>)
   emerald -V | --version
   emerald -h | --help
 
 Options:
   -a, --all                                   Apply action to all accounts
-  -d, --data                                  Optional data included in a transaction
+  -c, --chain=<mainnet|testnet>               Chain name [default: mainnet]
   -h, --help                                  Show this message
   -V, --version                               Show current version
   -r, --raw                                   Create Keyfile directly from a private key
   -q, --quiet                                 Only errors printed to the output
   -v, --verbose                               Verbose output
-      --host <host>                           Listen host [default: 127.0.0.1]
-      --port <port>                           Listen port [default: 1920]
-      --base-path <path>                      Base directory path, if omitted default os-specific value will be used:
+      --data=<data>                           Optional data included in a transaction
+      --name=<name>                           Account name
+      --description=<description>             Account description
+      --host=<host>                           Listen host [default: 127.0.0.1]
+      --port=<port>                           Listen port [default: 1920]
+      --base-path=<path>                      Base directory path, if omitted default os-specific value will be used:
                                                   + Mac OS X: ~/Library/Emerald
                                                   + Linux: ~/.emerald
                                                   + Windows: %USERDIR%\.emerald
-      --security-level <normal|high|ultra>    Level of security for cryptographic operations [default: ultra]
-  -c, --chain <mainnet|testnet>               Chain name [default: mainnet]
-  --show-hidden                               Include hidden keyfiles
+      --security-level=<normal|high|ultra>    Level of security for cryptographic operations [default: ultra]
+      --show-hidden                           Include hidden keyfiles
+      --upstream=<upstream>                   URL to ethereum node [default: localhost:8545]
+      --gas=<gas>                             Gas limit for transaction
+      --gas-price=<price>                     Gas price for transaction execution
+      --nonce=<nonce>                         Transaction count for sender
