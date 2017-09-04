@@ -104,7 +104,7 @@ fn parse_arg(raw: &str) -> Result<String, Error> {
 /// Converts hex string to 32 bytes array
 /// Aligns original `hex` to fit 32 bytes
 fn hex_to_32bytes(hex: &str) -> Result<[u8; 32], Error> {
-    if hex.len() == 0 {
+    if hex.is_empty() {
         return Err(Error::ExecError(
             "Invalid parameter: empty string".to_string(),
         ));
