@@ -43,5 +43,5 @@ deploy:
   provider: script
   script: ./deploy.sh
   on:
-    branch: issue/ci_builds
+    branch: master
   tags: true
