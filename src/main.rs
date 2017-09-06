@@ -17,7 +17,6 @@ extern crate serde;
 extern crate docopt;
 extern crate env_logger;
 extern crate emerald_rs as emerald;
-extern crate regex;
 extern crate rustc_serialize;
 extern crate serde_json;
 extern crate jsonrpc_core;
@@ -74,7 +73,7 @@ fn main() {
         Ok(c) => c,
         Err(e) => {
             error!("{}", e.to_string());
-            exit(1);
+            exit(1)
         }
     };
 

@@ -12,7 +12,7 @@ use super::emerald::PrivateKey;
 use super::emerald::storage::{KeyfileStorage, build_storage, default_keystore_path};
 use std::net::SocketAddr;
 use std::str::FromStr;
-use std::io::{self, Write};
+use std::io::Write;
 use std::fs;
 use std::path::PathBuf;
 use rustc_serialize::json;
@@ -168,30 +168,23 @@ impl CmdExecutor {
     fn list(&self) -> ExecResult<Error> {
         let accounts_info = self.storage.list_accounts(self.args.flag_show_hidden)?;
 
-        io::stdout().write_all(
-            &format!("Total: {}\n", accounts_info.len())
-                .into_bytes(),
-        )?;
+        println!("Total: {}", accounts_info.len());
 
         for info in accounts_info {
-            io::stdout().write_all(&format!(
-                "Account: {}, name: {}, description: {}\n",
+            println!(
+                "Account: {}, name: {}, description: {}",
                 &info.address,
                 &info.name,
                 &info.description
-            ).into_bytes())?;
+            );
         }
-        io::stdout().flush()?;
 
         Ok(())
     }
 
     /// Creates new account
     fn new_account(&self) -> ExecResult<Error> {
-        let mut out = io::stdout();
-        out.write_all(
-            b"! Warning: passphrase can't be restored. Don't forget it !\n",
-        )?;
+        println!("! Warning: passphrase can't be restored. Don't forget it !");
         let passphrase = request_passphrase()?;
         let name = arg_to_opt(&self.args.flag_name)?;
         let desc = arg_to_opt(&self.args.flag_description)?;
@@ -206,11 +199,7 @@ impl CmdExecutor {
         };
 
         self.storage.put(&kf)?;
-        out.write_all(&format!(
-            "Created new account: {}",
-            &kf.address.to_string()
-        ).into_bytes())?;
-        out.flush()?;
+        println!("Created new account: {}", &kf.address.to_string());
 
         Ok(())
     }
@@ -238,18 +227,14 @@ impl CmdExecutor {
         let passphrase = request_passphrase()?;
         let pk = kf.decrypt_key(&passphrase)?;
 
-        io::stdout().write_all(
-            &format!("Private key: {}", &pk.to_string())
-                .into_bytes(),
-        )?;
-        io::stdout().flush()?;
+        println!("Private key: {}", &pk.to_string());
 
         Ok(())
     }
 
     /// Export accounts
     fn export(&self) -> ExecResult<Error> {
-        let path = parse_path_or_default(&self.args.flag_base_path, &self.vars.emerald_base_path)?;
+        let path = parse_path_or_default(&self.args.arg_path, &self.vars.emerald_base_path)?;
 
         if self.args.flag_all {
             if !path.is_dir() {
@@ -279,7 +264,7 @@ impl CmdExecutor {
 
     /// Import accounts
     fn import(&self) -> ExecResult<Error> {
-        let path = parse_path_or_default(&self.args.flag_base_path, &self.vars.emerald_base_path)?;
+        let path = parse_path_or_default(&self.args.arg_path, &self.vars.emerald_base_path)?;
 
         if path.is_file() {
             self.import_keyfile(path)?;
