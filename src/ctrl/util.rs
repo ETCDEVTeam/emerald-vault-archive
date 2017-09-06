@@ -136,8 +136,13 @@ pub fn parse_value(s: &str) -> Result<[u8; 32], Error> {
 
 /// Parse transaction data
 pub fn parse_data(s: &str) -> Result<Vec<u8>, Error> {
-    let str = parse_arg(s)?;
-    let data = Vec::from_hex(&str)?;
+    let data = match s.parse::<String>().and_then(
+        |d| Ok(to_even_str(trim_hex(&d))),
+    ) {
+        Ok(str) => Vec::from_hex(&str)?,
+        Err(e) => vec![],
+    };
+
     Ok(data)
 }
 
@@ -354,6 +359,15 @@ mod tests {
         assert!(parse_value("00_10000").is_err());
         assert!(parse_value("01000z").is_err());
         assert!(parse_value("").is_err());
+    }
+
+    #[test]
+    fn should_parse_data() {
+        assert_eq!(parse_data("0x00").unwrap(), vec![0]);
+        assert_eq!(parse_data("000").unwrap(), vec![0, 0]);
+        assert!(parse_data(""), vec![]);
+        assert!(parse_data("00_10000").is_err());
+        assert!(parse_data("01000z").is_err());
     }
 
     #[test]

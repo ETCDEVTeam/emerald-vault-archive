@@ -234,7 +234,7 @@ impl CmdExecutor {
 
     /// Export accounts
     fn export(&self) -> ExecResult<Error> {
-        let path = parse_path_or_default(&self.args.flag_base_path, &self.vars.emerald_base_path)?;
+        let path = parse_path_or_default(&self.args.arg_path, &self.vars.emerald_base_path)?;
 
         if self.args.flag_all {
             if !path.is_dir() {
@@ -264,7 +264,7 @@ impl CmdExecutor {
 
     /// Import accounts
     fn import(&self) -> ExecResult<Error> {
-        let path = parse_path_or_default(&self.args.flag_base_path, &self.vars.emerald_base_path)?;
+        let path = parse_path_or_default(&self.args.arg_path, &self.vars.emerald_base_path)?;
 
         if path.is_file() {
             self.import_keyfile(path)?;
