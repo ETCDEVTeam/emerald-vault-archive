@@ -4,32 +4,44 @@ rust:
 - stable
 - beta
 - nightly
+
 os:
 - linux
 - osx
+
+env:
+  global:
+    - secure: "llTyX5P3hSaYYYIhmT7YlceqmfoeluB4rR9JMp8pkMPUeDBc7YPlULTfalpSxOlFCGLtNit1qVcPEIrm80tAzknDYMXWHHvVu4wcVCWMdeShwFFKlPqZJwIkEH/tGlUP+k49KIFOV4gvwOfUo7d1cg9garOnlGZW+z1RU2rQMUgu0QaQrNoux24HOenNfYnMGfGTHUFuyz9WXtU7yw6fUOr/VUiqc6BBndu1ip+WgM71btK9gdbbB4Qy/GP0IaP3lhZ+AqtKtugOzEtdXhs5QJvyWDdQqq4jzDi8R+tc2VVKhomiTADQBHTKV/P8uZhHoclA6D+2TOeqX3k/5nfS9hcKBzOe5wIiVkmXf1/bxJpliF/7YnB1zSFnrKHAS4LU1jdHPMu8VRyQZ3EUoaCOW9WxL87LP489V4j2LZrIV9fOmgstlS8MZGcXDnqaUqoaOf78tcYwBtblcMsQj4ANktySv7SDLTTx5UEXfecX8W7nEdvggOcfzEqMR4k13pZeZ4AFmI7p2Za0BeaOl3vayaAv3Y4hlCM9AabutLOaRGODV3Jra1PlPGzaDc4TtYFAxyoOx/4KVeKs0sw9lFgd93V6TWfhqbZ/n6HXEREQb/UVtt4YAtO9IW1gDOYzFXt3Fh9Hwt8ZB0vHHfRHuw/EC5+WcfLqstBqeosjlH/C+wg="
+
 notifications:
   email:
     on_success: never
+
 before_install:
 - if [ $TRAVIS_OS_NAME = linux ]; then sudo apt-get -qq update; else brew update; fi
 - if [ $TRAVIS_OS_NAME = linux ]; then sudo apt-get install -y libusb-1.0-0-dev; else brew install libusb; fi
 - travis_wait cargo install rustfmt --force || true
+
 before_script:
 - export PATH="$PATH":~/.cargo/bin
 - echo "\$ rustfmt --version"
 - cargo fmt --all -- --version
+
 script:
+# Install Janus
+- curl -sL https://raw.githubusercontent.com/ethereumproject/janus/master/get.sh | bash
+# Add Janus to PATH.
+- export PATH=$PATH:$PWD/janusbin
+- export APP_VERSION="$(janus version -format 'v%M.%m.%C-%S')"
 - export RUST_BACKTRACE=1
 - cargo fmt --all -- --verbose --write-mode=diff
 - cargo test --all --verbose
 - cargo build --all --verbose --release
+
 deploy:
-  provider: releases
   skip_cleanup: true
-  api_key:
-    secure: qXqFCva/yJfwdJzLUazv3AUqvnbUWWEvCOoZHMkByK7/OP1yGdB/q7R24IRAf5SvfEk9TR8a81i+tiy/3iLfgrrBPLc077cLB4q6q1O1yBIrRTg61ggUDyiKaZDZqHtuvI2ocTnFM5jXTuEXVVGt0HA1IO3ezogmcVi9UrQp5rDDCWqPcNviTVweTICLb9PAWKmhbGrGmR3BVuNjmBCDJr25qnW6wors93xfCrpePepnl92gvPrp30WmQ2E+bgV+Hoeu9gJjCIjRU8bTmDWEdkBa3Qe8xIMU+SAw7CBUWRALh5q1HX0M7RYpg3zOEdVdWZ+OwDTO0mc40UdaV5rkx029ird4mC96bkHHemYITJJrDrwjoni9wSbnhZaNefZeKf8pAGLUO/+NwtcYbj8ogYdnsweAMRiZUvA15/tzk6kMQqBILjL605YayPWt9XvdU06gLjWtEd8qlOqt+xBPat3dKw15Xkb8XPM8bc6+YBHDvJC9tF4vozOsj9Sh4b/RV9+tB0xrjniY/ZRMtGe6JJO+7+7naszekz+F9lZJocmAhbX7XUsgyvjhmVn/1+IKnJQ/iqIn7FNQa+7y9ONmQxke4aibKdM3vTicgwwPD4IY2i9MGLCBDUFIiu70k8pJ2Gy4xa8E0LupcHui4uysG2ukqJhPU/4rN9v7HZznE3Y=
-  file: target/release/emerald
+  provider: script
+  script: ./deploy.sh
   on:
-    repo: ethereumproject/emerald-cli
     branch: master
-    tags: true
+  tags: true
