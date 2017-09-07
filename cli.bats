@@ -60,7 +60,11 @@ teardown() {
     [ "$status" -eq 0 ]
     [[ "$output" == *"Created new account"* ]]
 
-    address=$(echo "$output" | perl -lane 'print $F[-1]')
+    # FIXME I'm ugly.
+    local address=$(echo "$output" | perl -lane 'print $F[-1]' | tr -d '\n')
+    local removeme='!passphrase:'
+    local replacewith=''
+    address="${address//$removeme/$replacewith}"
     [[ "$address" != "" ]]
     [[ "$address" == *"0x"* ]]
 
@@ -71,9 +75,7 @@ teardown() {
 
     [ "$status" -eq 0 ]
     [[ "$output" == *"Total: 1"* ]]
-    # FIXME Why not work? Possibly because has newline in it.
-    # [[ "$output" == *"Account: $address, name: , description:"* ]]
-    unset address
+    [[ "$output" == *"Account: $address, name: , description:"* ]]
 }
 
 @test "succeeds: update" {
@@ -83,12 +85,14 @@ teardown() {
     [ "$status" -eq 0 ]
     [[ "$output" == *"Created new account"* ]]
 
-    address=$(echo "$output" | perl -lane 'print $F[-1]')
+    # FIXME I'm ugly.
+    local address=$(echo "$output" | perl -lane 'print $F[-1]' | tr -d '\n')
+    local removeme='!passphrase:'
+    local replacewith=''
+    address="${address//$removeme/$replacewith}"
     [[ "$address" != "" ]]
     [[ "$address" == *"0x"* ]]
 
-    # FIXME Address probably with newline is still messing this up.
-    # I gotta learn me some awk.
     run $EMERALD_CLI update \
         --chain=testnet \
         "$address" \
@@ -99,5 +103,3 @@ teardown() {
     echo "$output"
     [ "$status" -eq 0 ]
 }
-
-# perl -lane 'print $F[-1]'
