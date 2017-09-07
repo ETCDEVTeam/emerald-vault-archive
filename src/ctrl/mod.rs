@@ -12,10 +12,8 @@ use super::emerald::PrivateKey;
 use super::emerald::storage::{KeyfileStorage, build_storage, default_keystore_path};
 use std::net::SocketAddr;
 use std::str::FromStr;
-use std::io::Write;
 use std::fs;
 use std::path::PathBuf;
-use rustc_serialize::json;
 use std::sync::Arc;
 use self::util::*;
 use rpc::Connector;
@@ -223,7 +221,7 @@ impl CmdExecutor {
     /// Extract private key from a keyfile
     fn strip(&self) -> ExecResult<Error> {
         let address = parse_address(&self.args.arg_address)?;
-        let kf = self.storage.search_by_address(&address)?;
+        let (_, kf) = self.storage.search_by_address(&address)?;
         let passphrase = request_passphrase()?;
         let pk = kf.decrypt_key(&passphrase)?;
 
@@ -245,19 +243,13 @@ impl CmdExecutor {
 
             let accounts_info = self.storage.list_accounts(true)?;
             for info in accounts_info {
-                let address = Address::from_str(&info.address)?;
-                let kf = self.storage.search_by_address(&address)?;
-
-                let mut p = path.clone();
-                p.push(&info.filename);
-
-                let json = json::encode(&kf).and_then(|s| Ok(s.into_bytes()))?;
-                let mut f = fs::File::create(p)?;
-                f.write_all(&json)?;
+                let addr = Address::from_str(&info.address)?;
+                self.export_keyfile(&addr, &path)?
             }
+        } else {
+            let addr = parse_address(&self.args.arg_address)?;
+            self.export_keyfile(&addr, &path)?
         }
-
-        if path.is_file() {};
 
         Ok(())
     }
@@ -296,7 +288,7 @@ impl CmdExecutor {
     /// Sign transaction
     fn sign_transaction(&self) -> ExecResult<Error> {
         let from = parse_address(&self.args.arg_from)?;
-        let kf = self.storage.search_by_address(&from)?;
+        let (_, kf) = self.storage.search_by_address(&from)?;
 
         let tr = Transaction {
             nonce: self.get_nonce(&from)?,
