@@ -98,8 +98,76 @@ teardown() {
         "$address" \
         --name="NewName" \
         --description="NewDescription"
-        # <<< $'foo\n'
 
-    echo "$output"
     [ "$status" -eq 0 ]
+
+    run $EMERALD_CLI list \
+        --chain=testnet
+
+    [ "$status" -eq 0 ]
+    [[ "$output" == *"NewName"* ]]
+    [[ "$output" == *"NewDescription"* ]]
+}
+
+@test "succeeds: strip" {
+    run $EMERALD_CLI new \
+        --chain=testnet \
+        <<< $'foo\n'
+    [ "$status" -eq 0 ]
+    [[ "$output" == *"Created new account"* ]]
+
+    # FIXME I'm ugly.
+    local address=$(echo "$output" | perl -lane 'print $F[-1]' | tr -d '\n')
+    local removeme='!passphrase:'
+    local replacewith=''
+    address="${address//$removeme/$replacewith}"
+    [[ "$address" != "" ]]
+    [[ "$address" == *"0x"* ]]
+
+    run $EMERALD_CLI strip \
+        --chain=testnet \
+        "$address" \
+        <<< $'foo\n'
+
+    [ "$status" -eq 0 ]
+    [[ "$output" == *"Private key: 0x"* ]]
+}
+
+@test "succeeds: hide && unhide" {
+    run $EMERALD_CLI new \
+        --chain=testnet \
+        <<< $'foo\n'
+    [ "$status" -eq 0 ]
+    [[ "$output" == *"Created new account"* ]]
+
+    # FIXME I'm ugly.
+    local address=$(echo "$output" | perl -lane 'print $F[-1]' | tr -d '\n')
+    local removeme='!passphrase:'
+    local replacewith=''
+    address="${address//$removeme/$replacewith}"
+    [[ "$address" != "" ]]
+    [[ "$address" == *"0x"* ]]
+
+    run $EMERALD_CLI hide \
+        --chain=testnet \
+        "$address"
+    [ "$status" -eq 0 ]
+
+    # Ensure is hidden; doesn't show up in list.
+    run $EMERALD_CLI list \
+        --chain=testnet
+
+    [ "$status" -eq 0 ]
+    [[ "$output" != *"$address"* ]]
+
+    run $EMERALD_CLI unhide \
+        --chain=testnet \
+        "$address"
+
+    # Esnure is not hidden; shows up in list.
+    run $EMERALD_CLI list \
+        --chain=testnet
+
+    [ "$status" -eq 0 ]
+    [[ "$output" == *"$address"* ]]
 }
