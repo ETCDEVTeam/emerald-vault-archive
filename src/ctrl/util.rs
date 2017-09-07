@@ -13,6 +13,9 @@ use jsonrpc_core::Params;
 use serde_json::Value;
 use rustc_serialize::hex::ToHex;
 use hex::FromHex;
+use rustc_serialize::json;
+use std::fs;
+use std::io::Write;
 
 
 /// Environment variables used to change default variables
@@ -140,7 +143,7 @@ pub fn parse_data(s: &str) -> Result<Vec<u8>, Error> {
         |d| Ok(to_even_str(trim_hex(&d))),
     ) {
         Ok(str) => Vec::from_hex(&str)?,
-        Err(e) => vec![],
+        Err(_) => vec![],
     };
 
     Ok(data)
@@ -191,6 +194,27 @@ impl CmdExecutor {
         //        io::stdout().write_all(
         //            &format!("kf: {:?}\n", kf).into_bytes(),
         //        )?;
+
+        Ok(())
+    }
+
+    /// Export Keyfile for selected address
+    /// into into specified file
+    ///
+    /// # Arguments:
+    ///
+    /// * addr - target addr
+    /// * path - target file path
+    ///
+    pub fn export_keyfile(&self, addr: &Address, path: &Path) -> Result<(), Error> {
+        let (info, kf) = self.storage.search_by_address(addr)?;
+
+        let mut p = PathBuf::from(path);
+        p.push(&info.filename);
+
+        let json = json::encode(&kf).and_then(|s| Ok(s.into_bytes()))?;
+        let mut f = fs::File::create(p)?;
+        f.write_all(&json)?;
 
         Ok(())
     }
@@ -365,7 +389,7 @@ mod tests {
     fn should_parse_data() {
         assert_eq!(parse_data("0x00").unwrap(), vec![0]);
         assert_eq!(parse_data("000").unwrap(), vec![0, 0]);
-        assert!(parse_data(""), vec![]);
+        assert_eq!(parse_data("").unwrap(), Vec::new() as Vec<u8>);
         assert!(parse_data("00_10000").is_err());
         assert!(parse_data("01000z").is_err());
     }

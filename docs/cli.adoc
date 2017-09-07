@@ -84,10 +84,22 @@ emerald update --chain=testnet \
 ----
 
 === How to export & import all accounts
-
+Import content of whole folder:
 ----
 emerald import --chain=testnet --all <path_to_files>
-emerald export --chain=testnet --all --all_accounts.json
+----
+or single keyfile:
+----
+emerald import --chain=testnet <path_to_file>
+----
+
+Export all keyfiles into directory:
+----
+emerald export --chain=testnet --all <path_to_export_dir>
+----
+or single keyfile for selected <address>:
+----
+emerald export --chain=testnet <address> <path_to_export_dir>
 ----
 
 === How to sign transaction
