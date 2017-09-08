@@ -148,6 +148,7 @@ teardown() {
     [[ "$address" != "" ]]
     [[ "$address" == *"0x"* ]]
 
+    # Hide account.
     run $EMERALD_CLI hide \
         --chain=testnet \
         "$address"
@@ -160,6 +161,7 @@ teardown() {
     [ "$status" -eq 0 ]
     [[ "$output" != *"$address"* ]]
 
+    # Unhide account.
     run $EMERALD_CLI unhide \
         --chain=testnet \
         "$address"
