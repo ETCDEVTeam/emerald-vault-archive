@@ -99,6 +99,7 @@ teardown() {
         --name="NewName" \
         --description="NewDescription"
 
+	echo "$address" # debug
     [ "$status" -eq 0 ]
 
     run $EMERALD_CLI list \
@@ -152,6 +153,8 @@ teardown() {
     run $EMERALD_CLI hide \
         --chain=testnet \
         "$address"
+
+	echo "$address" # debug
     [ "$status" -eq 0 ]
 
     # Ensure is hidden; doesn't show up in list.
