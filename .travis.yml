@@ -1,42 +1,46 @@
 language: rust
 cache: cargo
 rust:
-- stable
-- beta
-- nightly
+  - stable
+  - beta
+  - nightly
 
 os:
-- linux
-- osx
+  - linux
+  - osx
+
+matrix:
+  allow_failures:
+    - rust: nightly
 
 env:
   global:
-    - secure: "llTyX5P3hSaYYYIhmT7YlceqmfoeluB4rR9JMp8pkMPUeDBc7YPlULTfalpSxOlFCGLtNit1qVcPEIrm80tAzknDYMXWHHvVu4wcVCWMdeShwFFKlPqZJwIkEH/tGlUP+k49KIFOV4gvwOfUo7d1cg9garOnlGZW+z1RU2rQMUgu0QaQrNoux24HOenNfYnMGfGTHUFuyz9WXtU7yw6fUOr/VUiqc6BBndu1ip+WgM71btK9gdbbB4Qy/GP0IaP3lhZ+AqtKtugOzEtdXhs5QJvyWDdQqq4jzDi8R+tc2VVKhomiTADQBHTKV/P8uZhHoclA6D+2TOeqX3k/5nfS9hcKBzOe5wIiVkmXf1/bxJpliF/7YnB1zSFnrKHAS4LU1jdHPMu8VRyQZ3EUoaCOW9WxL87LP489V4j2LZrIV9fOmgstlS8MZGcXDnqaUqoaOf78tcYwBtblcMsQj4ANktySv7SDLTTx5UEXfecX8W7nEdvggOcfzEqMR4k13pZeZ4AFmI7p2Za0BeaOl3vayaAv3Y4hlCM9AabutLOaRGODV3Jra1PlPGzaDc4TtYFAxyoOx/4KVeKs0sw9lFgd93V6TWfhqbZ/n6HXEREQb/UVtt4YAtO9IW1gDOYzFXt3Fh9Hwt8ZB0vHHfRHuw/EC5+WcfLqstBqeosjlH/C+wg="
+    - secure: "VdWpdGMMMGuQT66mgvpSvlW1Dv4mbn16UoFZ0QzgDQUkLrSArT4qExxe6piRK2avOjGbMyhP0wGnMZvrVkZXub2KsbnOqpSQUTNHiJnl0ooSAyC/ASuBYUEJNFQoBIscjmSgv21Y8Lu3uO3jF80NERpFsI/lSLRDpGKjmmx7xrDFjOm/FVwTr6Nw9sxGZtKxXxmAgz+kJGtAc3n3VOH+PyOtbwJtdx4+6Hwy3JCJcMRSwYh35AptU3kP+NkO7jiBNi5blxs3obBwKyI88tmrJeJe9c9Yp6OdQGYiJk8bkEUsZKVw7P8QHE+b+um0HUw0XzqGkMax9ihysaBd+nPR1aWWVHDNVLlt0rvIhK0v9O4lOnvMR0KENbCUhdL2X4KwHhQEv20LqytMOyhce4aBrJ/4bBi7pwxkopiZwsHZ9NOXFBYGfo4Kl7ZH1cfs66L+8lGMOQWs/JpTeE3wo5b39Ky0mH/BIoPtZUPDRvp3SRrZ3CDkoQ6KWNDXY3ebOcW0o0STTkC8Wjbbaexp8z0NkFXlVbRsXOVG1Idi77VjwRFLbJKolV0fgXBanWM5IY4ry0dj5Ho8z7dSVJbISkhZvDVa/a/9jmV8eVylJOjxo1kX6d/Mh6rwT5UcP1sb6CRl/L+mYuq0MekDlT9HP/FKeyML/cvklDO6DBKAa9lsWwE="
 
 notifications:
   email:
     on_success: never
 
 before_install:
-- if [ $TRAVIS_OS_NAME = linux ]; then sudo apt-get -qq update; else brew update; fi
-- if [ $TRAVIS_OS_NAME = linux ]; then sudo apt-get install -y libusb-1.0-0-dev; else brew install libusb; fi
-- travis_wait cargo install rustfmt --force || true
+  - if [ $TRAVIS_OS_NAME = linux ]; then sudo apt-get -qq update; else brew update; fi
+  - if [ $TRAVIS_OS_NAME = linux ]; then sudo apt-get install -y libusb-1.0-0-dev; else brew install libusb; fi
+  - travis_wait cargo install rustfmt --force || true
 
 before_script:
-- export PATH="$PATH":~/.cargo/bin
-- echo "\$ rustfmt --version"
-- cargo fmt --all -- --version
+  - export PATH="$PATH":~/.cargo/bin
+  - echo "\$ rustfmt --version"
+  - cargo fmt --all -- --version
 
 script:
-# Install Janus
-- curl -sL https://raw.githubusercontent.com/ethereumproject/janus/master/get.sh | bash
-# Add Janus to PATH.
-- export PATH=$PATH:$PWD/janusbin
-- export APP_VERSION="$(janus version -format 'v%M.%m.%C-%S')"
-- export RUST_BACKTRACE=1
-- cargo fmt --all -- --verbose --write-mode=diff
-- cargo test --all --verbose
-- cargo build --all --verbose --release
+  # Install Janus
+  - curl -sL https://raw.githubusercontent.com/ethereumproject/janus/master/get.sh | bash
+  # Add Janus to PATH.
+  - export PATH=$PATH:$PWD/janusbin
+  - export APP_VERSION="$(janus version -format 'v%M.%m.%C-%S')"
+  - export RUST_BACKTRACE=1
+  - cargo fmt --all -- --verbose --write-mode=diff
+  - cargo test --all --verbose
+  - cargo build --all --verbose --release
 
 deploy:
   skip_cleanup: true
