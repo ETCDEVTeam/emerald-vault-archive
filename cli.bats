@@ -98,7 +98,6 @@ teardown() {
         "$address" \
         --name="NewName" \
         --description="NewDescription"
-
     [ "$status" -eq 0 ]
 
     run $EMERALD_CLI list \
