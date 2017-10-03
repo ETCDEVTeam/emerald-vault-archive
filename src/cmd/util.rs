@@ -16,6 +16,7 @@ use hex::FromHex;
 use rustc_serialize::json;
 use std::fs;
 use std::io::Write;
+use rpassword;
 
 
 /// Environment variables used to change default variables
@@ -176,7 +177,7 @@ pub fn parse_gas_price_or_default(s: &str, default: &Option<String>) -> Result<[
 /// Request passphrase
 pub fn request_passphrase() -> Result<String, Error> {
     println!("Enter passphrase: ");
-    let passphrase = read!("{}\n");
+    let passphrase = rpassword::read_password().unwrap();;
 
     Ok(passphrase)
 }

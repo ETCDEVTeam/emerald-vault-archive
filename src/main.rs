@@ -23,6 +23,7 @@ extern crate jsonrpc_core;
 extern crate hyper;
 extern crate reqwest;
 extern crate hex;
+extern crate rpassword;
 
 mod ctrl;
 mod rpc;
