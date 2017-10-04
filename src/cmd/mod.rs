@@ -86,7 +86,7 @@ impl CmdExecutor {
         let sec_level = match KdfDepthLevel::from_str(&sec_level_str) {
             Ok(sec) => sec,
             Err(e) => {
-                drror!("{}", e.to_string());
+                error!("{}", e.to_string());
                 KdfDepthLevel::default()
             }
         };
