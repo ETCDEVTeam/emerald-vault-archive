@@ -5,7 +5,7 @@ use hyper::client::IntoUrl;
 use jsonrpc_core::Params;
 use reqwest::Client;
 use serde_json::Value;
-use ctrl::Error;
+use cmd::Error;
 
 
 lazy_static! {

@@ -177,7 +177,7 @@ pub fn parse_gas_price_or_default(s: &str, default: &Option<String>) -> Result<[
 /// Request passphrase
 pub fn request_passphrase() -> Result<String, Error> {
     println!("Enter passphrase: ");
-    let passphrase = rpassword::read_password().unwrap();;
+    let passphrase = rpassword::read_password().unwrap();
 
     Ok(passphrase)
 }

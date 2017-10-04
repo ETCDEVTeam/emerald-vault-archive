@@ -25,10 +25,10 @@ extern crate reqwest;
 extern crate hex;
 extern crate rpassword;
 
-mod ctrl;
+mod cmd;
 mod rpc;
 
-use ctrl::{Args, CmdExecutor};
+use cmd::{Args, CmdExecutor};
 use docopt::Docopt;
 use env_logger::LogBuilder;
 use log::LogRecord;
