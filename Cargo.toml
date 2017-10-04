@@ -8,7 +8,7 @@ repository = "https://github.com/ethereumproject/emerald-cli"
 documentation = "https://docs.rs/emerald-cli"
 keywords = ["ethereum-classic", "blockchain", "ffi", "crypto-wallet", "cold-storage", "cli"]
 categories = ["cli", "script"]
-readme = "../README.adoc"
+readme = "README.adoc"
 license = "Apache-2.0"
 
 [badges]
