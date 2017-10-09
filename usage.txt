@@ -10,7 +10,8 @@ Usage:
   emerald import    --chain=<chain>  [-a | --all] <path>
   emerald export    --chain=<chain>  ([-a | --all] | <address>) <path>
   emerald update    --chain=<chain>  <address> [--name=<name>] [--description=<description>]
-  emerald transaction --chain=<chain> <from> <to> <value> [--gas=<gas>] [--gas-price=<price>] [--data=<data>] (--nonce=<nonce> | --upstream=<upstream>)
+  emerald transaction   --chain=<chain> <from> <to> <value> [--gas=<gas>] [--gas-price=<price>] [--data=<data>] (--nonce=<nonce> | --upstream=<upstream>)
+  emerald balance   <address>
   emerald -V | --version
   emerald -h | --help
 

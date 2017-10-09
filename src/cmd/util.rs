@@ -275,6 +275,34 @@ impl CmdExecutor {
             None => Err(Error::ExecError("Can't connect to client".to_string())),
         }
     }
+
+    /// Get balance for selected account
+    ///
+    /// # Arguments:
+    ///
+    /// * addr - target account
+    ///
+    /// # Return:
+    ///
+    /// * String - latest balance
+    ///
+    pub fn get_balance(&self, addr: &Address) -> Result<String, Error> {
+        match self.connector {
+            Some(ref conn) => {
+                let data = vec![
+                    Value::String(addr.to_string()),
+                    Value::String("latest".to_string()),
+                ];
+                let params = Params::Array(data);
+                conn.send_post(&MethodParams(ClientMethod::EthGetBalance, &params))
+                    .and_then(|v| match v.as_str() {
+                        Some(str) => Ok(str.to_string()),
+                        None => Err(Error::ExecError(format!("Can't get balance for {}", addr))),
+                    })
+            }
+            None => Err(Error::ExecError("Can't connect to client".to_string())),
+        }
+    }
 }
 
 #[cfg(test)]
