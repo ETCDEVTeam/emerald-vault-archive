@@ -11,7 +11,6 @@ extern crate log;
 extern crate lazy_static;
 #[macro_use]
 extern crate serde_derive;
-#[macro_use]
 extern crate text_io;
 extern crate serde;
 extern crate docopt;

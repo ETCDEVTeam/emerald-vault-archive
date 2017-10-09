@@ -10,7 +10,8 @@ Usage:
   emerald import    --chain=<chain>  [-a | --all] <path>
   emerald export    --chain=<chain>  ([-a | --all] | <address>) <path>
   emerald update    --chain=<chain>  <address> [--name=<name>] [--description=<description>]
-  emerald transaction --chain=<chain> <from> <to> <value> [--gas=<gas>] [--gas-price=<price>] [--data=<data>] (--nonce=<nonce> | --upstream=<upstream>)
+  emerald transaction   --chain=<chain> <from> <to> <value> [--gas=<gas>] [--gas-price=<price>] [--data=<data>] (--nonce=<nonce> | --upstream=<upstream>)
+  emerald balance   <address> [--upstream=<upstream>]
   emerald -V | --version
   emerald -h | --help
 
@@ -33,7 +34,7 @@ Options:
                                                   + Windows: %USERDIR%\.emerald
       --security-level=<normal|high|ultra>    Level of security for cryptographic operations [default: ultra]
       --show-hidden                           Include hidden keyfiles
-      --upstream=<upstream>                   URL to ethereum node [default: localhost:8545]
+      --upstream=<upstream>                   URL to ethereum node [default: 127.0.0.1:8545]
       --gas=<gas>                             Gas limit for transaction
       --gas-price=<price>                     Gas price for transaction execution
       --nonce=<nonce>                         Transaction count for sender

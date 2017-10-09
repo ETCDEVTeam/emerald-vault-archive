@@ -1,8 +1,0 @@
-= Emerald-cli image:https://img.shields.io/travis/ethereumproject/emerald-cli/master.svg?style=flat-square["Build Status", link="https://travis-ci.org/ethereumproject/emerald-cli"] image:https://img.shields.io/appveyor/ci/r8d8/emerald-cli/master.svg?style=flat-square["Build Status", link="https://ci.appveyor.com/project/r8d8/emerald-cli"] image:https://img.shields.io/badge/License-Apache%202.0-blue.svg?style=flat-square&maxAge=2592000["License", link="https://github.com/ethereumproject/emerald-cli/blob/master/LICENSE"]
-
-
-=== Console tool for link:https://github.com/ethereumproject/emerald-rs/[Emerald Vault]
-
-image::images/list.gif[]
-
-==== See our link:docs/cli.adoc[HowTo] for more

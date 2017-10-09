@@ -30,6 +30,10 @@ pub enum ClientMethod {
     /// [eth_sendRawTransaction](
     /// https://github.com/paritytech/parity/wiki/JSONRPC-eth-module#eth_sendrawtransaction)
     EthSendRawTransaction,
+
+    /// [eth_getBalance](
+    /// https://github.com/ethereumproject/go-ethereum/wiki/JSON-RPC#eth_getbalance)
+    EthGetBalance,
 }
 
 /// RPC method's parameters
