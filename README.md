@@ -11,6 +11,6 @@
 
 ### Console tool for [Emerald Vault](https://github.com/ethereumproject/emerald-rs/)
 
-
+[![asciicast](https://asciinema.org/a/WbivFQXwm5lUXenNsTvzfQxRY.png)](https://asciinema.org/a/WbivFQXwm5lUXenNsTvzfQxRY?speed=2)
 
 #### See our [HowTo](docs/cli.md) for more
