@@ -21,7 +21,7 @@ Environment variables allow you to redefine the default settings:
 
 ## HOWTO
 
-### How to run <<cli.adoc#,`JSON-RPC`>> endpoint
+### How to run [JSON-RPC](http://github.com/ethereumproject/emerald-rs/blob/master/docs/api.adoc) endpoint
 
 ```
 emerald server --host=127.0.0.1 --port=1920
@@ -95,6 +95,17 @@ or single keyfile for selected <address>:
 ```
 emerald export --chain=testnet <address> <path_to_export_dir>
 ```
+
+### How to get balance for address
+If using client that running on a local host (127.0.0.1:8545):
+```
+emerald balance 0x0e7c045110b8dbf29765047380898919c5cb56f4
+```
+or connecting to some specific host & port:
+```
+emerald balance 0x0e7c045110b8dbf29765047380898919c5cb56f4 --upstream=8.8.8.8:8545
+```
+
 
 ### How to sign transaction
 
