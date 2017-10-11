@@ -35,7 +35,12 @@ use std::env;
 use std::process::*;
 
 const USAGE: &'static str = include_str!("../usage.txt");
+const VERSION: Option<&'static str> = option_env!("CARGO_PKG_VERSION");
 
+/// Get the current Emerald version.
+pub fn version() -> &'static str {
+    VERSION.unwrap_or("unknown")
+}
 
 fn main() {
     env::set_var("RUST_BACKTRACE", "1");
@@ -65,7 +70,7 @@ fn main() {
     log_builder.init().expect("Expect to initialize logger");
 
     if args.flag_version {
-        println!("v{}", emerald::version());
+        println!("v{}", version());
         exit(0);
     }
 

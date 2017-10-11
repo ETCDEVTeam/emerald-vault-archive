@@ -169,15 +169,9 @@ impl CmdExecutor {
     fn list(&self) -> ExecResult<Error> {
         let accounts_info = self.storage.list_accounts(self.args.flag_show_hidden)?;
 
-        println!("Total: {}", accounts_info.len());
-
+        println!("{0: <45} {1: <45} ", "ADDRESS", "NAME");
         for info in accounts_info {
-            println!(
-                "Account: {}, name: {}, description: {}",
-                &info.address,
-                &info.name,
-                &info.description
-            );
+            println!("{0: <45} {1: <45} ", &info.address, &info.name);
         }
 
         Ok(())
