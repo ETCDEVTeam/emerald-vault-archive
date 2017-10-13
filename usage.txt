@@ -1,7 +1,7 @@
 Emerald offline wallet command line interface.
 
 Usage:
-  emerald server    [--port=<port>] [--host=<host>] [--base-path=<path>]
+  emerald server    [--port=<port>] [--host=<host>] [--base-path=<path>] [-v | --verbose] [-q | --quite]
   emerald new       --chain=<chain>  ([[--security-level=<level>] [--name=<name>] [--description=<description>]] | --raw <key>)
   emerald list      --chain=<chain>  [--show-hidden]
   emerald hide      --chain=<chain>  <address>

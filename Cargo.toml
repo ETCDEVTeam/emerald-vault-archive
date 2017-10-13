@@ -1,6 +1,6 @@
 [package]
 name = "emerald-cli"
-version = "0.11.0"
+version = "0.12.0"
 authors = ["Constantine Kryvomaz <kostiyantynk@gmail.com>"]
 description = "Console utility for secure account management"
 homepage = "http://etcdevteam.com"
@@ -8,7 +8,7 @@ repository = "https://github.com/ethereumproject/emerald-cli"
 documentation = "https://docs.rs/emerald-cli"
 keywords = ["ethereum-classic", "blockchain", "crypto-wallet", "cold-storage", "cli"]
 categories = ["cli", "script"]
-readme = "README.adoc"
+readme = "README.md"
 license = "Apache-2.0"
 
 [badges]
