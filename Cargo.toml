@@ -1,6 +1,6 @@
 [package]
 name = "emerald-cli"
-version = "0.12.0"
+version = "0.12.1"
 authors = ["Constantine Kryvomaz <kostiyantynk@gmail.com>"]
 description = "Console utility for secure account management"
 homepage = "http://etcdevteam.com"
