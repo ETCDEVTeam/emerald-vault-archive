@@ -37,4 +37,4 @@ Options:
       --upstream=<upstream>                   URL to ethereum node [default: 127.0.0.1:8545]
       --gas=<gas>                             Gas limit for transaction
       --gas-price=<price>                     Gas price for transaction execution
-      --nonce=<nonce>                         Transaction count for sender
+      --nonce=<nonce>                         Transaction count of sender
