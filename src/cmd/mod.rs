@@ -175,8 +175,8 @@ impl CmdExecutor {
         };
 
         let mut storage_ctrl = StorageController::new();
-        storage_ctrl.insert("mainnet".to_string(), );
-        storage_ctrl.insert("testnet".to_string(), );
+//        storage_ctrl.insert("mainnet".to_string(), );
+//        storage_ctrl.insert("testnet".to_string(), );
 
         emerald::rpc::start(
             &addr,
