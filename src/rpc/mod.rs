@@ -42,8 +42,8 @@ pub fn get_nonce(rpc: &RpcConnector, addr: &Address) -> Result<u64, Error> {
 ///
 /// * String - transaction hash
 ///
-pub fn send_transaction(rpc: &RpcConnector, raw: Vec<u8>) -> Result<String, Error> {
-    let data = vec![Value::String(format!("0x{}", raw.to_hex()))];
+pub fn send_transaction(rpc: &RpcConnector, raw: &[u8]) -> Result<String, Error> {
+    let data = vec![Value::String(format!("0x{}", &raw.to_hex()))];
     let params = Params::Array(data);
     rpc.send_post(&MethodParams(ClientMethod::EthSendRawTransaction, &params))
         .and_then(|v| match v.as_str() {

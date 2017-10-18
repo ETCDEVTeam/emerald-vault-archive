@@ -188,10 +188,8 @@ impl CmdExecutor {
         )?;
 
         let kf = KeyFile::decode(json)?;
-        self.storage.put(&kf)?;
-        //        io::stdout().write_all(
-        //            &format!("kf: {:?}\n", kf).into_bytes(),
-        //        )?;
+        let st = self.get_storage()?;
+        st.put(&kf)?;
 
         Ok(())
     }
@@ -205,7 +203,8 @@ impl CmdExecutor {
     /// * path - target file path
     ///
     pub fn export_keyfile(&self, addr: &Address, path: &Path) -> Result<(), Error> {
-        let (info, kf) = self.storage.search_by_address(addr)?;
+        let st = self.get_storage()?;
+        let (info, kf) = st.search_by_address(addr)?;
 
         let mut p = PathBuf::from(path);
         p.push(&info.filename);
@@ -220,7 +219,8 @@ impl CmdExecutor {
     /// Build trnsaction for provided arguments
     pub fn build_transaction(&self) -> Result<(KeyFile, Transaction), Error> {
         let from = parse_address(&self.args.arg_from)?;
-        let (_, kf) = self.storage.search_by_address(&from)?;
+        let st = self.get_storage()?;
+        let (_, kf) = st.search_by_address(&from)?;
 
         let tr = Transaction {
             nonce: parse_nonce(&self.args.flag_nonce)?,

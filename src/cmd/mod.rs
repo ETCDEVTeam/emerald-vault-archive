@@ -9,15 +9,15 @@ use super::emerald::keystore::{KeyFile, KdfDepthLevel};
 use super::emerald::{self, Address, Transaction, to_arr, to_chain_id, trim_hex, align_bytes,
                      to_even_str};
 use super::emerald::PrivateKey;
-use super::emerald::storage::{KeyfileStorage, build_storage, default_keystore_path, StorageController};
+use super::emerald::storage::{KeyfileStorage, default_path, StorageController};
 use std::net::SocketAddr;
 use std::str::FromStr;
 use std::fs;
-use std::path::PathBuf;
-use std::sync::Arc;
 use self::arg_handlers::*;
 use rpc::{self, RpcConnector};
 use hex::ToHex;
+use std::path::PathBuf;
+use std::sync::Arc;
 
 
 #[derive(Debug, Deserialize, Clone)]
@@ -64,7 +64,7 @@ type ExecResult<Error> = Result<(), Error>;
 pub struct CmdExecutor {
     chain: String,
     sec_level: KdfDepthLevel,
-    storage: Arc<Box<KeyfileStorage>>,
+    storage_ctrl: Arc<Box<StorageController>>,
     args: Args,
     vars: EnvVars,
     connector: Option<RpcConnector>,
@@ -92,11 +92,15 @@ impl CmdExecutor {
             }
         };
 
-        let keystore_path = match arg_or_default(&args.flag_base_path, &env.emerald_base_path) {
-            Ok(ref path) => PathBuf::from(path),
-            Err(_) => default_keystore_path(&chain),
+        let mut p = PathBuf::new();
+        let base_path = match arg_or_default(&args.flag_base_path, &env.emerald_base_path) {
+            Ok(path) => {
+                p.push(&path);
+                p
+            }
+            Err(_) => default_path(),
         };
-        let storage = build_storage(keystore_path)?;
+        let storage_ctrl = Arc::new(Box::new(StorageController::new(base_path)?));
 
         let connector = match args.flag_upstream.parse::<SocketAddr>() {
             Ok(addr) => Some(RpcConnector::new(&format!("http://{}", addr))),
@@ -108,10 +112,15 @@ impl CmdExecutor {
             args: args.clone(),
             chain: chain,
             sec_level: sec_level,
-            storage: Arc::new(storage),
+            storage_ctrl: storage_ctrl,
             vars: env,
             connector: connector,
         })
+    }
+
+    fn get_storage(&self) -> Result<&Box<KeyfileStorage>, Error> {
+        let st = self.storage_ctrl.get(&self.chain)?;
+        Ok(st)
     }
 
     /// Dispatch command to proper handler
@@ -169,28 +178,16 @@ impl CmdExecutor {
         let addr = format!("{}:{}", self.args.flag_host, self.args.flag_port)
             .parse::<SocketAddr>()?;
 
-        let keystore_path = match arg_or_default(&args.flag_base_path, &env.emerald_base_path) {
-            Ok(ref path) => PathBuf::from(path),
-            Err(_) => default_keystore_path(&chain),
-        };
-
-        let mut storage_ctrl = StorageController::new();
-//        storage_ctrl.insert("mainnet".to_string(), );
-//        storage_ctrl.insert("testnet".to_string(), );
-
-        emerald::rpc::start(
-            &addr,
-            &self.chain,
-            self.storage.clone(),
-            Some(self.sec_level),
-        );
+        let storage_ctrl = Arc::clone(&self.storage_ctrl);
+        emerald::rpc::start(&addr, &self.chain, storage_ctrl, Some(self.sec_level));
 
         Ok(())
     }
 
     /// List all accounts
     fn list(&self) -> ExecResult<Error> {
-        let accounts_info = self.storage.list_accounts(self.args.flag_show_hidden)?;
+        let st = self.get_storage()?;
+        let accounts_info = st.list_accounts(self.args.flag_show_hidden)?;
 
         println!("{0: <45} {1: <45} ", "ADDRESS", "NAME");
         for info in accounts_info {
@@ -216,7 +213,8 @@ impl CmdExecutor {
             KeyFile::new(&passphrase, &self.sec_level, name, desc)?
         };
 
-        self.storage.put(&kf)?;
+        let st = self.get_storage()?;
+        st.put(&kf)?;
         println!("Created new account: {}", &kf.address.to_string());
 
         Ok(())
@@ -239,7 +237,8 @@ impl CmdExecutor {
     /// Hide account from being listed
     fn hide(&self) -> ExecResult<Error> {
         let address = parse_address(&self.args.arg_address)?;
-        self.storage.hide(&address)?;
+        let st = self.get_storage()?;
+        st.hide(&address)?;
 
         Ok(())
     }
@@ -247,7 +246,8 @@ impl CmdExecutor {
     /// Unhide account from being listed
     fn unhide(&self) -> ExecResult<Error> {
         let address = parse_address(&self.args.arg_address)?;
-        self.storage.unhide(&address)?;
+        let st = self.get_storage()?;
+        st.unhide(&address)?;
 
         Ok(())
     }
@@ -255,7 +255,9 @@ impl CmdExecutor {
     /// Extract private key from a keyfile
     fn strip(&self) -> ExecResult<Error> {
         let address = parse_address(&self.args.arg_address)?;
-        let (_, kf) = self.storage.search_by_address(&address)?;
+        let st = self.get_storage()?;
+
+        let (_, kf) = st.search_by_address(&address)?;
         let passphrase = request_passphrase()?;
         let pk = kf.decrypt_key(&passphrase)?;
 
@@ -275,7 +277,8 @@ impl CmdExecutor {
                 ));
             }
 
-            let accounts_info = self.storage.list_accounts(true)?;
+            let st = self.get_storage()?;
+            let accounts_info = st.list_accounts(true)?;
             for info in accounts_info {
                 let addr = Address::from_str(&info.address)?;
                 self.export_keyfile(&addr, &path)?
@@ -314,7 +317,8 @@ impl CmdExecutor {
         let name = arg_to_opt(&self.args.flag_name)?;
         let desc = arg_to_opt(&self.args.flag_description)?;
 
-        self.storage.update(&address, name, desc)?;
+        let st = self.get_storage()?;
+        st.update(&address, name, desc)?;
 
         Ok(())
     }
@@ -332,7 +336,7 @@ impl CmdExecutor {
     fn send_transaction(&self, raw: Vec<u8>) -> ExecResult<Error> {
         match self.connector {
             Some(ref conn) => {
-                let tx_hash = rpc::send_transaction(conn, raw)?;
+                let tx_hash = rpc::send_transaction(conn, &raw)?;
                 println!("Tx hash: ");
                 println!("{}", tx_hash);
                 Ok(())
