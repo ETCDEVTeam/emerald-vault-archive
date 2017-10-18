@@ -32,6 +32,7 @@ pub struct Args {
     pub flag_version: bool,
     pub flag_quiet: bool,
     pub flag_verbose: bool,
+    pub flag_force: bool,
     pub flag_host: String,
     pub flag_port: String,
     pub flag_nonce: String,
@@ -294,9 +295,11 @@ impl CmdExecutor {
     /// Import accounts
     fn import(&self) -> ExecResult<Error> {
         let path = parse_path_or_default(&self.args.arg_path, &self.vars.emerald_base_path)?;
+        let mut counter = 0;
 
         if path.is_file() {
-            self.import_keyfile(path)?;
+            self.import_keyfile(path, self.args.flag_force)?;
+            counter += 1;
         } else {
             let entries = fs::read_dir(&path)?;
             for entry in entries {
@@ -304,9 +307,12 @@ impl CmdExecutor {
                 if path.is_dir() {
                     continue;
                 }
-                self.import_keyfile(path)?;
+                self.import_keyfile(path, self.args.flag_force)?;
+                counter += 1;
             }
         }
+
+        println!("Imported accounts: {}",  counter);
 
         Ok(())
     }

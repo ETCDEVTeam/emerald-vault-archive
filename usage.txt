@@ -7,7 +7,7 @@ Usage:
   emerald hide      --chain=<chain>  <address>
   emerald unhide    --chain=<chain>  ([-a | --all] | <address>)
   emerald strip     --chain=<chain>  <address>
-  emerald import    --chain=<chain>  [-a | --all] <path>
+  emerald import    --chain=<chain>  [-a | --all] [-f | --force] <path>
   emerald export    --chain=<chain>  ([-a | --all] | <address>) <path>
   emerald update    --chain=<chain>  <address> [--name=<name>] [--description=<description>]
   emerald transaction   --chain=<chain> <from> <to> <value> [--gas=<gas>] [--gas-price=<price>] [--data=<data>] (--nonce=<nonce> | --upstream=<upstream>)
@@ -18,6 +18,7 @@ Usage:
 Options:
   -a, --all                                   Apply action to all accounts
   -c, --chain=<mainnet|testnet>               Chain name [default: mainnet]
+  -f, --force                                 Override existing keystore file
   -h, --help                                  Show this message
   -V, --version                               Show current version
   -r, --raw                                   Create Keyfile directly from a private key

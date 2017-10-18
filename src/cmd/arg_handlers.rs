@@ -181,7 +181,7 @@ pub fn request_passphrase() -> Result<String, Error> {
 
 impl CmdExecutor {
     /// Import Keyfile into storage
-    pub fn import_keyfile<P: AsRef<Path>>(&self, path: P) -> Result<(), Error> {
+    pub fn import_keyfile<P: AsRef<Path>>(&self, path: P, force_mode: bool) -> Result<(), Error> {
         let mut json = String::new();
         File::open(path).and_then(
             |mut f| f.read_to_string(&mut json),
@@ -189,7 +189,15 @@ impl CmdExecutor {
 
         let kf = KeyFile::decode(json)?;
         let st = self.get_storage()?;
-        st.put(&kf)?;
+
+        match st.is_addr_exist(&kf.address) {
+            Ok(_) => {
+                if force_mode {
+                    st.put(&kf)?;
+                }
+            }
+            Err(_) => st.put(&kf)?,
+        }
 
         Ok(())
     }
