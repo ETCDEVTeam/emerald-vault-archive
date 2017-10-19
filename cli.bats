@@ -74,8 +74,7 @@ teardown() {
     echo "$address"
 
     [ "$status" -eq 0 ]
-    [[ "$output" == *"Total: 1"* ]]
-    [[ "$output" == *"Account: $address, name: , description:"* ]]
+    [[ "$output" == *"$address"* ]]
 }
 
 @test "succeeds: update" {
@@ -105,7 +104,6 @@ teardown() {
 
     [ "$status" -eq 0 ]
     [[ "$output" == *"NewName"* ]]
-    [[ "$output" == *"NewDescription"* ]]
 }
 
 @test "succeeds: strip" {

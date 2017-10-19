@@ -8,15 +8,12 @@ use std::io::Read;
 use std::fs::File;
 use std::str::FromStr;
 use std::env;
-use rpc::{ClientMethod, MethodParams};
-use jsonrpc_core::Params;
-use serde_json::Value;
-use rustc_serialize::hex::ToHex;
 use hex::FromHex;
 use rustc_serialize::json;
 use std::fs;
 use std::io::Write;
 use rpassword;
+use emerald::Transaction;
 
 
 /// Environment variables used to change default variables
@@ -184,17 +181,23 @@ pub fn request_passphrase() -> Result<String, Error> {
 
 impl CmdExecutor {
     /// Import Keyfile into storage
-    pub fn import_keyfile<P: AsRef<Path>>(&self, path: P) -> Result<(), Error> {
+    pub fn import_keyfile<P: AsRef<Path>>(&self, path: P, force_mode: bool) -> Result<(), Error> {
         let mut json = String::new();
         File::open(path).and_then(
             |mut f| f.read_to_string(&mut json),
         )?;
 
         let kf = KeyFile::decode(json)?;
-        self.storage.put(&kf)?;
-        //        io::stdout().write_all(
-        //            &format!("kf: {:?}\n", kf).into_bytes(),
-        //        )?;
+        let st = self.get_storage()?;
+
+        match st.is_addr_exist(&kf.address) {
+            Ok(_) => {
+                if force_mode {
+                    st.put(&kf)?;
+                }
+            }
+            Err(_) => st.put(&kf)?,
+        }
 
         Ok(())
     }
@@ -208,7 +211,8 @@ impl CmdExecutor {
     /// * path - target file path
     ///
     pub fn export_keyfile(&self, addr: &Address, path: &Path) -> Result<(), Error> {
-        let (info, kf) = self.storage.search_by_address(addr)?;
+        let st = self.get_storage()?;
+        let (info, kf) = st.search_by_address(addr)?;
 
         let mut p = PathBuf::from(path);
         p.push(&info.filename);
@@ -220,88 +224,28 @@ impl CmdExecutor {
         Ok(())
     }
 
-    /// Get nonce for address from remote node
-    ///
-    /// # Arguments:
-    ///
-    /// * addr - target address
-    ///
-    pub fn get_nonce(&self, addr: &Address) -> Result<u64, Error> {
-        match self.connector {
-            Some(ref conn) => {
-                let data = vec![
-                    Value::String(addr.to_string()),
-                    Value::String("latest".to_string()),
-                ];
-                let params = Params::Array(data);
+    /// Build trnsaction for provided arguments
+    pub fn build_transaction(&self) -> Result<(KeyFile, Transaction), Error> {
+        let from = parse_address(&self.args.arg_from)?;
+        let st = self.get_storage()?;
+        let (_, kf) = st.search_by_address(&from)?;
 
-                let val = conn.send_post(
-                    &MethodParams(ClientMethod::EthGetTxCount, &params),
-                )?;
-                match val.as_str() {
-                    Some(s) => Ok(u64::from_str_radix(trim_hex(s), 16)?),
-                    None => Err(Error::ExecError("Can't parse tx count".to_string())),
-                }
-            }
-            None => {
-                let nonce = parse_nonce(&self.args.flag_nonce)?;
-                Ok(nonce)
-            }
-        }
-    }
+        let tr = Transaction {
+            nonce: parse_nonce(&self.args.flag_nonce)?,
+            gas_price: parse_gas_price_or_default(
+                &self.args.flag_gas_price,
+                &self.vars.emerald_gas_price,
+            )?,
+            gas_limit: parse_gas_or_default(&self.args.flag_gas, &self.vars.emerald_gas)?,
+            to: match parse_address(&self.args.arg_to) {
+                Ok(a) => Some(a),
+                Err(_) => None,
+            },
+            value: parse_value(&self.args.arg_value)?,
+            data: parse_data(&self.args.flag_data)?,
+        };
 
-
-    /// Send signed raw transaction to the remote client
-    ///
-    /// # Arguments:
-    ///
-    /// * raw - signed tx
-    ///
-    /// # Return:
-    ///
-    /// * String - transaction hash
-    ///
-    pub fn send_transaction(&self, raw: Vec<u8>) -> Result<String, Error> {
-        match self.connector {
-            Some(ref conn) => {
-                let data = vec![Value::String(format!("0x{}", raw.to_hex()))];
-                let params = Params::Array(data);
-                conn.send_post(&MethodParams(ClientMethod::EthSendRawTransaction, &params))
-                    .and_then(|v| match v.as_str() {
-                        Some(str) => Ok(str.to_string()),
-                        None => Err(Error::ExecError("Can't parse tx hash".to_string())),
-                    })
-            }
-            None => Err(Error::ExecError("Can't connect to client".to_string())),
-        }
-    }
-
-    /// Get balance for selected account
-    ///
-    /// # Arguments:
-    ///
-    /// * addr - target account
-    ///
-    /// # Return:
-    ///
-    /// * String - latest balance
-    ///
-    pub fn get_balance(&self, addr: &Address) -> Result<String, Error> {
-        match self.connector {
-            Some(ref conn) => {
-                let data = vec![
-                    Value::String(addr.to_string()),
-                    Value::String("latest".to_string()),
-                ];
-                let params = Params::Array(data);
-                conn.send_post(&MethodParams(ClientMethod::EthGetBalance, &params))
-                    .and_then(|v| match v.as_str() {
-                        Some(str) => Ok(str.to_string()),
-                        None => Err(Error::ExecError(format!("Can't get balance for {}", addr))),
-                    })
-            }
-            None => Err(Error::ExecError("Can't connect to client".to_string())),
-        }
+        Ok((kf, tr))
     }
 }
 

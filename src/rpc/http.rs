@@ -40,13 +40,13 @@ pub enum ClientMethod {
 #[derive(Clone, Debug, PartialEq)]
 pub struct MethodParams<'a>(pub ClientMethod, pub &'a Params);
 
-pub struct Connector {
+pub struct RpcConnector {
     pub url: Url,
 }
 
-impl Connector {
-    pub fn new<U: IntoUrl>(url: U) -> Connector {
-        Connector { url: url.into_url().expect("Expect to encode request url") }
+impl RpcConnector {
+    pub fn new<U: IntoUrl>(url: U) -> RpcConnector {
+        RpcConnector { url: url.into_url().expect("Expect to encode request url") }
     }
 
     /// Send and JSON RPC HTTP post request

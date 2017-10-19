@@ -2,22 +2,22 @@
 
 mod error;
 #[macro_use]
-mod util;
+mod arg_handlers;
 
 pub use self::error::Error;
 use super::emerald::keystore::{KeyFile, KdfDepthLevel};
 use super::emerald::{self, Address, Transaction, to_arr, to_chain_id, trim_hex, align_bytes,
                      to_even_str};
 use super::emerald::PrivateKey;
-use super::emerald::storage::{KeyfileStorage, build_storage, default_keystore_path};
+use super::emerald::storage::{KeyfileStorage, default_path, StorageController};
 use std::net::SocketAddr;
 use std::str::FromStr;
 use std::fs;
+use self::arg_handlers::*;
+use rpc::{self, RpcConnector};
+use hex::ToHex;
 use std::path::PathBuf;
 use std::sync::Arc;
-use self::util::*;
-use rpc::Connector;
-use hex::ToHex;
 
 
 #[derive(Debug, Deserialize, Clone)]
@@ -32,6 +32,7 @@ pub struct Args {
     pub flag_version: bool,
     pub flag_quiet: bool,
     pub flag_verbose: bool,
+    pub flag_force: bool,
     pub flag_host: String,
     pub flag_port: String,
     pub flag_nonce: String,
@@ -64,10 +65,10 @@ type ExecResult<Error> = Result<(), Error>;
 pub struct CmdExecutor {
     chain: String,
     sec_level: KdfDepthLevel,
-    storage: Arc<Box<KeyfileStorage>>,
+    storage_ctrl: Arc<Box<StorageController>>,
     args: Args,
     vars: EnvVars,
-    connector: Option<Connector>,
+    connector: Option<RpcConnector>,
 }
 
 impl CmdExecutor {
@@ -92,14 +93,18 @@ impl CmdExecutor {
             }
         };
 
-        let keystore_path = match arg_or_default(&args.flag_base_path, &env.emerald_base_path) {
-            Ok(ref path) => PathBuf::from(path),
-            Err(_) => default_keystore_path(&chain),
+        let mut p = PathBuf::new();
+        let base_path = match arg_or_default(&args.flag_base_path, &env.emerald_base_path) {
+            Ok(path) => {
+                p.push(&path);
+                p
+            }
+            Err(_) => default_path(),
         };
-        let storage = build_storage(keystore_path)?;
+        let storage_ctrl = Arc::new(Box::new(StorageController::new(base_path)?));
 
         let connector = match args.flag_upstream.parse::<SocketAddr>() {
-            Ok(addr) => Some(Connector::new(&format!("http://{}", addr))),
+            Ok(addr) => Some(RpcConnector::new(&format!("http://{}", addr))),
             Err(_) => None,
         };
 
@@ -108,10 +113,15 @@ impl CmdExecutor {
             args: args.clone(),
             chain: chain,
             sec_level: sec_level,
-            storage: Arc::new(storage),
+            storage_ctrl: storage_ctrl,
             vars: env,
             connector: connector,
         })
+    }
+
+    fn get_storage(&self) -> Result<&Box<KeyfileStorage>, Error> {
+        let st = self.storage_ctrl.get(&self.chain)?;
+        Ok(st)
     }
 
     /// Dispatch command to proper handler
@@ -137,13 +147,27 @@ impl CmdExecutor {
         } else if self.args.cmd_export {
             self.export()
         } else if self.args.cmd_transaction {
-            self.sign_transaction()
+            let (kf, mut tr) = self.build_transaction()?;
+            let pass = request_passphrase()?;
+            let pk = kf.decrypt_key(&pass)?;
+
+            let raw = self.sign_transaction(tr, pk)?;
+            match self.connector {
+                Some(ref conn) => {
+                    tr.nonce = rpc::get_nonce(conn, &kf.address)?;
+                    self.send_transaction(raw)
+                }
+                None => {
+                    println!("Signed transaction: ");
+                    println!("{}", raw.to_hex());
+                    Ok(())
+                }
+            }
         } else {
             Err(Error::ExecError(
                 "No command selected. Use `-h` for help".to_string(),
             ))
         }
-
     }
 
     /// Launch connector in a `server` mode
@@ -155,19 +179,16 @@ impl CmdExecutor {
         let addr = format!("{}:{}", self.args.flag_host, self.args.flag_port)
             .parse::<SocketAddr>()?;
 
-        emerald::rpc::start(
-            &addr,
-            &self.chain,
-            self.storage.clone(),
-            Some(self.sec_level),
-        );
+        let storage_ctrl = Arc::clone(&self.storage_ctrl);
+        emerald::rpc::start(&addr, &self.chain, storage_ctrl, Some(self.sec_level));
 
         Ok(())
     }
 
     /// List all accounts
     fn list(&self) -> ExecResult<Error> {
-        let accounts_info = self.storage.list_accounts(self.args.flag_show_hidden)?;
+        let st = self.get_storage()?;
+        let accounts_info = st.list_accounts(self.args.flag_show_hidden)?;
 
         println!("{0: <45} {1: <45} ", "ADDRESS", "NAME");
         for info in accounts_info {
@@ -193,7 +214,8 @@ impl CmdExecutor {
             KeyFile::new(&passphrase, &self.sec_level, name, desc)?
         };
 
-        self.storage.put(&kf)?;
+        let st = self.get_storage()?;
+        st.put(&kf)?;
         println!("Created new account: {}", &kf.address.to_string());
 
         Ok(())
@@ -201,17 +223,23 @@ impl CmdExecutor {
 
     /// Show user balance
     fn balance(&self) -> ExecResult<Error> {
-        let address = parse_address(&self.args.arg_address)?;
-        let balance = self.get_balance(&address)?;
-        println!("Address: {}, balance: {}", &address, &balance);
+        match self.connector {
+            Some(ref conn) => {
+                let address = parse_address(&self.args.arg_address)?;
+                let balance = rpc::get_balance(conn, &address)?;
+                println!("Address: {}, balance: {}", &address, &balance);
 
-        Ok(())
+                Ok(())
+            }
+            None => Err(Error::ExecError("no connection to client".to_string())),
+        }
     }
 
     /// Hide account from being listed
     fn hide(&self) -> ExecResult<Error> {
         let address = parse_address(&self.args.arg_address)?;
-        self.storage.hide(&address)?;
+        let st = self.get_storage()?;
+        st.hide(&address)?;
 
         Ok(())
     }
@@ -219,7 +247,8 @@ impl CmdExecutor {
     /// Unhide account from being listed
     fn unhide(&self) -> ExecResult<Error> {
         let address = parse_address(&self.args.arg_address)?;
-        self.storage.unhide(&address)?;
+        let st = self.get_storage()?;
+        st.unhide(&address)?;
 
         Ok(())
     }
@@ -227,7 +256,9 @@ impl CmdExecutor {
     /// Extract private key from a keyfile
     fn strip(&self) -> ExecResult<Error> {
         let address = parse_address(&self.args.arg_address)?;
-        let (_, kf) = self.storage.search_by_address(&address)?;
+        let st = self.get_storage()?;
+
+        let (_, kf) = st.search_by_address(&address)?;
         let passphrase = request_passphrase()?;
         let pk = kf.decrypt_key(&passphrase)?;
 
@@ -247,7 +278,8 @@ impl CmdExecutor {
                 ));
             }
 
-            let accounts_info = self.storage.list_accounts(true)?;
+            let st = self.get_storage()?;
+            let accounts_info = st.list_accounts(true)?;
             for info in accounts_info {
                 let addr = Address::from_str(&info.address)?;
                 self.export_keyfile(&addr, &path)?
@@ -263,9 +295,11 @@ impl CmdExecutor {
     /// Import accounts
     fn import(&self) -> ExecResult<Error> {
         let path = parse_path_or_default(&self.args.arg_path, &self.vars.emerald_base_path)?;
+        let mut counter = 0;
 
         if path.is_file() {
-            self.import_keyfile(path)?;
+            self.import_keyfile(path, self.args.flag_force)?;
+            counter += 1;
         } else {
             let entries = fs::read_dir(&path)?;
             for entry in entries {
@@ -273,9 +307,12 @@ impl CmdExecutor {
                 if path.is_dir() {
                     continue;
                 }
-                self.import_keyfile(path)?;
+                self.import_keyfile(path, self.args.flag_force)?;
+                counter += 1;
             }
         }
+
+        println!("Imported accounts: {}",  counter);
 
         Ok(())
     }
@@ -286,48 +323,32 @@ impl CmdExecutor {
         let name = arg_to_opt(&self.args.flag_name)?;
         let desc = arg_to_opt(&self.args.flag_description)?;
 
-        self.storage.update(&address, name, desc)?;
+        let st = self.get_storage()?;
+        st.update(&address, name, desc)?;
 
         Ok(())
     }
 
-    /// Sign transaction
-    fn sign_transaction(&self) -> ExecResult<Error> {
-        let from = parse_address(&self.args.arg_from)?;
-        let (_, kf) = self.storage.search_by_address(&from)?;
-
-        let tr = Transaction {
-            nonce: self.get_nonce(&from)?,
-            gas_price: parse_gas_price_or_default(
-                &self.args.flag_gas_price,
-                &self.vars.emerald_gas_price,
-            )?,
-            gas_limit: parse_gas_or_default(&self.args.flag_gas, &self.vars.emerald_gas)?,
-            to: match parse_address(&self.args.arg_to) {
-                Ok(a) => Some(a),
-                Err(_) => None,
-            },
-            value: parse_value(&self.args.arg_value)?,
-            data: parse_data(&self.args.flag_data)?,
-        };
-        let pass = request_passphrase()?;
-        let pk = kf.decrypt_key(&pass)?;
-
+    /// Sign transaction with
+    fn sign_transaction(&self, tr: Transaction, pk: PrivateKey) -> Result<Vec<u8>, Error> {
         if let Some(chain_id) = to_chain_id(&self.chain) {
             let raw = tr.to_signed_raw(pk, chain_id)?;
-
-            println!("Signed transaction: ");
-            println!("{}", raw.to_hex());
-
-            if self.connector.is_some() {
-                let tx_hash = self.send_transaction(raw)?;
-                println!("Tx hash: ");
-                println!("{}", tx_hash);
-            }
-
-            Ok(())
+            Ok(raw)
         } else {
             Err(Error::ExecError("Invalid chain name".to_string()))
+        }
+    }
+
+    fn send_transaction(&self, raw: Vec<u8>) -> ExecResult<Error> {
+        match self.connector {
+            Some(ref conn) => {
+                let tx_hash = rpc::send_transaction(conn, &raw)?;
+                println!("Tx hash: ");
+                println!("{}", tx_hash);
+                Ok(())
+            }
+
+            None => Err(Error::ExecError("Invalid chain name".to_string())),
         }
     }
 }

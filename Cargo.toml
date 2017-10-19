@@ -1,6 +1,6 @@
 [package]
 name = "emerald-cli"
-version = "0.12.1"
+version = "0.13.0"
 authors = ["Constantine Kryvomaz <kostiyantynk@gmail.com>"]
 description = "Console utility for secure account management"
 homepage = "http://etcdevteam.com"
@@ -22,7 +22,7 @@ path = "src/main.rs"
 [dependencies]
 log = "0.3"
 docopt = "0.8"
-jsonrpc-core = "7.0.1"
+jsonrpc-core = "7.1.1"
 serde = "1.0"
 hex = "0.2"
 lazy_static = "0.2"
