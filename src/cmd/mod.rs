@@ -9,7 +9,7 @@ use super::emerald::keystore::{KeyFile, KdfDepthLevel};
 use super::emerald::{self, Address, Transaction, to_arr, to_chain_id, trim_hex, align_bytes,
                      to_even_str};
 use super::emerald::PrivateKey;
-use super::emerald::storage::{KeyfileStorage, default_path, StorageController};
+use super::emerald::storage::{default_path, StorageController};
 use std::net::SocketAddr;
 use std::str::FromStr;
 use std::fs;
@@ -119,11 +119,6 @@ impl CmdExecutor {
         })
     }
 
-    fn get_storage(&self) -> Result<&Box<KeyfileStorage>, Error> {
-        let st = self.storage_ctrl.get(&self.chain)?;
-        Ok(st)
-    }
-
     /// Dispatch command to proper handler
     pub fn run(&self) -> ExecResult<Error> {
         if self.args.cmd_server {
@@ -187,7 +182,7 @@ impl CmdExecutor {
 
     /// List all accounts
     fn list(&self) -> ExecResult<Error> {
-        let st = self.get_storage()?;
+        let st = self.storage_ctrl.get_keystore(&self.chain)?;
         let accounts_info = st.list_accounts(self.args.flag_show_hidden)?;
 
         println!("{0: <45} {1: <45} ", "ADDRESS", "NAME");
@@ -214,7 +209,7 @@ impl CmdExecutor {
             KeyFile::new(&passphrase, &self.sec_level, name, desc)?
         };
 
-        let st = self.get_storage()?;
+        let st = self.storage_ctrl.get_keystore(&self.chain)?;
         st.put(&kf)?;
         println!("Created new account: {}", &kf.address.to_string());
 
@@ -238,7 +233,7 @@ impl CmdExecutor {
     /// Hide account from being listed
     fn hide(&self) -> ExecResult<Error> {
         let address = parse_address(&self.args.arg_address)?;
-        let st = self.get_storage()?;
+        let st = self.storage_ctrl.get_keystore(&self.chain)?;
         st.hide(&address)?;
 
         Ok(())
@@ -247,7 +242,7 @@ impl CmdExecutor {
     /// Unhide account from being listed
     fn unhide(&self) -> ExecResult<Error> {
         let address = parse_address(&self.args.arg_address)?;
-        let st = self.get_storage()?;
+        let st = self.storage_ctrl.get_keystore(&self.chain)?;
         st.unhide(&address)?;
 
         Ok(())
@@ -256,7 +251,7 @@ impl CmdExecutor {
     /// Extract private key from a keyfile
     fn strip(&self) -> ExecResult<Error> {
         let address = parse_address(&self.args.arg_address)?;
-        let st = self.get_storage()?;
+        let st = self.storage_ctrl.get_keystore(&self.chain)?;
 
         let (_, kf) = st.search_by_address(&address)?;
         let passphrase = request_passphrase()?;
@@ -278,7 +273,7 @@ impl CmdExecutor {
                 ));
             }
 
-            let st = self.get_storage()?;
+            let st = self.storage_ctrl.get_keystore(&self.chain)?;
             let accounts_info = st.list_accounts(true)?;
             for info in accounts_info {
                 let addr = Address::from_str(&info.address)?;
@@ -312,7 +307,7 @@ impl CmdExecutor {
             }
         }
 
-        println!("Imported accounts: {}",  counter);
+        println!("Imported accounts: {}", counter);
 
         Ok(())
     }
@@ -323,7 +318,7 @@ impl CmdExecutor {
         let name = arg_to_opt(&self.args.flag_name)?;
         let desc = arg_to_opt(&self.args.flag_description)?;
 
-        let st = self.get_storage()?;
+        let st = self.storage_ctrl.get_keystore(&self.chain)?;
         st.update(&address, name, desc)?;
 
         Ok(())

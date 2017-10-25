@@ -188,7 +188,7 @@ impl CmdExecutor {
         )?;
 
         let kf = KeyFile::decode(json)?;
-        let st = self.get_storage()?;
+        let st = self.storage_ctrl.get_keystore(&self.chain)?;
 
         match st.is_addr_exist(&kf.address) {
             Ok(_) => {
@@ -211,7 +211,7 @@ impl CmdExecutor {
     /// * path - target file path
     ///
     pub fn export_keyfile(&self, addr: &Address, path: &Path) -> Result<(), Error> {
-        let st = self.get_storage()?;
+        let st = self.storage_ctrl.get_keystore(&self.chain)?;
         let (info, kf) = st.search_by_address(addr)?;
 
         let mut p = PathBuf::from(path);
@@ -227,7 +227,7 @@ impl CmdExecutor {
     /// Build trnsaction for provided arguments
     pub fn build_transaction(&self) -> Result<(KeyFile, Transaction), Error> {
         let from = parse_address(&self.args.arg_from)?;
-        let st = self.get_storage()?;
+        let st = self.storage_ctrl.get_keystore(&self.chain)?;
         let (_, kf) = st.search_by_address(&from)?;
 
         let tr = Transaction {
