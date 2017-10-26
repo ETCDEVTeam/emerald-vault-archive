@@ -34,9 +34,9 @@ teardown() {
     [[ "$output" == *"Options"* ]]
 }
 
-@test "succeeds: new --chain=testnet [empty options]" {
+@test "succeeds: new --chain=morden [empty options]" {
     run $EMERALD_CLI new \
-        --chain=testnet \
+        --chain=morden \
         <<< $'foo\n'
     [ "$status" -eq 0 ]
     [[ "$output" == *"Created new account"* ]]
@@ -55,7 +55,7 @@ teardown() {
 
 @test "succeeds: list" {
     run $EMERALD_CLI new \
-        --chain=testnet \
+        --chain=morden \
         <<< $'foo\n'
     [ "$status" -eq 0 ]
     [[ "$output" == *"Created new account"* ]]
@@ -69,7 +69,7 @@ teardown() {
     [[ "$address" == *"0x"* ]]
 
     run $EMERALD_CLI list \
-        --chain=testnet
+        --chain=morden
     echo "$output" # prints in case fails
     echo "$address"
 
@@ -79,7 +79,7 @@ teardown() {
 
 @test "succeeds: update" {
     run $EMERALD_CLI new \
-        --chain=testnet \
+        --chain=morden \
         <<< $'foo\n'
     [ "$status" -eq 0 ]
     [[ "$output" == *"Created new account"* ]]
@@ -93,14 +93,14 @@ teardown() {
     [[ "$address" == *"0x"* ]]
 
     run $EMERALD_CLI update \
-        --chain=testnet \
+        --chain=morden \
         "$address" \
         --name="NewName" \
         --description="NewDescription"
     [ "$status" -eq 0 ]
 
     run $EMERALD_CLI list \
-        --chain=testnet
+        --chain=morden
 
     [ "$status" -eq 0 ]
     [[ "$output" == *"NewName"* ]]
@@ -108,7 +108,7 @@ teardown() {
 
 @test "succeeds: strip" {
     run $EMERALD_CLI new \
-        --chain=testnet \
+        --chain=morden \
         <<< $'foo\n'
     [ "$status" -eq 0 ]
     [[ "$output" == *"Created new account"* ]]
@@ -122,7 +122,7 @@ teardown() {
     [[ "$address" == *"0x"* ]]
 
     run $EMERALD_CLI strip \
-        --chain=testnet \
+        --chain=morden \
         "$address" \
         <<< $'foo\n'
 
@@ -132,7 +132,7 @@ teardown() {
 
 @test "succeeds: hide && unhide" {
     run $EMERALD_CLI new \
-        --chain=testnet \
+        --chain=morden \
         <<< $'foo\n'
     [ "$status" -eq 0 ]
     [[ "$output" == *"Created new account"* ]]
@@ -147,25 +147,25 @@ teardown() {
 
     # Hide account.
     run $EMERALD_CLI hide \
-        --chain=testnet \
+        --chain=morden \
         "$address"
     [ "$status" -eq 0 ]
 
     # Ensure is hidden; doesn't show up in list.
     run $EMERALD_CLI list \
-        --chain=testnet
+        --chain=morden
 
     [ "$status" -eq 0 ]
     [[ "$output" != *"$address"* ]]
 
     # Unhide account.
     run $EMERALD_CLI unhide \
-        --chain=testnet \
+        --chain=morden \
         "$address"
 
     # Esnure is not hidden; shows up in list.
     run $EMERALD_CLI list \
-        --chain=testnet
+        --chain=morden
 
     [ "$status" -eq 0 ]
     [[ "$output" == *"$address"* ]]
