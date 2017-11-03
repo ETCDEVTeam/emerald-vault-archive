@@ -21,7 +21,7 @@ Environment variables allow you to redefine the default settings:
 
 ## HOWTO
 
-### How to run [JSON-RPC](http://github.com/ethereumproject/emerald-rs/blob/master/docs/api.adoc) endpoint
+### How to run [JSON-RPC](http://github.com/ethereumproject/emerald-rs/blob/master/docs/api.md) endpoint
 
 ```
     emerald server --host=127.0.0.1 --port=1920
