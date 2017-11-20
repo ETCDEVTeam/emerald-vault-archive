@@ -34,7 +34,7 @@ use log::LogRecord;
 use std::env;
 use std::process::*;
 
-const USAGE: &'static str = include_str!("../usage.txt");
+const USAGE: &str = include_str!("../usage.txt");
 const VERSION: Option<&'static str> = option_env!("CARGO_PKG_VERSION");
 
 /// Get the current Emerald version.
