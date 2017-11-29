@@ -146,11 +146,11 @@ impl CmdExecutor {
             let pass = request_passphrase()?;
             let pk = kf.decrypt_key(&pass)?;
 
-            let raw = self.sign_transaction(tr, pk)?;
+            let raw = self.sign_transaction(&tr, pk)?;
             match self.connector {
                 Some(ref conn) => {
                     tr.nonce = rpc::get_nonce(conn, &kf.address)?;
-                    self.send_transaction(raw)
+                    self.send_transaction(&raw)
                 }
                 None => {
                     println!("Signed transaction: ");
@@ -325,7 +325,7 @@ impl CmdExecutor {
     }
 
     /// Sign transaction with
-    fn sign_transaction(&self, tr: Transaction, pk: PrivateKey) -> Result<Vec<u8>, Error> {
+    fn sign_transaction(&self, tr: &Transaction, pk: PrivateKey) -> Result<Vec<u8>, Error> {
         if let Some(chain_id) = to_chain_id(&self.chain) {
             let raw = tr.to_signed_raw(pk, chain_id)?;
             Ok(raw)
@@ -334,10 +334,10 @@ impl CmdExecutor {
         }
     }
 
-    fn send_transaction(&self, raw: Vec<u8>) -> ExecResult<Error> {
+    fn send_transaction(&self, raw: &[u8]) -> ExecResult<Error> {
         match self.connector {
             Some(ref conn) => {
-                let tx_hash = rpc::send_transaction(conn, &raw)?;
+                let tx_hash = rpc::send_transaction(conn, raw)?;
                 println!("Tx hash: ");
                 println!("{}", tx_hash);
                 Ok(())
