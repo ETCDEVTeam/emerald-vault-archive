@@ -187,7 +187,7 @@ impl CmdExecutor {
             |mut f| f.read_to_string(&mut json),
         )?;
 
-        let kf = KeyFile::decode(json)?;
+        let kf = KeyFile::decode(&json)?;
         let st = self.storage_ctrl.get_keystore(&self.chain)?;
 
         match st.is_addr_exist(&kf.address) {
