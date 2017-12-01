@@ -79,7 +79,7 @@ impl CmdExecutor {
         let chain = match arg_or_default(&args.flag_chain, &env.emerald_chain) {
             Ok(c) => c,
             Err(e) => {
-                error!("{}", e.to_string());
+                info!("Missed `--chain` argument. Use default: `mainnet`");
                 "mainnet".to_string()
             }
         };
@@ -88,7 +88,7 @@ impl CmdExecutor {
         let sec_level = match KdfDepthLevel::from_str(&sec_level_str) {
             Ok(sec) => sec,
             Err(e) => {
-                error!("{}", e.to_string());
+                info!("Missed `--security-level` argument. Use default: `ultra`");
                 KdfDepthLevel::default()
             }
         };
