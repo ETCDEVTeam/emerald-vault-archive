@@ -12,7 +12,7 @@ Environment variables allow you to redefine the default settings:
 
 * `EMERALD_HOST` - listen host
 * `EMERALD_PORT` - listen port
-* `EMERALD_CHAIN` - chain name (`mainnet` | `testnet`), has a higher priority relative to `EMERALD_CHAIN_ID`
+* `EMERALD_CHAIN` - chain name (`mainnet` | `morden`), has a higher priority relative to `EMERALD_CHAIN_ID`
 * `EMERALD_CHAIN_ID` - chain id number, has a lower priority relative to `EMERALD_CHAIN`
 * `EMERALD_GAS` - maximum gas limit to use by transaction
 * `EMERALD_GAS_PRICE` - gas cost to use by transaction (in Gwei)
@@ -30,25 +30,25 @@ Environment variables allow you to redefine the default settings:
 ### How to show all available accounts
 
 ```
-    emerald list --chain=testnet
+    emerald list --chain=morden
 ```
 
 ### How to exclude some accounts from the showing list
 
 ```
-    emerald hide --chain=testnet 0x0e7c045110b8dbf29765047380898919c5cb56f4
+    emerald hide --chain=morden 0x0e7c045110b8dbf29765047380898919c5cb56f4
 ```
 
 To undo in the future:
 
 ```
-    emerald unhide --chain=testnet --all
+    emerald unhide --chain=morden --all
 ```
 
 ### How to create new account
 
 ```
-    emerald new --chain=testnet \
+    emerald new --chain=morden \
         --security-level=high \
         --name="Test account" \
         --description="Some description" \
@@ -58,20 +58,20 @@ To undo in the future:
 ### How to show private key
 
 ```
-    emerald strip --chain=testnet 0x0e7c045110b8dbf29765047380898919c5cb56f4 < echo "secret passphrase"
+    emerald strip --chain=morden 0x0e7c045110b8dbf29765047380898919c5cb56f4 < echo "secret passphrase"
 ```
 
 ### How to change `passphrase`
 
 ```
-    emerald strip --chain=testnet 0x0e7c045110b8dbf29765047380898919c5cb56f4 < echo "old passphrase" \
-    emerald new --chain=testnet --raw < echo "new passphrase"
+    emerald strip --chain=morden 0x0e7c045110b8dbf29765047380898919c5cb56f4 < echo "old passphrase" \
+    emerald new --chain=morden --raw < echo "new passphrase"
 ```
 
 ### How to change account name
 
 ```
-    emerald update --chain=testnet \
+    emerald update --chain=morden \
         0x0e7c045110b8dbf29765047380898919c5cb56f4 \
         --name="New name" \
         --description="A new description"
@@ -80,27 +80,27 @@ To undo in the future:
 ### How to export & import all accounts
 Import content of whole folder:
 ```
-    emerald import --chain=testnet --all <path_to_files>
+    emerald import --chain=morden --all <path_to_files>
 ```
 or single keyfile:
 ```
-    emerald import --chain=testnet <path_to_file>
+    emerald import --chain=morden <path_to_file>
 ```
 If keyfile already exist in a storage, import will be ignore.
 
 To override existing Keyfile, use `-f | --force` option:
 ```
-    emerald import --chain=testnet --force <path_to_file>
+    emerald import --chain=morden --force <path_to_file>
 ```
 
 
 Export all keyfiles into directory:
 ```
-    emerald export --chain=testnet --all <path_to_export_dir>
+    emerald export --chain=morden --all <path_to_export_dir>
 ```
 or single keyfile for selected <address>:
 ```
-    emerald export --chain=testnet <address> <path_to_export_dir>
+    emerald export --chain=morden <address> <path_to_export_dir>
 ```
 
 ### How to get balance for address
