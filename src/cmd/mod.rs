@@ -9,6 +9,7 @@ use super::emerald::keystore::{KeyFile, KdfDepthLevel};
 use super::emerald::{self, Address, Transaction, to_arr, to_chain_id, trim_hex, align_bytes,
                      to_even_str};
 use super::emerald::PrivateKey;
+use super::emerald::mnemonic::{Mnemonic, Language, ENTROPY_BYTE_LENGTH, gen_entropy};
 use super::emerald::storage::{default_path, StorageController};
 use std::net::SocketAddr;
 use std::str::FromStr;
@@ -50,6 +51,7 @@ pub struct Args {
     pub cmd_server: bool,
     pub cmd_list: bool,
     pub cmd_new: bool,
+    pub cmd_mnemonic: bool,
     pub cmd_balance: bool,
     pub cmd_hide: bool,
     pub cmd_unhide: bool,
@@ -127,6 +129,8 @@ impl CmdExecutor {
             self.list()
         } else if self.args.cmd_new {
             self.new_account()
+        } else if self.args.cmd_mnemonic {
+            self.new_mnemonic()
         } else if self.args.cmd_balance {
             self.balance()
         } else if self.args.cmd_hide {
@@ -214,6 +218,13 @@ impl CmdExecutor {
         println!("Created new account: {}", &kf.address.to_string());
 
         Ok(())
+    }
+
+    /// Creates new BIP32 mnemonic phrase
+    fn new_mnemonic(&self) -> ExecResult<Error> {
+        let entropy = gen_entropy(ENTROPY_BYTE_LENGTH)?;
+        let mn = Mnemonic::new(Language::English, &entropy)?;
+        println!(mn.sentence());
     }
 
     /// Show user balance
