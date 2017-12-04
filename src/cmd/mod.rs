@@ -334,6 +334,7 @@ impl CmdExecutor {
         }
     }
 
+    /// Send transaction into network through provided node
     fn send_transaction(&self, raw: &[u8]) -> ExecResult<Error> {
         match self.connector {
             Some(ref conn) => {
@@ -343,7 +344,7 @@ impl CmdExecutor {
                 Ok(())
             }
 
-            None => Err(Error::ExecError("Invalid chain name".to_string())),
+            None => Err(Error::ExecError("Can't connect to node".to_string())),
         }
     }
 }
