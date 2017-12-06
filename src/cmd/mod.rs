@@ -224,7 +224,7 @@ impl CmdExecutor {
     fn new_mnemonic(&self) -> ExecResult<Error> {
         let entropy = gen_entropy(ENTROPY_BYTE_LENGTH)?;
         let mn = Mnemonic::new(Language::English, &entropy)?;
-        println!(mn.sentence());
+        println!("{}", mn.sentence());
     }
 
     /// Show user balance
