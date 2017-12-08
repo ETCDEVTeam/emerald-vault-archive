@@ -115,3 +115,9 @@ cd target\debug
 
 Apache 2.0
 
+#### :beers: Install with Homebrew (OSX only)
+```
+$ brew install ethereumproject/classic/emerald-cli
+```
+
+#### See our [HowTo](docs/cli.md) for more
