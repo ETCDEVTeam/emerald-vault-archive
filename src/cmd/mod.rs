@@ -80,7 +80,7 @@ impl CmdExecutor {
 
         let chain = match arg_or_default(&args.flag_chain, &env.emerald_chain) {
             Ok(c) => c,
-            Err(e) => {
+            Err(_) => {
                 info!("Missed `--chain` argument. Use default: `mainnet`");
                 "mainnet".to_string()
             }
@@ -89,7 +89,7 @@ impl CmdExecutor {
         let sec_level_str = arg_or_default(&args.flag_security_level, &env.emerald_security_level)?;
         let sec_level = match KdfDepthLevel::from_str(&sec_level_str) {
             Ok(sec) => sec,
-            Err(e) => {
+            Err(_) => {
                 info!("Missed `--security-level` argument. Use default: `ultra`");
                 KdfDepthLevel::default()
             }
@@ -225,6 +225,7 @@ impl CmdExecutor {
         let entropy = gen_entropy(ENTROPY_BYTE_LENGTH)?;
         let mn = Mnemonic::new(Language::English, &entropy)?;
         println!("{}", mn.sentence());
+        Ok(())
     }
 
     /// Show user balance
