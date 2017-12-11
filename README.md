@@ -65,6 +65,14 @@ For detailed documentation see [https://docs.etcdevteam.com/html/emerald-cli](ht
 
 Binaries for all platforms are currently published at https://github.com/ETCDEVTeam/emerald-cli/releases
 
+### :beers: Install with Homebrew (OSX only)
+
+Install latest stable binary.
+
+```
+$ brew install ethereumproject/classic/emerald-cli
+```
+
 ### Download development build
 
 
@@ -115,9 +123,7 @@ cd target\debug
 
 Apache 2.0
 
-#### :beers: Install with Homebrew (OSX only)
-```
-$ brew install ethereumproject/classic/emerald-cli
-```
+#### Documentation:
+- [Installation](docs/install.md)
+- [CLI Usage](docs/cli.md)
 
-#### See our [HowTo](docs/cli.md) for more
