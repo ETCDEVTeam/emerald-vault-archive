@@ -24,7 +24,7 @@ notifications:
 before_install:
    - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then sudo add-apt-repository ppa:duggan/bats --yes; fi
    - if [ $TRAVIS_OS_NAME = linux ]; then sudo apt-get -qq update; else brew update; fi
-   - if [ $TRAVIS_OS_NAME = linux ]; then sudogit  apt-get install -y libusb-1.0-0-dev bats; else brew install libusb bats; fi
+   - if [ $TRAVIS_OS_NAME = linux ]; then sudo git  apt-get install -y libusb-1.0-0-dev bats; else brew install libusb bats; fi
    - travis_wait cargo install rustfmt --force || true
    - travis_wait cargo install rustfmt --force || true
 
