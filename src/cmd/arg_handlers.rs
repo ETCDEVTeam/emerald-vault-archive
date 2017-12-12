@@ -1,8 +1,7 @@
 //! # Helpers for command execution
 
-
 use super::Error;
-use super::{CmdExecutor, Address, PrivateKey, KeyFile, trim_hex, to_arr, align_bytes, to_even_str};
+use super::{align_bytes, to_arr, to_even_str, trim_hex, Address, CmdExecutor, KeyFile, PrivateKey};
 use std::path::{Path, PathBuf};
 use std::io::Read;
 use std::fs::File;
@@ -14,7 +13,6 @@ use std::fs;
 use std::io::Write;
 use rpassword;
 use emerald::Transaction;
-
 
 /// Environment variables used to change default variables
 #[derive(Default, Debug)]
@@ -64,9 +62,8 @@ pub fn arg_or_default(arg: &str, env: &Option<String>) -> Result<String, Error> 
     let val = arg.parse::<String>()?;
 
     if val.is_empty() {
-        env.clone().ok_or_else(|| {
-            Error::ExecError("Missed arguments".to_string())
-        })
+        env.clone()
+            .ok_or_else(|| Error::ExecError("Missed arguments".to_string()))
     } else {
         Ok(val)
     }
@@ -89,9 +86,8 @@ pub fn arg_to_opt(arg: &str) -> Result<Option<String>, Error> {
 
 /// Parse raw hex string arguments from user
 fn parse_arg(raw: &str) -> Result<String, Error> {
-    let s = raw.parse::<String>().and_then(
-        |s| Ok(to_even_str(trim_hex(&s))),
-    )?;
+    let s = raw.parse::<String>()
+        .and_then(|s| Ok(to_even_str(trim_hex(&s))))?;
 
     if s.is_empty() {
         Err(Error::ExecError(
@@ -128,7 +124,6 @@ pub fn parse_pk(s: &str) -> Result<PrivateKey, Error> {
     Ok(pk)
 }
 
-
 /// Parse transaction value
 pub fn parse_value(s: &str) -> Result<[u8; 32], Error> {
     let value_str = parse_arg(s)?;
@@ -137,9 +132,9 @@ pub fn parse_value(s: &str) -> Result<[u8; 32], Error> {
 
 /// Parse transaction data
 pub fn parse_data(s: &str) -> Result<Vec<u8>, Error> {
-    let data = match s.parse::<String>().and_then(
-        |d| Ok(to_even_str(trim_hex(&d))),
-    ) {
+    let data = match s.parse::<String>()
+        .and_then(|d| Ok(to_even_str(trim_hex(&d))))
+    {
         Ok(str) => Vec::from_hex(&str)?,
         Err(_) => vec![],
     };
@@ -183,9 +178,7 @@ impl CmdExecutor {
     /// Import Keyfile into storage
     pub fn import_keyfile<P: AsRef<Path>>(&self, path: P, force_mode: bool) -> Result<(), Error> {
         let mut json = String::new();
-        File::open(path).and_then(
-            |mut f| f.read_to_string(&mut json),
-        )?;
+        File::open(path).and_then(|mut f| f.read_to_string(&mut json))?;
 
         let kf = KeyFile::decode(&json)?;
         let st = self.storage_ctrl.get_keystore(&self.chain)?;
@@ -256,42 +249,12 @@ mod tests {
     #[test]
     fn should_convert_hex_to_32bytes() {
         assert_eq!(
-            hex_to_32bytes(
-                "fa384e6fe915747cd13faa1022044b0def5e6bec4238bec53166487a5cca569f",
-            ).unwrap(),
+            hex_to_32bytes("fa384e6fe915747cd13faa1022044b0def5e6bec4238bec53166487a5cca569f",)
+                .unwrap(),
             [
-                0xfa,
-                0x38,
-                0x4e,
-                0x6f,
-                0xe9,
-                0x15,
-                0x74,
-                0x7c,
-                0xd1,
-                0x3f,
-                0xaa,
-                0x10,
-                0x22,
-                0x04,
-                0x4b,
-                0x0d,
-                0xef,
-                0x5e,
-                0x6b,
-                0xec,
-                0x42,
-                0x38,
-                0xbe,
-                0xc5,
-                0x31,
-                0x66,
-                0x48,
-                0x7a,
-                0x5c,
-                0xca,
-                0x56,
-                0x9f,
+                0xfa, 0x38, 0x4e, 0x6f, 0xe9, 0x15, 0x74, 0x7c, 0xd1, 0x3f, 0xaa, 0x10, 0x22, 0x04,
+                0x4b, 0x0d, 0xef, 0x5e, 0x6b, 0xec, 0x42, 0x38, 0xbe, 0xc5, 0x31, 0x66, 0x48, 0x7a,
+                0x5c, 0xca, 0x56, 0x9f,
             ]
         );
         assert_eq!(hex_to_32bytes("00").unwrap(), [0u8; 32]);
@@ -321,9 +284,8 @@ mod tests {
         let pk = PrivateKey::try_from(&[0u8; 32]).unwrap();
         assert_eq!(
             pk,
-            parse_pk(
-                "0x0000000000000000000000000000000000000000000000000000000000000000",
-            ).unwrap()
+            parse_pk("0x0000000000000000000000000000000000000000000000000000000000000000",)
+                .unwrap()
         );
     }
 

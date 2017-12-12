@@ -6,7 +6,6 @@ use std::sync::Arc;
 use std::sync::atomic::{AtomicUsize, Ordering};
 use jsonrpc_core::Params;
 
-
 lazy_static! {
     static ref REQ_ID: Arc<AtomicUsize> = Arc::new(AtomicUsize::new(1));
 }

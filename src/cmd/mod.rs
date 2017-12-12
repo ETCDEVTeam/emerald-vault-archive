@@ -5,11 +5,11 @@ mod error;
 mod arg_handlers;
 
 pub use self::error::Error;
-use super::emerald::keystore::{KeyFile, KdfDepthLevel};
-use super::emerald::{self, Address, Transaction, to_arr, to_chain_id, trim_hex, align_bytes,
-                     to_even_str};
+use super::emerald::keystore::{KdfDepthLevel, KeyFile};
+use super::emerald::{self, align_bytes, to_arr, to_chain_id, to_even_str, trim_hex, Address,
+                     Transaction};
 use super::emerald::PrivateKey;
-use super::emerald::mnemonic::{Mnemonic, Language, ENTROPY_BYTE_LENGTH, gen_entropy};
+use super::emerald::mnemonic::{gen_entropy, Language, Mnemonic, ENTROPY_BYTE_LENGTH};
 use super::emerald::storage::{default_path, StorageController};
 use std::net::SocketAddr;
 use std::str::FromStr;
@@ -19,7 +19,6 @@ use rpc::{self, RpcConnector};
 use hex::ToHex;
 use std::path::PathBuf;
 use std::sync::Arc;
-
 
 #[derive(Debug, Deserialize, Clone)]
 pub struct Args {
@@ -110,7 +109,6 @@ impl CmdExecutor {
             Err(_) => None,
         };
 
-
         Ok(CmdExecutor {
             args: args.clone(),
             chain: chain,
@@ -175,8 +173,8 @@ impl CmdExecutor {
         info!("Chain set to '{}'", self.chain);
         info!("Security level set to '{}'", self.sec_level);
 
-        let addr = format!("{}:{}", self.args.flag_host, self.args.flag_port)
-            .parse::<SocketAddr>()?;
+        let addr =
+            format!("{}:{}", self.args.flag_host, self.args.flag_port).parse::<SocketAddr>()?;
 
         let storage_ctrl = Arc::clone(&self.storage_ctrl);
         emerald::rpc::start(&addr, &self.chain, storage_ctrl, Some(self.sec_level));

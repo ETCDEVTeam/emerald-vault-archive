@@ -9,7 +9,6 @@ use reqwest;
 use std::num;
 use hex;
 
-
 macro_rules! from_err {
     ( $x:ty ) => {
         impl From<$x> for Error {

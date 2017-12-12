@@ -3,11 +3,11 @@
 mod http;
 mod serialize;
 
-pub use self::http::{RpcConnector, MethodParams, ClientMethod};
-use jsonrpc_core::{Value, Params};
+pub use self::http::{ClientMethod, MethodParams, RpcConnector};
+use jsonrpc_core::{Params, Value};
 use cmd::Error;
 use hex::ToHex;
-use emerald::{Address, trim_hex};
+use emerald::{trim_hex, Address};
 
 /// Get nonce for address from remote node
 ///
@@ -21,16 +21,13 @@ pub fn get_nonce(rpc: &RpcConnector, addr: &Address) -> Result<u64, Error> {
         Value::String("latest".to_string()),
     ];
     let params = Params::Array(data);
-    let val = rpc.send_post(
-        &MethodParams(ClientMethod::EthGetTxCount, &params),
-    )?;
+    let val = rpc.send_post(&MethodParams(ClientMethod::EthGetTxCount, &params))?;
 
     match val.as_str() {
         Some(s) => Ok(u64::from_str_radix(trim_hex(s), 16)?),
         None => Err(Error::ExecError("Can't parse tx count".to_string())),
     }
 }
-
 
 /// Send signed raw transaction to the remote client
 ///
