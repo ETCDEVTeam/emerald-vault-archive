@@ -21,9 +21,7 @@ pub fn get_nonce(rpc: &RpcConnector, addr: &Address) -> Result<u64, Error> {
         Value::String("latest".to_string()),
     ];
     let params = Params::Array(data);
-    let val = rpc.send_post(
-        &MethodParams(ClientMethod::EthGetTxCount, &params)
-    )?;
+    let val = rpc.send_post(&MethodParams(ClientMethod::EthGetTxCount, &params))?;
 
     match val.as_str() {
         Some(s) => Ok(u64::from_str_radix(trim_hex(s), 16)?),
