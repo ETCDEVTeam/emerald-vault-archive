@@ -7,11 +7,9 @@ use reqwest::Client;
 use serde_json::Value;
 use cmd::Error;
 
-
 lazy_static! {
     static ref CLIENT: Client = Client::new().expect("Expect to create an HTTP client");
 }
-
 
 /// RPC methods
 #[derive(Clone, Copy, Debug, Hash, PartialEq, Eq)]

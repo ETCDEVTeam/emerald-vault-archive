@@ -3,11 +3,11 @@
 mod http;
 mod serialize;
 
-pub use self::http::{RpcConnector, MethodParams, ClientMethod};
-use jsonrpc_core::{Value, Params};
+pub use self::http::{ClientMethod, MethodParams, RpcConnector};
+use jsonrpc_core::{Params, Value};
 use cmd::Error;
 use hex::ToHex;
-use emerald::{Address, trim_hex};
+use emerald::{trim_hex, Address};
 
 /// Get nonce for address from remote node
 ///
@@ -30,7 +30,6 @@ pub fn get_nonce(rpc: &RpcConnector, addr: &Address) -> Result<u64, Error> {
         None => Err(Error::ExecError("Can't parse tx count".to_string())),
     }
 }
-
 
 /// Send signed raw transaction to the remote client
 ///

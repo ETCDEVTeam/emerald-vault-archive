@@ -5,10 +5,11 @@ mod error;
 mod arg_handlers;
 
 pub use self::error::Error;
-use super::emerald::keystore::{KeyFile, KdfDepthLevel};
-use super::emerald::{self, Address, Transaction, to_arr, to_chain_id, trim_hex, align_bytes,
-                     to_even_str};
+use super::emerald::keystore::{KdfDepthLevel, KeyFile};
+use super::emerald::{self, align_bytes, to_arr, to_chain_id, to_even_str, trim_hex, Address,
+                     Transaction};
 use super::emerald::PrivateKey;
+use super::emerald::mnemonic::{gen_entropy, Language, Mnemonic, ENTROPY_BYTE_LENGTH};
 use super::emerald::storage::{default_path, StorageController};
 use std::net::SocketAddr;
 use std::str::FromStr;
@@ -18,7 +19,6 @@ use rpc::{self, RpcConnector};
 use hex::ToHex;
 use std::path::PathBuf;
 use std::sync::Arc;
-
 
 #[derive(Debug, Deserialize, Clone)]
 pub struct Args {
@@ -50,6 +50,7 @@ pub struct Args {
     pub cmd_server: bool,
     pub cmd_list: bool,
     pub cmd_new: bool,
+    pub cmd_mnemonic: bool,
     pub cmd_balance: bool,
     pub cmd_hide: bool,
     pub cmd_unhide: bool,
@@ -78,7 +79,7 @@ impl CmdExecutor {
 
         let chain = match arg_or_default(&args.flag_chain, &env.emerald_chain) {
             Ok(c) => c,
-            Err(e) => {
+            Err(_) => {
                 info!("Missed `--chain` argument. Use default: `mainnet`");
                 "mainnet".to_string()
             }
@@ -87,7 +88,7 @@ impl CmdExecutor {
         let sec_level_str = arg_or_default(&args.flag_security_level, &env.emerald_security_level)?;
         let sec_level = match KdfDepthLevel::from_str(&sec_level_str) {
             Ok(sec) => sec,
-            Err(e) => {
+            Err(_) => {
                 info!("Missed `--security-level` argument. Use default: `ultra`");
                 KdfDepthLevel::default()
             }
@@ -108,7 +109,6 @@ impl CmdExecutor {
             Err(_) => None,
         };
 
-
         Ok(CmdExecutor {
             args: args.clone(),
             chain: chain,
@@ -127,6 +127,8 @@ impl CmdExecutor {
             self.list()
         } else if self.args.cmd_new {
             self.new_account()
+        } else if self.args.cmd_mnemonic {
+            self.new_mnemonic()
         } else if self.args.cmd_balance {
             self.balance()
         } else if self.args.cmd_hide {
@@ -213,6 +215,14 @@ impl CmdExecutor {
         st.put(&kf)?;
         println!("Created new account: {}", &kf.address.to_string());
 
+        Ok(())
+    }
+
+    /// Creates new BIP32 mnemonic phrase
+    fn new_mnemonic(&self) -> ExecResult<Error> {
+        let entropy = gen_entropy(ENTROPY_BYTE_LENGTH)?;
+        let mn = Mnemonic::new(Language::English, &entropy)?;
+        println!("{}", mn.sentence());
         Ok(())
     }
 
@@ -334,6 +344,7 @@ impl CmdExecutor {
         }
     }
 
+    /// Send transaction into network through provided node
     fn send_transaction(&self, raw: &[u8]) -> ExecResult<Error> {
         match self.connector {
             Some(ref conn) => {
@@ -343,7 +354,7 @@ impl CmdExecutor {
                 Ok(())
             }
 
-            None => Err(Error::ExecError("Invalid chain name".to_string())),
+            None => Err(Error::ExecError("Can't connect to node".to_string())),
         }
     }
 }

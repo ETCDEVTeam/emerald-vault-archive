@@ -1,6 +1,6 @@
 #!/usr/bin/env bats
 
-: ${EMERALD_CLI:=$HOME/.cargo/bin/emerald} # FIXME emerald or emerald-cli?
+: ${EMERALD_CLI:=$HOME/.cargo/bin/emerald}
 
 
 # Setup and teardown are called surrounding EACH @test.

@@ -9,35 +9,21 @@ use reqwest;
 use std::num;
 use hex;
 
+macro_rules! from_err {
+    ( $x:ty ) => {
+        impl From<$x> for Error {
+            fn from(err: $x) -> Self {
+                Error::ExecError(err.to_string())
+            }
+        }
+    };
+}
+
 ///
 #[derive(Debug)]
 pub enum Error {
     /// Command execution error
     ExecError(String),
-}
-
-impl From<io::Error> for Error {
-    fn from(err: io::Error) -> Self {
-        Error::ExecError(err.to_string())
-    }
-}
-
-impl From<KeyStorageError> for Error {
-    fn from(err: KeyStorageError) -> Self {
-        Error::ExecError(err.to_string())
-    }
-}
-
-impl From<string::ParseError> for Error {
-    fn from(err: string::ParseError) -> Self {
-        Error::ExecError(err.to_string())
-    }
-}
-
-impl From<emerald::Error> for Error {
-    fn from(err: emerald::Error) -> Self {
-        Error::ExecError(err.to_string())
-    }
 }
 
 impl From<AddrParseError> for Error {
@@ -46,41 +32,17 @@ impl From<AddrParseError> for Error {
     }
 }
 
-impl From<keystore::Error> for Error {
-    fn from(err: keystore::Error) -> Self {
-        Error::ExecError(err.to_string())
-    }
-}
-
-impl From<keystore::SerializeError> for Error {
-    fn from(err: keystore::SerializeError) -> Self {
-        Error::ExecError(err.to_string())
-    }
-}
-
-impl From<json::EncoderError> for Error {
-    fn from(err: json::EncoderError) -> Self {
-        Error::ExecError(err.to_string())
-    }
-}
-
-impl From<reqwest::Error> for Error {
-    fn from(err: reqwest::Error) -> Self {
-        Error::ExecError(err.to_string())
-    }
-}
-
-impl From<num::ParseIntError> for Error {
-    fn from(err: num::ParseIntError) -> Self {
-        Error::ExecError(err.to_string())
-    }
-}
-
-impl From<hex::FromHexError> for Error {
-    fn from(err: hex::FromHexError) -> Self {
-        Error::ExecError(err.to_string())
-    }
-}
+from_err!(io::Error);
+from_err!(KeyStorageError);
+from_err!(string::ParseError);
+from_err!(emerald::Error);
+from_err!(keystore::Error);
+from_err!(keystore::SerializeError);
+from_err!(json::EncoderError);
+from_err!(reqwest::Error);
+from_err!(num::ParseIntError);
+from_err!(hex::FromHexError);
+from_err!(emerald::mnemonic::Error);
 
 impl fmt::Display for Error {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {

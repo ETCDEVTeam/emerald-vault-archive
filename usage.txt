@@ -2,6 +2,7 @@ Emerald offline wallet command line interface.
 
 Usage:
   emerald server    [--port=<port>] [--host=<host>] [--base-path=<path>] [-v | --verbose] [-q | --quite]
+  emerald mnemonic
   emerald new       [--chain=<chain>]  ([[--security-level=<level>] [--name=<name>] [--description=<description>]] | --raw <key>)
   emerald list      [--chain=<chain>]  [--show-hidden]
   emerald hide      [--chain=<chain>]  <address>
@@ -36,6 +37,6 @@ Options:
       --security-level=<normal|high|ultra>    Level of security for cryptographic operations [default: ultra]
       --show-hidden                           Include hidden keyfiles
       --upstream=<upstream>                   URL to ethereum node [default: 127.0.0.1:8545]
-      --gas=<gas>                             Gas limit for transaction
-      --gas-price=<price>                     Gas price for transaction execution
+      --gas=<gas>                             Gas limit for transaction, hex-encoded value  in `wei`
+      --gas-price=<price>                     Gas price for transaction, hex-encoded value  in `wei`
       --nonce=<nonce>                         Transaction count of sender
