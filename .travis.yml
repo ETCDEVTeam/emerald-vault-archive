@@ -39,7 +39,7 @@ script:
   - export PATH=$PATH:$PWD/janusbin
   - export APP_VERSION="$(janus version -format 'v%M.%m.%C-%S')"
   - export RUST_BACKTRACE=1
-  - cargo fmt --all -- --verbose --write-mode=diff
+  - cargo fmt --all -- --verbose --force --write-mode=diff
   - cargo test --all --verbose
   - cargo build --all --verbose --release
   - cp ./target/release/emerald "$HOME/.cargo/bin/"
