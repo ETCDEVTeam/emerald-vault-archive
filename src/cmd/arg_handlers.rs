@@ -1,8 +1,7 @@
 //! # Helpers for command execution
 
-
 use super::Error;
-use super::{CmdExecutor, Address, PrivateKey, KeyFile, trim_hex, to_arr, align_bytes, to_even_str};
+use super::{align_bytes, to_arr, to_even_str, trim_hex, Address, CmdExecutor, KeyFile, PrivateKey};
 use std::path::{Path, PathBuf};
 use std::io::Read;
 use std::fs::File;
@@ -14,7 +13,6 @@ use std::fs;
 use std::io::Write;
 use rpassword;
 use emerald::Transaction;
-
 
 /// Environment variables used to change default variables
 #[derive(Default, Debug)]
@@ -128,7 +126,6 @@ pub fn parse_pk(s: &str) -> Result<PrivateKey, Error> {
     Ok(pk)
 }
 
-
 /// Parse transaction value
 pub fn parse_value(s: &str) -> Result<[u8; 32], Error> {
     let value_str = parse_arg(s)?;
@@ -187,7 +184,7 @@ impl CmdExecutor {
             |mut f| f.read_to_string(&mut json),
         )?;
 
-        let kf = KeyFile::decode(json)?;
+        let kf = KeyFile::decode(&json)?;
         let st = self.storage_ctrl.get_keystore(&self.chain)?;
 
         match st.is_addr_exist(&kf.address) {

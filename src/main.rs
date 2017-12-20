@@ -1,28 +1,27 @@
 //! # CLI wrapper for `emerald-rs`
 
 #![cfg(feature = "cli")]
-
 #![cfg_attr(feature = "dev", feature(plugin))]
 #![cfg_attr(feature = "dev", plugin(clippy))]
 
-#[macro_use]
-extern crate log;
+extern crate docopt;
+extern crate emerald_rs as emerald;
+extern crate env_logger;
+extern crate hex;
+extern crate hyper;
+extern crate jsonrpc_core;
 #[macro_use]
 extern crate lazy_static;
 #[macro_use]
-extern crate serde_derive;
-extern crate text_io;
-extern crate serde;
-extern crate docopt;
-extern crate env_logger;
-extern crate emerald_rs as emerald;
-extern crate rustc_serialize;
-extern crate serde_json;
-extern crate jsonrpc_core;
-extern crate hyper;
+extern crate log;
 extern crate reqwest;
-extern crate hex;
 extern crate rpassword;
+extern crate rustc_serialize;
+extern crate serde;
+#[macro_use]
+extern crate serde_derive;
+extern crate serde_json;
+extern crate text_io;
 
 mod cmd;
 mod rpc;
@@ -34,7 +33,7 @@ use log::LogRecord;
 use std::env;
 use std::process::*;
 
-const USAGE: &'static str = include_str!("../usage.txt");
+const USAGE: &str = include_str!("../usage.txt");
 const VERSION: Option<&'static str> = option_env!("CARGO_PKG_VERSION");
 
 /// Get the current Emerald version.
