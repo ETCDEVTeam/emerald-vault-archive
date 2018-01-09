@@ -17,6 +17,10 @@ pub enum ClientMethod {
     /// [eth_gasPrice](https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_gasprice)
     EthGasPrice,
 
+    /// [eth_estimatePrice](
+    /// https://github.com/ethereumproject/go-ethereum/wiki/JSON-RPC#eth_estimategas)
+    EthEstimateGas,
+
     /// [eth_getTransactionCount](
     /// https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_gettransactioncount)
     EthGetTxCount,
