@@ -74,7 +74,11 @@ install:
   - ps: $env:VERSION_BASE = "$(janus.exe version -format='v%M.%m.x')"
   - ps: $env:VERSION = "$(janus.exe version -format='v%M.%m.%C-%S')"
 
-  - appveyor DownloadFile https://win.rustup.rs/ -FileName rustup-init.exe
+  # https://github.com/rust-lang-nursery/rustup.rs/issues/1316#issuecomment-354156348
+  # Downgrade to use older, not-currently-broken version.
+  - appveyor DownloadFile https://static.rust-lang.org/rustup/archive/1.7.0/i686-pc-windows-gnu/rustup-init.exe -FileName rustup-init.exe
+  # Currently broken version.
+  # - appveyor DownloadFile https://win.rustup.rs/ -FileName rustup-init.exe  - rustup-init -yv --default-toolchain %channel% --default-host %target%
   - rustup-init -yv --default-toolchain %channel% --default-host %target%
   - cmd: set PATH=%PATH%;%USERPROFILE%\.cargo\bin
   - rustup update
