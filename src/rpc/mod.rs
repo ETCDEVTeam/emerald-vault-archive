@@ -54,7 +54,7 @@ pub fn get_balance(rpc: &RpcConnector, addr: &Address) -> Result<String, Error> 
 }
 
 /// Get estimated gas from remote node
-pub fn get_gas() -> Result<u64, Error> {
+pub fn get_gas(rpc: &RpcConnector) -> Result<u64, Error> {
     let data = vec![Value::String("latest".to_string())];
     let params = Params::Array(data);
     let val = rpc.send_post(&MethodParams(ClientMethod::EthEstimateGas, &params))?;
@@ -66,7 +66,7 @@ pub fn get_gas() -> Result<u64, Error> {
 }
 
 /// Get gas price from remote node
-pub fn get_gas_price() -> Result<u64, Error> {
+pub fn get_gas_price(rpc: &RpcConnector) -> Result<u64, Error> {
     let params = Params::Array(vec![]);
     let val = rpc.send_post(&MethodParams(ClientMethod::EthGasPrice, &params))?;
 

@@ -25,6 +25,7 @@ impl<'a> Serialize for MethodParams<'a> {
     {
         match self.0 {
             ClientMethod::EthGasPrice => serialize("eth_gasPrice", self.1, s),
+            ClientMethod::EthEstimateGas => serialize("eth_etsimateGas", self.1, s),
             ClientMethod::EthGetTxCount => serialize("eth_getTransactionCount", self.1, s),
             ClientMethod::EthGetTxByHash => serialize("eth_getTransactionByHash", self.1, s),
             ClientMethod::EthSendRawTransaction => serialize("eth_sendRawTransaction", self.1, s),
