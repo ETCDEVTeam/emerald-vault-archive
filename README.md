@@ -8,7 +8,8 @@
   </p>
 </p>
 
-
-[![asciicast](https://asciinema.org/a/WbivFQXwm5lUXenNsTvzfQxRY.png)](https://asciinema.org/a/WbivFQXwm5lUXenNsTvzfQxRY?speed=2)
+<a href="https://asciinema.org/a/WbivFQXwm5lUXenNsTvzfQxRY?speed=2" target="_blank">
+  <img src="https://asciinema.org/a/WbivFQXwm5lUXenNsTvzfQxRY.png" />
+</a>
 
 #### See our [HowTo](docs/cli.md) for more
