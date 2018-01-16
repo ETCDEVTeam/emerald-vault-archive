@@ -8,6 +8,7 @@ use jsonrpc_core::{Params, Value};
 use cmd::Error;
 use hex::ToHex;
 use emerald::{trim_hex, Address};
+use cmd::hex_to_32bytes;
 
 /// Get nonce for address from remote node
 ///
@@ -66,12 +67,12 @@ pub fn get_gas(rpc: &RpcConnector) -> Result<u64, Error> {
 }
 
 /// Get gas price from remote node
-pub fn get_gas_price(rpc: &RpcConnector) -> Result<u64, Error> {
+pub fn get_gas_price(rpc: &RpcConnector) -> Result<[u8; 32], Error> {
     let params = Params::Array(vec![]);
     let val = rpc.send_post(&MethodParams(ClientMethod::EthGasPrice, &params))?;
 
     match val.as_str() {
-        Some(s) => Ok(u64::from_str_radix(trim_hex(s), 16)?),
+        Some(s) => Ok(hex_to_32bytes(trim_hex(s))?),
         None => Err(Error::ExecError("Can't estimate gas price".to_string())),
     }
 }

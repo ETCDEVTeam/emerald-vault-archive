@@ -5,6 +5,7 @@ mod error;
 mod arg_handlers;
 
 pub use self::error::Error;
+pub use self::arg_handlers::*;
 use super::emerald::keystore::{KdfDepthLevel, KeyFile};
 use super::emerald::{self, align_bytes, to_arr, to_chain_id, to_even_str, trim_hex, Address,
                      Transaction};
@@ -14,7 +15,6 @@ use super::emerald::storage::{default_path, StorageController};
 use std::net::SocketAddr;
 use std::str::FromStr;
 use std::fs;
-use self::arg_handlers::*;
 use rpc::{self, RpcConnector};
 use hex::ToHex;
 use std::path::PathBuf;
@@ -144,16 +144,18 @@ impl CmdExecutor {
         } else if self.args.cmd_export {
             self.export()
         } else if self.args.cmd_transaction {
-            let (kf, mut tr) = self.build_transaction()?;
+            let st = self.storage_ctrl.get_keystore(&self.chain)?;
+            let from = parse_address(&self.args.arg_from)?;
+            let (_, kf) = st.search_by_address(&from)?;
+
             let pass = request_passphrase()?;
             let pk = kf.decrypt_key(&pass)?;
 
+            let tr = self.build_tx()?;
             let raw = self.sign_transaction(&tr, pk)?;
+
             match self.connector {
-                Some(ref conn) => {
-                    tr.nonce = rpc::get_nonce(conn, &kf.address)?;
-                    self.send_transaction(&raw)
-                }
+                Some(_) => self.send_transaction(&raw),
                 None => {
                     println!("Signed transaction: ");
                     println!("{}", raw.to_hex());

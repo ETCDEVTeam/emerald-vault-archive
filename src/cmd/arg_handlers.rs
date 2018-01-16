@@ -13,6 +13,7 @@ use std::fs;
 use std::io::Write;
 use rpassword;
 use emerald::Transaction;
+use rpc::{self, RpcConnector};
 
 /// Environment variables used to change default variables
 #[derive(Default, Debug)]
@@ -100,7 +101,7 @@ fn parse_arg(raw: &str) -> Result<String, Error> {
 
 /// Converts hex string to 32 bytes array
 /// Aligns original `hex` to fit 32 bytes
-fn hex_to_32bytes(hex: &str) -> Result<[u8; 32], Error> {
+pub fn hex_to_32bytes(hex: &str) -> Result<[u8; 32], Error> {
     if hex.is_empty() {
         return Err(Error::ExecError(
             "Invalid parameter: empty string".to_string(),
@@ -142,28 +143,64 @@ pub fn parse_data(s: &str) -> Result<Vec<u8>, Error> {
     Ok(data)
 }
 
-/// Parse transaction data
-pub fn parse_nonce(s: &str) -> Result<u64, Error> {
-    let nonce_str = parse_arg(s)?;
-    Ok(u64::from_str_radix(&nonce_str, 16)?)
-}
-
 /// Parse path for accounts import/export
 pub fn parse_path_or_default(s: &str, default: &Option<String>) -> Result<PathBuf, Error> {
     let path_str = arg_or_default(s, default)?;
     Ok(PathBuf::from(&path_str))
 }
 
-/// Parse gas limit for transaction execution
-pub fn parse_gas_or_default(s: &str, default: &Option<String>) -> Result<u64, Error> {
-    let gas_str = arg_or_default(s, default).and_then(|s| parse_arg(&s))?;
-    Ok(u64::from_str_radix(&gas_str, 16)?)
+/// Parse nonce value,
+/// or try to request from network node
+pub fn parse_nonce(
+    s: &str,
+    rpc: &Option<RpcConnector>,
+    addr: Option<Address>,
+) -> Result<u64, Error> {
+    match parse_arg(s) {
+        Ok(nonce) => Ok(u64::from_str_radix(&nonce, 16)?),
+        Err(e) => match *rpc {
+            Some(ref conn) => {
+                if let Some(a) = addr {
+                    Ok(rpc::get_nonce(conn, &a)?)
+                } else {
+                    Err(e)
+                }
+            }
+            None => Err(e),
+        },
+    }
 }
 
-/// Parse gas limit for transaction execution
-pub fn parse_gas_price_or_default(s: &str, default: &Option<String>) -> Result<[u8; 32], Error> {
-    let gp_str = arg_or_default(s, default).and_then(|s| parse_arg(&s))?;
-    hex_to_32bytes(&gp_str)
+/// Parse gas limit for transaction execution,
+///  or try to request from network node
+pub fn parse_gas_or_default(
+    s: &str,
+    default: &Option<String>,
+    rpc: &Option<RpcConnector>,
+) -> Result<u64, Error> {
+    match arg_or_default(s, default).and_then(|s| parse_arg(&s)) {
+        Ok(gas) => Ok(u64::from_str_radix(&gas, 16)?),
+        Err(e) => match *rpc {
+            Some(ref conn) => Ok(rpc::get_gas(conn)?),
+            None => Err(e),
+        },
+    }
+}
+
+/// Parse gas price for transaction execution,
+/// or try to request from network node
+pub fn parse_gas_price_or_default(
+    s: &str,
+    default: &Option<String>,
+    rpc: &Option<RpcConnector>,
+) -> Result<[u8; 32], Error> {
+    match arg_or_default(s, default).and_then(|s| parse_arg(&s)) {
+        Ok(s) => hex_to_32bytes(&s),
+        Err(e) => match *rpc {
+            Some(ref conn) => Ok(rpc::get_gas_price(conn)?),
+            None => Err(e),
+        },
+    }
 }
 
 /// Request passphrase
@@ -217,19 +254,21 @@ impl CmdExecutor {
         Ok(())
     }
 
-    /// Build trnsaction for provided arguments
-    pub fn build_transaction(&self) -> Result<(KeyFile, Transaction), Error> {
+    /// Build transaction for provided arguments
+    pub fn build_tx(&self) -> Result<Transaction, Error> {
         let from = parse_address(&self.args.arg_from)?;
-        let st = self.storage_ctrl.get_keystore(&self.chain)?;
-        let (_, kf) = st.search_by_address(&from)?;
-
         let tr = Transaction {
-            nonce: parse_nonce(&self.args.flag_nonce)?,
+            nonce: parse_nonce(&self.args.flag_nonce, &self.connector, Some(from))?,
             gas_price: parse_gas_price_or_default(
                 &self.args.flag_gas_price,
                 &self.vars.emerald_gas_price,
+                &self.connector,
             )?,
-            gas_limit: parse_gas_or_default(&self.args.flag_gas, &self.vars.emerald_gas)?,
+            gas_limit: parse_gas_or_default(
+                &self.args.flag_gas,
+                &self.vars.emerald_gas,
+                &self.connector,
+            )?,
             to: match parse_address(&self.args.arg_to) {
                 Ok(a) => Some(a),
                 Err(_) => None,
@@ -238,7 +277,7 @@ impl CmdExecutor {
             data: parse_data(&self.args.flag_data)?,
         };
 
-        Ok((kf, tr))
+        Ok(tr)
     }
 }
 
