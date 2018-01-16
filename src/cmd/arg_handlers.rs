@@ -384,11 +384,11 @@ mod tests {
 
     #[test]
     fn should_parse_nonce() {
-        assert_eq!(parse_nonce("0x1000").unwrap(), 4096);
-        assert_eq!(parse_nonce("0x01000").unwrap(), 4096);
-        assert_eq!(parse_nonce("0x100").unwrap(), 256);
-        assert_eq!(parse_nonce("0x0100").unwrap(), 256);
-        assert!(parse_nonce("").is_err());
+        assert_eq!(parse_nonce("0x1000", &None, None).unwrap(), 4096);
+        assert_eq!(parse_nonce("0x01000", &None, None).unwrap(), 4096);
+        assert_eq!(parse_nonce("0x100", &None, None).unwrap(), 256);
+        assert_eq!(parse_nonce("0x0100", &None, None).unwrap(), 256);
+        assert!(parse_nonce("", &None, None).is_err());
     }
 
     #[test]
@@ -411,24 +411,24 @@ mod tests {
 
     #[test]
     fn should_parse_gas() {
-        assert_eq!(parse_gas_or_default("0x000", &None).unwrap(), 0);
+        assert_eq!(parse_gas_or_default("0x000", &None, &None).unwrap(), 0);
         assert_eq!(
-            parse_gas_or_default("", &Some("0x000".to_string())).unwrap(),
+            parse_gas_or_default("", &Some("0x000".to_string()), &None).unwrap(),
             0
         );
-        assert!(parse_gas_or_default("", &None).is_err());
+        assert!(parse_gas_or_default("", &None, &None).is_err());
     }
 
     #[test]
     fn should_parse_gas_price() {
         assert_eq!(
-            parse_gas_price_or_default("0x000", &None).unwrap(),
+            parse_gas_price_or_default("0x000", &None, &None).unwrap(),
             [0u8; 32]
         );
         assert_eq!(
-            parse_gas_price_or_default("", &Some("0x000".to_string())).unwrap(),
+            parse_gas_price_or_default("", &Some("0x000".to_string()), &None).unwrap(),
             [0u8; 32]
         );
-        assert!(parse_gas_price_or_default("", &None).is_err());
+        assert!(parse_gas_price_or_default("", &None, &None).is_err());
     }
 }
