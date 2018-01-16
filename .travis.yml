@@ -28,7 +28,7 @@ before_install:
 
 before_script:
   - export PATH="$PATH":~/.cargo/bin
-  - echo "\$ rustfmt --version"
+  - echo "\rustmt version: $ rustfmt --version"
   - cargo fmt --all -- --version --force
 
 script:
