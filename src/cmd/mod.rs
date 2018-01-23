@@ -175,8 +175,8 @@ impl CmdExecutor {
         info!("Chain set to '{}'", self.chain);
         info!("Security level set to '{}'", self.sec_level);
 
-        let addr = format!("{}:{}", self.args.flag_host, self.args.flag_port)
-            .parse::<SocketAddr>()?;
+        let addr =
+            format!("{}:{}", self.args.flag_host, self.args.flag_port).parse::<SocketAddr>()?;
 
         let storage_ctrl = Arc::clone(&self.storage_ctrl);
         emerald::rpc::start(&addr, &self.chain, storage_ctrl, Some(self.sec_level));
