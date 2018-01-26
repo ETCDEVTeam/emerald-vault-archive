@@ -19,7 +19,6 @@ image: Visual Studio 2015
 # The values for target are the set of windows Rust build targets. Each value is of the form
 #
 # ARCH-pc-windows-TOOLCHAIN
-#
 # Where ARCH is the target architecture, either x86_64 or i686, and TOOLCHAIN is the linker
 # toolchain to use, either msvc or gnu. See https://www.rust-lang.org/downloads.html#win-foot for
 # a description of the toolchain differences.
@@ -41,15 +40,9 @@ environment:
     # Stable 64-bit MSVC
     - channel: stable
       target: x86_64-pc-windows-msvc
-    # Stable 32-bit MSVC
-    - channel: stable
-      target: i686-pc-windows-msvc
     # Beta 64-bit MSVC
     - channel: beta
-      target: x86_64-pc-windows-msvc
-    # Beta 32-bit MSVC
-    - channel: beta
-      target: i686-pc-windows-msvc
+      target: x86_64-pc-windows-msvс
 
 # Only build against the branches that will have pull requests built against them (master).
 # Otherwise creating feature branches on this repository and a pull requests against them will
@@ -73,12 +66,10 @@ install:
   - set PATH=./janusbin;%PATH%
   - ps: $env:VERSION_BASE = "$(janus.exe version -format='v%M.%m.x')"
   - ps: $env:VERSION = "$(janus.exe version -format='v%M.%m.%C-%S')"
-
-  # https://github.com/rust-lang-nursery/rustup.rs/issues/1316#issuecomment-354156348
-  # Downgrade to use older, not-currently-broken version.
-  - appveyor DownloadFile https://static.rust-lang.org/rustup/archive/1.7.0/i686-pc-windows-gnu/rustup-init.exe -FileName rustup-init.exe
-  # Currently broken version.
-  # - appveyor DownloadFile https://win.rustup.rs/ -FileName rustup-init.exe  - rustup-init -yv --default-toolchain %channel% --default-host %target%
+  
+  - call "C:\Program Files\Microsoft SDKs\Windows\v7.1\Bin\SetEnv.cmd" /x64
+  - call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" x86_amd64
+  - appveyor DownloadFile https://win.rustup.rs/ -FileName rustup-init.exe
   - rustup-init -yv --default-toolchain %channel% --default-host %target%
   - cmd: set PATH=%PATH%;%USERPROFILE%\.cargo\bin
   - rustup update
