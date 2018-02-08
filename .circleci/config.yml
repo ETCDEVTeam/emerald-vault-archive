@@ -10,21 +10,25 @@ jobs:
       - run:
           name: Install software
           command: |
-              npm -v
-              node -v
               curl -sL https://raw.githubusercontent.com/ethereumproject/janus/master/get.sh | bash
+              brew install bats
+              curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain stable
+              rustc -V
+
+#      - run:
+#          name: Tests
+#          command: |
+
 
       - run:
-          name: Tests
-          command: |
-
-
-      - run:
-          name: Build distributive
+          name: Build
           command: |
               export PATH=$PATH:$PWD/janusbin
               export APP_VERSION_GIT_TAG="$(janus version -format 'TAG_OR_NIGHTLY')"
               echo "Building app version $APP_VERSION_GIT_TAG"
+              cargo build --all --verbose --release
+              cp ./target/release/emerald "$HOME/.cargo/bin/"
+              bats cli.bats
 
       - deploy:
           name: Deploy to builds.etcdevteam.com
