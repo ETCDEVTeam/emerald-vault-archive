@@ -72,7 +72,7 @@ install:
   - curl -sL https://raw.githubusercontent.com/ethereumproject/janus/master/get-windows.sh | bash
   - set PATH=./janusbin;%PATH%
   - ps: $env:VERSION_BASE = "$(janus.exe version -format='v%M.%m.x')"
-  - ps: $env:VERSION = "$(janus.exe version -format='v%M.%m.%C-%S')"
+  - ps: $env:VERSION = "$(janus.exe version -format='TAG_OR_NIGHTLY')"
 
   # https://github.com/rust-lang-nursery/rustup.rs/issues/1316#issuecomment-354156348
   # Downgrade to use older, not-currently-broken version.
