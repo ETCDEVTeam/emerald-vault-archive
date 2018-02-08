@@ -11,9 +11,9 @@ jobs:
           name: Install software
           command: |
               curl -sL https://raw.githubusercontent.com/ethereumproject/janus/master/get.sh | bash
-              brew install bats
               curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain stable
-              rustc -V
+              export PATH=$PATH:$HOME/.cargo/bin:$HOME/janusbin
+              brew install bats
 
 #      - run:
 #          name: Tests
