@@ -23,7 +23,6 @@ jobs:
           name: Build
           command: |
               export PATH=$PATH:$HOME/.cargo/bin:$PWD/janusbin
-              echo "Building app version $APP_VERSION_GIT_TAG"
               cargo build --all --verbose --release
               cp ./target/release/emerald "$HOME/.cargo/bin/"
               bats cli.bats
@@ -32,7 +31,7 @@ jobs:
           name: Deploy to builds.etcdevteam.com
           command: |
               export PATH=$PATH:$PWD/janusbin
-              export APP_VERSION="$(janus version -format 'v%M.%m.%C-%S')"
-              #if [ "${CIRCLE_BRANCH}" == "master" ]; then
+              export APP_VERSION="$(janus version -format 'TAG_OR_NIGHTLY')"
+              if [ "${CIRCLE_BRANCH}" == "master" ]; then
                   .circleci/deploy.sh
-              #fi
+              fi
