@@ -8,11 +8,10 @@ jobs:
       - checkout
 
       - run:
-          name: Install software
+          name: Install required software
           command: |
               curl -sL https://raw.githubusercontent.com/ethereumproject/janus/master/get.sh | bash
               curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain stable
-              export PATH=$PATH:$HOME/.cargo/bin:$HOME/janusbin
               brew install bats
 
 #      - run:
@@ -23,7 +22,7 @@ jobs:
       - run:
           name: Build
           command: |
-              export PATH=$PATH:$PWD/janusbin
+              export PATH=$PATH:$HOME/.cargo/bin:$PWD/janusbin
               export APP_VERSION_GIT_TAG="$(janus version -format 'TAG_OR_NIGHTLY')"
               echo "Building app version $APP_VERSION_GIT_TAG"
               cargo build --all --verbose --release
