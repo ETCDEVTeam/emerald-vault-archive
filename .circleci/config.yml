@@ -13,11 +13,10 @@ jobs:
               curl -sL https://raw.githubusercontent.com/ethereumproject/janus/master/get.sh | bash
               curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain stable
               brew install bats
-
+              brew install gpg2
 #      - run:
 #          name: Tests
 #          command: |
-
 
       - run:
           name: Build
