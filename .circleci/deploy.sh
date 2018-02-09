@@ -12,5 +12,5 @@ mkdir deploy
 mv *.zip *.tar.gz deploy/
 ls -l deploy/
 
-janus deploy -to="builds.etcdevteam.com/emerald-cli/$VERSION_BASE/" -files="deploy/*" -key=".circleci/gcloud-circleci.json.enc"
+janus deploy -to="builds.etcdevteam.com/emerald-cli/$VERSION_BASE/" -files="deploy/*" -key=".circleci/gcloud-circleci.json.enc" -gpg
 echo "Deployed"
