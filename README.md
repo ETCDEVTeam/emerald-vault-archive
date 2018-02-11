@@ -13,4 +13,4 @@
   <img src="https://asciinema.org/a/WbivFQXwm5lUXenNsTvzfQxRY.png" />
 </a>
 
-#### See our [HowTo](docs/cli.md) for more
+#### See our [Docs](docs/SUMMARY.adoc) for more information

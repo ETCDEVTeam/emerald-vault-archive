@@ -1,0 +1,20 @@
+```
+                                                       .__       .___      /\         .__  .__
+                      ____   _____   ________________  |  |    __| _/     / /    ____ |  | |__|
+                    _/ __ \ /     \_/ __ \_  __ \__  \ |  |   / __ |     / /   _/ ___\|  | |  |
+                    \  ___/|  Y Y  \  ___/|  | \// __ \|  |__/ /_/ |    / /    \  \___|  |_|  |
+                     \___  >__|_|  /\___  >__|  (____  /____/\____ |   / /      \___  >____/__|
+                        \/      \/     \/           \/           \/   \/           \/
+
+```
+
+= About Emerald Command Line Interface (CLI)
+
+Emerald Platfor is a set of tools to build and integrate other apps with Ethereum ETC blockchain.
+
+Emerald CLI is a tool to access Ethereum ETC from command line. It connects to an external node (_"Upstream"_) and
+allows to read information from blockchain and send new transactions. At the later case it provides functionality
+to sign transaction by provided Private Key. The tool integrates Emerald Vault with designed to generate, import and/or
+store Ethereum Private Keys
+
+It's compatible with both Ethereum ETC and ETH
