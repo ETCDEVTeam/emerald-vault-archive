@@ -1,8 +1,56 @@
 # Usage
 
-Usage help description is based on [DOCOPT](http://docopt.org/) link:{rootdir}/emerald-cli/usage.txt[`usage.txt`].
+Usage help description is based on http://docopt.org/[DOCOPT].
 
-use `-h | --help` for help menu
+Use `-h | --help` for help menu:
+
+```
+emerald --help
+
+Emerald offline wallet command line interface.
+
+Usage:
+  emerald server    [--chain=<chain>] [--port=<port>] [--host=<host>] [--base-path=<path>] [-v | --verbose] [-q | --quite]
+  emerald mnemonic
+  emerald new       [--chain=<chain>]  ([[--security-level=<level>] [--name=<name>] [--description=<description>]] | --raw <key>)
+  emerald list      [--chain=<chain>]  [--show-hidden]
+  emerald hide      [--chain=<chain>]  <address>
+  emerald unhide    [--chain=<chain>]  ([-a | --all] | <address>)
+  emerald strip     [--chain=<chain>] <address>
+  emerald import    [--chain=<chain>]  [-a | --all] [-f | --force] <path>
+  emerald export    [--chain=<chain>]  ([-a | --all] | <address>) <path>
+  emerald update    [--chain=<chain>]  <address> [--name=<name>] [--description=<description>]
+  emerald transaction   [--chain=<chain>] <from> <to> <value> [--gas=<gas>] [--gas-price=<price>] [--data=<data>] (--nonce=<nonce> | --upstream=<upstream>)
+  emerald balance   <address> [--upstream=<upstream>]
+  emerald -V | --version
+  emerald -h | --help
+
+Options:
+  -a, --all                                   Apply action to all accounts
+  -c, --chain=<mainnet|testnet>               Chain name
+  -f, --force                                 Override existing keystore file
+  -h, --help                                  Show this message
+  -V, --version                               Show current version
+  -r, --raw                                   Create Keyfile directly from a private key
+  -q, --quiet                                 Only errors printed to the output
+  -v, --verbose                               Verbose output
+      --data=<data>                           Optional data included in a transaction
+      --name=<name>                           Account name
+      --description=<description>             Account description
+      --host=<host>                           Listen host [default: 127.0.0.1]
+      --port=<port>                           Listen port [default: 1920]
+      --base-path=<path>                      Base directory path, if omitted default os-specific value will be used:
+                                                  + Mac OS X: ~/Library/Emerald
+                                                  + Linux: ~/.emerald
+                                                  + Windows: %USERDIR%\.emerald
+      --security-level=<normal|high|ultra>    Level of security for cryptographic operations [default: ultra]
+      --show-hidden                           Include hidden keyfiles
+      --upstream=<upstream>                   URL to ethereum node [default: 127.0.0.1:8545]
+      --gas=<gas>                             Gas limit for transaction, hex-encoded value  in `wei`
+      --gas-price=<price>                     Gas price for transaction, hex-encoded value  in `wei`
+      --nonce=<nonce>                         Transaction count of sender
+
+```
 
 ## Environment variables
 
@@ -15,126 +63,6 @@ Environment variables allow you to redefine the default settings:
 * `EMERALD_GAS` - maximum gas limit to use by transaction
 * `EMERALD_GAS_PRICE` - gas cost to use by transaction (in Gwei)
 * `EMERALD_SECURITY_LEVEL` - security level (`normal` | `high` | `ultra`)
-* `EMERALD_NODE` - url to node. Used for sign and send of transactions
-
-## HOWTO
-
-### How to run [JSON-RPC](http://github.com/ethereumproject/emerald-rs/blob/master/docs/api.md) endpoint
-
-```
-emerald server --host=127.0.0.1 --port=1920
-```
-
-### How to show all available accounts
-
-```
-emerald list --chain=morden
-```
-
-### How to exclude some accounts from the showing list
-
-```
-emerald hide --chain=morden 0x0e7c045110b8dbf29765047380898919c5cb56f4
-```
-
-To undo in the future:
-
-```
-emerald unhide --chain=morden --all
-```
-
-### How to create new account
-
-```
-emerald new --chain=morden \
-    --security-level=high \
-    --name="Test account" \
-    --description="Some description" \
-    < echo "secret passphrase"
-```
-
-### How to show private key
-
-```
-emerald strip --chain=morden 0x0e7c045110b8dbf29765047380898919c5cb56f4 < echo "secret passphrase"
-```
-
-### How to change `passphrase`
-
-```
-emerald strip --chain=morden 0x0e7c045110b8dbf29765047380898919c5cb56f4 < echo "old passphrase" \
-emerald new --chain=morden --raw < echo "new passphrase"
-```
-
-### How to change account name
-
-```
-emerald update --chain=morden \
-    0x0e7c045110b8dbf29765047380898919c5cb56f4 \
-    --name="New name" \
-    --description="A new description"
-```
-
-### How to export & import all accounts
-
-Import content of whole folder:
-```
-emerald import --chain=morden --all <path_to_files>
-```
-or single keyfile:
-```
-emerald import --chain=morden <path_to_file>
-```
-If keyfile already exist in a storage, import will be ignore.
-
-To override existing Keyfile, use `-f | --force` option:
-```
-    emerald import --chain=morden --force <path_to_file>
-```
+* `EMERALD_NODE` - url to upstream node. Used for sign and send of transactions
 
 
-Export all keyfiles into directory:
-```
-    emerald export --chain=morden --all <path_to_export_dir>
-```
-or single keyfile for selected <address>:
-```
-    emerald export --chain=morden <address> <path_to_export_dir>
-```
-
-### How to get balance for address
-If using client that running on a local host (127.0.0.1:8545):
-```
-emerald balance 0x0e7c045110b8dbf29765047380898919c5cb56f4
-```
-or connecting to some specific host & port:
-```
-emerald balance 0x0e7c045110b8dbf29765047380898919c5cb56f4 --upstream=8.8.8.8:8545
-```
-
-
-### How to sign transaction
-
-Offline:
-```
-EMERALD_GAS_COST=21 \
-emerald transaction \
-    0x0e7c045110b8dbf29765047380898919c5cb56f4 \
-    0x0e7c045110b8dbf29765047380898919c5cb56f4 \
-    0x1000 \
-    --gas=0x2100 \
-    --nonce=0x10001 \
-    < echo "secret passphrase"
-```
-
-or sent transaction for execution through remote node:
-```
-EMERALD_GAS_COST=21 \
-emerald transaction \
-    0x0e7c045110b8dbf29765047380898919c5cb56f4 \
-    0x0e7c045110b8dbf29765047380898919c5cb56f4 \
-    0x1000 \
-    --gas=0x2100 \
-    --upstream=127.0.0.1:8545 \
-    < echo "secret passphrase"
-```
