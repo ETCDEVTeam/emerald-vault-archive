@@ -155,7 +155,9 @@ impl CmdExecutor {
             let raw = self.sign_transaction(&tr, pk)?;
 
             match self.connector {
-                Some(_) => self.send_transaction(&raw),
+                Some(_) => {
+                    self.send_transaction(&raw)
+                }
                 None => {
                     println!("Signed transaction: ");
                     println!("{}", raw.to_hex());

@@ -36,7 +36,7 @@ Options:
                                                   + Windows: %USERDIR%\.emerald
       --security-level=<normal|high|ultra>    Level of security for cryptographic operations [default: ultra]
       --show-hidden                           Include hidden keyfiles
-      --upstream=<upstream>                   URL to ethereum node [default: 127.0.0.1:8545]
+      --upstream=<upstream>                   URL to ethereum node
       --gas=<gas>                             Gas limit for transaction, hex-encoded value  in `wei`
       --gas-price=<price>                     Gas price for transaction, hex-encoded value  in `wei`
       --nonce=<nonce>                         Transaction count of sender
