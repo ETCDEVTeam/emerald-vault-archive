@@ -1,0 +1,25 @@
+### How to sign transaction
+
+Offline:
+```
+EMERALD_GAS_COST=21 \
+emerald transaction \
+    0x0e7c045110b8dbf29765047380898919c5cb56f4 \
+    0x0e7c045110b8dbf29765047380898919c5cb56f4 \
+    0x1000 \
+    --gas=0x2100 \
+    --nonce=0x10001 \
+    < echo "secret passphrase"
+```
+
+or sent transaction for execution through remote node:
+```
+EMERALD_GAS_COST=21 \
+emerald transaction \
+    0x0e7c045110b8dbf29765047380898919c5cb56f4 \
+    0x0e7c045110b8dbf29765047380898919c5cb56f4 \
+    0x1000 \
+    --gas=0x2100 \
+    --upstream=127.0.0.1:8545 \
+    < echo "secret passphrase"
+```
