@@ -23,8 +23,8 @@ Install Rust from https://www.rust-lang.org/en-US/install.html
 
   
 Unix one-liner:
-```
-curl https://sh.rustup.rs -sSf | sh
+```shell
+$ curl https://sh.rustup.rs -sSf | sh
 ```
   
 [NOTE]
@@ -36,31 +36,20 @@ the build tools is by installing Microsoft Visual C++ Build Tools 2017 which pro
 ### Compile
 
 #### Step 1
-
 Clone the repository
-
-```
-git clone https://github.com/etcdevteam/emerald-cli.git
-```
-
-Move to the new directory
-
-```
-cd emerald-cli
+```shell
+$ git clone https://github.com/etcdevteam/emerald-cli.git
+$ cd emerald-cli
 ```
 
 #### Step 2
-
 Compile with cargo
-
-```
-cargo build --release
+```shell
+$ cargo build --release
 ```
 
 #### Step 3
-
- Move to install dir
-
-```
-cd target\debug
+ Run `emerald` 
+```shell
+$ ./target/release/emerald --help
 ```
