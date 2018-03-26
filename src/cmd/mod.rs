@@ -20,6 +20,7 @@ use hex::ToHex;
 use std::path::PathBuf;
 use std::sync::Arc;
 
+
 #[derive(Debug, Deserialize, Clone)]
 pub struct Args {
     pub arg_address: String,
@@ -104,18 +105,18 @@ impl CmdExecutor {
         };
         let storage_ctrl = Arc::new(Box::new(StorageController::new(base_path)?));
 
-        let connector = match args.flag_upstream.parse::<SocketAddr>() {
-            Ok(addr) => Some(RpcConnector::new(&format!("http://{}", addr))),
-            Err(_) => None,
-        };
+        let connector = parse_socket(&args.flag_upstream)
+            .or_else(|_| parse_url(&args.flag_upstream))
+            .and_then(RpcConnector::new)
+            .ok();
 
         Ok(CmdExecutor {
             args: args.clone(),
-            chain: chain,
-            sec_level: sec_level,
-            storage_ctrl: storage_ctrl,
+            chain,
+            sec_level,
+            storage_ctrl,
             vars: env,
-            connector: connector,
+            connector,
         })
     }
 
@@ -155,9 +156,7 @@ impl CmdExecutor {
             let raw = self.sign_transaction(&tr, pk)?;
 
             match self.connector {
-                Some(_) => {
-                    self.send_transaction(&raw)
-                }
+                Some(_) => self.send_transaction(&raw),
                 None => {
                     println!("Signed transaction: ");
                     println!("{}", raw.to_hex());
@@ -177,8 +176,8 @@ impl CmdExecutor {
         info!("Chain set to '{}'", self.chain);
         info!("Security level set to '{}'", self.sec_level);
 
-        let addr = format!("{}:{}", self.args.flag_host, self.args.flag_port)
-            .parse::<SocketAddr>()?;
+        let addr =
+            format!("{}:{}", self.args.flag_host, self.args.flag_port).parse::<SocketAddr>()?;
 
         let storage_ctrl = Arc::clone(&self.storage_ctrl);
         emerald::rpc::start(&addr, &self.chain, storage_ctrl, Some(self.sec_level));

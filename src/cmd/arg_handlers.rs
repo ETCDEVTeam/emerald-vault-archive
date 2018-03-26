@@ -14,6 +14,9 @@ use std::io::Write;
 use rpassword;
 use emerald::Transaction;
 use rpc::{self, RpcConnector};
+use hyper::Url;
+use hyper::client::IntoUrl;
+use std::net::SocketAddr;
 
 /// Environment variables used to change default variables
 #[derive(Default, Debug)]
@@ -63,9 +66,8 @@ pub fn arg_or_default(arg: &str, env: &Option<String>) -> Result<String, Error> 
     let val = arg.parse::<String>()?;
 
     if val.is_empty() {
-        env.clone().ok_or_else(|| {
-            Error::ExecError("Missed arguments".to_string())
-        })
+        env.clone()
+            .ok_or_else(|| Error::ExecError("Missed arguments".to_string()))
     } else {
         Ok(val)
     }
@@ -88,9 +90,8 @@ pub fn arg_to_opt(arg: &str) -> Result<Option<String>, Error> {
 
 /// Parse raw hex string arguments from user
 fn parse_arg(raw: &str) -> Result<String, Error> {
-    let s = raw.parse::<String>().and_then(
-        |s| Ok(to_even_str(trim_hex(&s))),
-    )?;
+    let s = raw.parse::<String>()
+        .and_then(|s| Ok(to_even_str(trim_hex(&s))))?;
 
     if s.is_empty() {
         Err(Error::ExecError(
@@ -135,9 +136,9 @@ pub fn parse_value(s: &str) -> Result<[u8; 32], Error> {
 
 /// Parse transaction data
 pub fn parse_data(s: &str) -> Result<Vec<u8>, Error> {
-    let data = match s.parse::<String>().and_then(
-        |d| Ok(to_even_str(trim_hex(&d))),
-    ) {
+    let data = match s.parse::<String>()
+        .and_then(|d| Ok(to_even_str(trim_hex(&d))))
+    {
         Ok(str) => Vec::from_hex(&str)?,
         Err(_) => vec![],
     };
@@ -160,18 +161,16 @@ pub fn parse_nonce(
 ) -> Result<u64, Error> {
     match parse_arg(s) {
         Ok(nonce) => Ok(u64::from_str_radix(&nonce, 16)?),
-        Err(e) => {
-            match *rpc {
-                Some(ref conn) => {
-                    if let Some(a) = addr {
-                        Ok(rpc::get_nonce(conn, &a)?)
-                    } else {
-                        Err(e)
-                    }
+        Err(e) => match *rpc {
+            Some(ref conn) => {
+                if let Some(a) = addr {
+                    Ok(rpc::get_nonce(conn, &a)?)
+                } else {
+                    Err(e)
                 }
-                None => Err(e),
             }
-        }
+            None => Err(e),
+        },
     }
 }
 
@@ -184,12 +183,10 @@ pub fn parse_gas_or_default(
 ) -> Result<u64, Error> {
     match arg_or_default(s, default).and_then(|s| parse_arg(&s)) {
         Ok(gas) => Ok(u64::from_str_radix(&gas, 16)?),
-        Err(e) => {
-            match *rpc {
-                Some(ref conn) => Ok(rpc::get_gas(conn)?),
-                None => Err(e),
-            }
-        }
+        Err(e) => match *rpc {
+            Some(ref conn) => Ok(rpc::get_gas(conn)?),
+            None => Err(e),
+        },
     }
 }
 
@@ -202,13 +199,26 @@ pub fn parse_gas_price_or_default(
 ) -> Result<[u8; 32], Error> {
     match arg_or_default(s, default).and_then(|s| parse_arg(&s)) {
         Ok(s) => hex_to_32bytes(&s),
-        Err(e) => {
-            match *rpc {
-                Some(ref conn) => Ok(rpc::get_gas_price(conn)?),
-                None => Err(e),
-            }
-        }
+        Err(e) => match *rpc {
+            Some(ref conn) => Ok(rpc::get_gas_price(conn)?),
+            None => Err(e),
+        },
     }
+}
+
+///
+pub fn parse_url(s: &str) -> Result<Url, Error> {
+    let addr = Url::parse(s).map_err(Error::from)?;
+    Ok(addr)
+}
+
+///
+pub fn parse_socket(s: &str) -> Result<Url, Error> {
+    let addr = s.parse::<SocketAddr>()
+        .map_err(Error::from)
+        .and_then(|a| format!("https://{}", a).into_url().map_err(Error::from))?;
+
+    Ok(addr)
 }
 
 /// Request passphrase
@@ -223,9 +233,7 @@ impl CmdExecutor {
     /// Import Keyfile into storage
     pub fn import_keyfile<P: AsRef<Path>>(&self, path: P, force_mode: bool) -> Result<(), Error> {
         let mut json = String::new();
-        File::open(path).and_then(
-            |mut f| f.read_to_string(&mut json),
-        )?;
+        File::open(path).and_then(|mut f| f.read_to_string(&mut json))?;
 
         let kf = KeyFile::decode(&json)?;
         let st = self.storage_ctrl.get_keystore(&self.chain)?;
@@ -298,42 +306,12 @@ mod tests {
     #[test]
     fn should_convert_hex_to_32bytes() {
         assert_eq!(
-            hex_to_32bytes(
-                "fa384e6fe915747cd13faa1022044b0def5e6bec4238bec53166487a5cca569f",
-            ).unwrap(),
+            hex_to_32bytes("fa384e6fe915747cd13faa1022044b0def5e6bec4238bec53166487a5cca569f",)
+                .unwrap(),
             [
-                0xfa,
-                0x38,
-                0x4e,
-                0x6f,
-                0xe9,
-                0x15,
-                0x74,
-                0x7c,
-                0xd1,
-                0x3f,
-                0xaa,
-                0x10,
-                0x22,
-                0x04,
-                0x4b,
-                0x0d,
-                0xef,
-                0x5e,
-                0x6b,
-                0xec,
-                0x42,
-                0x38,
-                0xbe,
-                0xc5,
-                0x31,
-                0x66,
-                0x48,
-                0x7a,
-                0x5c,
-                0xca,
-                0x56,
-                0x9f,
+                0xfa, 0x38, 0x4e, 0x6f, 0xe9, 0x15, 0x74, 0x7c, 0xd1, 0x3f, 0xaa, 0x10, 0x22, 0x04,
+                0x4b, 0x0d, 0xef, 0x5e, 0x6b, 0xec, 0x42, 0x38, 0xbe, 0xc5, 0x31, 0x66, 0x48, 0x7a,
+                0x5c, 0xca, 0x56, 0x9f,
             ]
         );
         assert_eq!(hex_to_32bytes("00").unwrap(), [0u8; 32]);
@@ -363,9 +341,8 @@ mod tests {
         let pk = PrivateKey::try_from(&[0u8; 32]).unwrap();
         assert_eq!(
             pk,
-            parse_pk(
-                "0x0000000000000000000000000000000000000000000000000000000000000000",
-            ).unwrap()
+            parse_pk("0x0000000000000000000000000000000000000000000000000000000000000000",)
+                .unwrap()
         );
     }
 
@@ -430,5 +407,27 @@ mod tests {
             [0u8; 32]
         );
         assert!(parse_gas_price_or_default("", &None, &None).is_err());
+    }
+
+    #[test]
+    fn should_parse_socket_addr() {
+        assert_eq!(
+            parse_socket("127.0.0.1:8545").unwrap(),
+            Url::parse("https://127.0.0.1:8545").unwrap()
+        );
+
+        assert!(parse_socket(";akjf.com").is_err());
+        assert!(parse_socket("https://127.0.0.1:8545").is_err());
+    }
+
+    #[test]
+    fn should_parse_url_name() {
+        assert_eq!(
+            parse_url("https://www.gastracker.io").unwrap(),
+            Url::parse("https://www.gastracker.io").unwrap()
+        );
+
+        assert!(parse_url("127.0.0.1:8545").is_err());
+        assert!(parse_url("12344.com").is_err());
     }
 }
