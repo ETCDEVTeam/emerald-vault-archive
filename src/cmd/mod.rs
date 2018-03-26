@@ -12,13 +12,15 @@ use super::emerald::{self, align_bytes, to_arr, to_chain_id, to_even_str, trim_h
 use super::emerald::PrivateKey;
 use super::emerald::mnemonic::{gen_entropy, Language, Mnemonic, ENTROPY_BYTE_LENGTH};
 use super::emerald::storage::{default_path, StorageController};
-use std::net::SocketAddr;
+use std::net::{SocketAddr, ToSocketAddrs};
 use std::str::FromStr;
 use std::fs;
 use rpc::{self, RpcConnector};
 use hex::ToHex;
 use std::path::PathBuf;
 use std::sync::Arc;
+use hyper::client::IntoUrl;
+use url::{Host, Url};
 
 #[derive(Debug, Deserialize, Clone)]
 pub struct Args {
@@ -104,10 +106,24 @@ impl CmdExecutor {
         };
         let storage_ctrl = Arc::new(Box::new(StorageController::new(base_path)?));
 
-        let connector = match args.flag_upstream.parse::<SocketAddr>() {
-            Ok(addr) => Some(RpcConnector::new(&format!("http://{}", addr))),
+        println!(
+            ">> DEBUG: {:?}",
+            format!("http://{}", args.flag_upstream.to_socket_addrs()
+                .unwrap().next().unwrap())
+                .into_url()
+                .unwrap()
+        );
+
+        let connector = match args.flag_upstream.parse::<SocketAddr>()
+            .map_err(|_| Url::parse(args.flag_upstream)) {
+            Ok(mut addr) => {
+                let val = &addr.next().unwrap().ip();
+                println!(">> DEBUG: {:?}", format!("{}", val).into_url().unwrap());
+                Some(RpcConnector::new(&format!("{}", val)))
+            }
             Err(_) => None,
-        };
+        }
+        let connector = None;
 
         Ok(CmdExecutor {
             args: args.clone(),
@@ -155,9 +171,7 @@ impl CmdExecutor {
             let raw = self.sign_transaction(&tr, pk)?;
 
             match self.connector {
-                Some(_) => {
-                    self.send_transaction(&raw)
-                }
+                Some(_) => self.send_transaction(&raw),
                 None => {
                     println!("Signed transaction: ");
                     println!("{}", raw.to_hex());
@@ -177,8 +191,8 @@ impl CmdExecutor {
         info!("Chain set to '{}'", self.chain);
         info!("Security level set to '{}'", self.sec_level);
 
-        let addr = format!("{}:{}", self.args.flag_host, self.args.flag_port)
-            .parse::<SocketAddr>()?;
+        let addr =
+            format!("{}:{}", self.args.flag_host, self.args.flag_port).parse::<SocketAddr>()?;
 
         let storage_ctrl = Arc::clone(&self.storage_ctrl);
         emerald::rpc::start(&addr, &self.chain, storage_ctrl, Some(self.sec_level));

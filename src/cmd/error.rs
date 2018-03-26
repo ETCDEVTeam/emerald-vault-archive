@@ -10,7 +10,7 @@ use std::num;
 use hex;
 
 macro_rules! from_err {
-    ( $x:ty ) => {
+    ($x: ty) => {
         impl From<$x> for Error {
             fn from(err: $x) -> Self {
                 Error::ExecError(err.to_string())

@@ -21,7 +21,7 @@ extern crate serde;
 #[macro_use]
 extern crate serde_derive;
 extern crate serde_json;
-extern crate text_io;
+extern crate url;
 
 mod cmd;
 mod rpc;
@@ -63,9 +63,7 @@ fn main() {
     if env::var("RUST_LOG").is_ok() {
         log_builder.parse(&env::var("RUST_LOG").unwrap());
     }
-    log_builder.format(|record: &LogRecord| {
-        format!("[{}]\t{}", record.level(), record.args())
-    });
+    log_builder.format(|record: &LogRecord| format!("[{}]\t{}", record.level(), record.args()));
     log_builder.init().expect("Expect to initialize logger");
 
     if args.flag_version {
