@@ -1,3 +1,12 @@
+# Usage
+
+Usage help description is based on http://docopt.org/[DOCOPT].
+
+Use `-h | --help` for help menu:
+
+```
+emerald --help
+
 Emerald offline wallet command line interface.
 
 Usage:
@@ -36,7 +45,24 @@ Options:
                                                   + Windows: %USERDIR%\.emerald
       --security-level=<normal|high|ultra>    Level of security for cryptographic operations [default: ultra]
       --show-hidden                           Include hidden keyfiles
-      --upstream=<upstream>                   URL to ethereum node
+      --upstream=<upstream>                   URL to ethereum node [default: 127.0.0.1:8545]
       --gas=<gas>                             Gas limit for transaction, hex-encoded value  in `wei`
       --gas-price=<price>                     Gas price for transaction, hex-encoded value  in `wei`
       --nonce=<nonce>                         Transaction count of sender
+
+```
+
+## Environment variables
+
+Environment variables allow you to redefine the default settings:
+
+* `EMERALD_HOST` - listen host
+* `EMERALD_PORT` - listen port
+* `EMERALD_CHAIN` - chain name (`mainnet` | `morden`), has a higher priority relative to `EMERALD_CHAIN_ID`
+* `EMERALD_CHAIN_ID` - chain id number, has a lower priority relative to `EMERALD_CHAIN`
+* `EMERALD_GAS` - maximum gas limit to use by transaction
+* `EMERALD_GAS_PRICE` - gas cost to use by transaction (in Gwei)
+* `EMERALD_SECURITY_LEVEL` - security level (`normal` | `high` | `ultra`)
+* `EMERALD_NODE` - url to upstream node. Used for sign and send of transactions
+
+
