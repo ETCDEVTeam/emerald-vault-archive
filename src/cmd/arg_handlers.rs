@@ -14,6 +14,9 @@ use std::io::Write;
 use rpassword;
 use emerald::Transaction;
 use rpc::{self, RpcConnector};
+use hyper::Url;
+use hyper::client::IntoUrl;
+use std::net::SocketAddr;
 
 /// Environment variables used to change default variables
 #[derive(Default, Debug)]
@@ -203,6 +206,21 @@ pub fn parse_gas_price_or_default(
     }
 }
 
+///
+pub fn parse_url(s: &str) -> Result<Url, Error> {
+    let addr = Url::parse(s).map_err(Error::from)?;
+    Ok(addr)
+}
+
+///
+pub fn parse_socket(s: &str) -> Result<Url, Error> {
+    let addr = s.parse::<SocketAddr>()
+        .map_err(Error::from)
+        .and_then(|a| format!("https://{}", a).into_url().map_err(Error::from))?;
+
+    Ok(addr)
+}
+
 /// Request passphrase
 pub fn request_passphrase() -> Result<String, Error> {
     println!("Enter passphrase: ");
@@ -280,14 +298,6 @@ impl CmdExecutor {
         Ok(tr)
     }
 }
-//
-//fn parse_url() -> Result<> {
-//
-//}
-//
-//fn parse_socket() -> Result<> {
-//
-//}
 
 #[cfg(test)]
 mod tests {
@@ -397,5 +407,27 @@ mod tests {
             [0u8; 32]
         );
         assert!(parse_gas_price_or_default("", &None, &None).is_err());
+    }
+
+    #[test]
+    fn should_parse_socket_addr() {
+        assert_eq!(
+            parse_socket("127.0.0.1:8545").unwrap(),
+            Url::parse("https://127.0.0.1:8545").unwrap()
+        );
+
+        assert!(parse_socket(";akjf.com").is_err());
+        assert!(parse_socket("https://127.0.0.1:8545").is_err());
+    }
+
+    #[test]
+    fn should_parse_url_name() {
+        assert_eq!(
+            parse_url("https://www.gastracker.io").unwrap(),
+            Url::parse("https://www.gastracker.io").unwrap()
+        );
+
+        assert!(parse_url("127.0.0.1:8545").is_err());
+        assert!(parse_url("12344.com").is_err());
     }
 }

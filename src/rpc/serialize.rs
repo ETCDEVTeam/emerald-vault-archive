@@ -46,8 +46,8 @@ fn to_json_data<'a>(method: &'static str, params: &'a Params) -> JsonData<'a> {
 
     JsonData {
         jsonrpc: "2.0",
-        method: method,
-        params: params,
-        id: id,
+        method,
+        params,
+        id,
     }
 }

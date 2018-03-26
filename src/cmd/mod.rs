@@ -12,15 +12,14 @@ use super::emerald::{self, align_bytes, to_arr, to_chain_id, to_even_str, trim_h
 use super::emerald::PrivateKey;
 use super::emerald::mnemonic::{gen_entropy, Language, Mnemonic, ENTROPY_BYTE_LENGTH};
 use super::emerald::storage::{default_path, StorageController};
-use std::net::{SocketAddr, ToSocketAddrs};
+use std::net::SocketAddr;
 use std::str::FromStr;
 use std::fs;
 use rpc::{self, RpcConnector};
 use hex::ToHex;
 use std::path::PathBuf;
 use std::sync::Arc;
-use hyper::client::IntoUrl;
-use url::{Host, Url};
+
 
 #[derive(Debug, Deserialize, Clone)]
 pub struct Args {
@@ -106,32 +105,18 @@ impl CmdExecutor {
         };
         let storage_ctrl = Arc::new(Box::new(StorageController::new(base_path)?));
 
-        println!(
-            ">> DEBUG: {:?}",
-            format!("http://{}", args.flag_upstream.to_socket_addrs()
-                .unwrap().next().unwrap())
-                .into_url()
-                .unwrap()
-        );
-
-        let connector = match args.flag_upstream.parse::<SocketAddr>()
-            .map_err(|_| Url::parse(args.flag_upstream)) {
-            Ok(mut addr) => {
-                let val = &addr.next().unwrap().ip();
-                println!(">> DEBUG: {:?}", format!("{}", val).into_url().unwrap());
-                Some(RpcConnector::new(&format!("{}", val)))
-            }
-            Err(_) => None,
-        }
-        let connector = None;
+        let connector = parse_socket(&args.flag_upstream)
+            .or_else(|_| parse_url(&args.flag_upstream))
+            .and_then(RpcConnector::new)
+            .ok();
 
         Ok(CmdExecutor {
             args: args.clone(),
-            chain: chain,
-            sec_level: sec_level,
-            storage_ctrl: storage_ctrl,
+            chain,
+            sec_level,
+            storage_ctrl,
             vars: env,
-            connector: connector,
+            connector,
         })
     }
 

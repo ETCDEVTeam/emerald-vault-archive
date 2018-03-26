@@ -47,10 +47,10 @@ pub struct RpcConnector {
 }
 
 impl RpcConnector {
-    pub fn new<U: IntoUrl>(url: U) -> RpcConnector {
-        RpcConnector {
-            url: url.into_url().expect("Expect to encode request url"),
-        }
+    pub fn new<U: IntoUrl>(url: U) -> Result<RpcConnector, Error> {
+        let url = url.into_url()?;
+
+        Ok(RpcConnector { url })
     }
 
     /// Send and JSON RPC HTTP post request
