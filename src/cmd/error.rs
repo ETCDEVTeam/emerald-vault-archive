@@ -8,9 +8,10 @@ use rustc_serialize::json;
 use reqwest;
 use std::num;
 use hex;
+use url;
 
 macro_rules! from_err {
-    ( $x:ty ) => {
+    ($x: ty) => {
         impl From<$x> for Error {
             fn from(err: $x) -> Self {
                 Error::ExecError(err.to_string())
@@ -43,6 +44,7 @@ from_err!(reqwest::Error);
 from_err!(num::ParseIntError);
 from_err!(hex::FromHexError);
 from_err!(emerald::mnemonic::Error);
+from_err!(url::ParseError);
 
 impl fmt::Display for Error {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
