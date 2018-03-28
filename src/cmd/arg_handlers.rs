@@ -206,13 +206,13 @@ pub fn parse_gas_price_or_default(
     }
 }
 
-/// Parse URL for ethereum node
+///
 pub fn parse_url(s: &str) -> Result<Url, Error> {
     let addr = Url::parse(s).map_err(Error::from)?;
     Ok(addr)
 }
 
-/// Parse socket address for ethereum node
+///
 pub fn parse_socket(s: &str) -> Result<Url, Error> {
     let addr = s.parse::<SocketAddr>()
         .map_err(Error::from)
