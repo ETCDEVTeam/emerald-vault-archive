@@ -81,7 +81,7 @@ fn main() {
         exit(0);
     }
 
-    let cmd = match CmdExecutor::new(matches) {
+    let cmd = match CmdExecutor::new(&matches) {
         Ok(c) => c,
         Err(e) => {
             error!("{}", e.to_string());

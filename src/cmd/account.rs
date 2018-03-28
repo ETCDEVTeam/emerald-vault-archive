@@ -1,19 +1,20 @@
-use super::{ExecResult, Error, KeyfileStorage};
+use super::{Error, ExecResult, KeyfileStorage};
 use clap::ArgMatches;
-
 
 ///
 pub fn account_cmd(matches: &ArgMatches, storage_ctrl: &Box<KeyfileStorage>) -> ExecResult {
     match matches.subcommand() {
-        ("list", Some(sub_m))  => list(sub_m, storage_ctrl.clone()),
-//        ("new", Some(sub_m))  => new(),
-//        ("hide", Some(sub_m))  => hide(),
-//        ("unhide", Some(sub_m))  => unhide(),
-//        ("strip", Some(sub_m))  => strip(),
-//        ("import", Some(sub_m))  => import(),
-//        ("export", Some(sub_m))  => export(),
-//        ("update", Some(sub_m))  => update(),
-        _                        => Err(Error::ExecError("Invalid account command. Use `emerald account -h` for help".to_string())),
+        ("list", Some(sub_m)) => list(sub_m, storage_ctrl.clone()),
+        //        ("new", Some(sub_m))  => new(),
+        //        ("hide", Some(sub_m))  => hide(),
+        //        ("unhide", Some(sub_m))  => unhide(),
+        //        ("strip", Some(sub_m))  => strip(),
+        //        ("import", Some(sub_m))  => import(),
+        //        ("export", Some(sub_m))  => export(),
+        //        ("update", Some(sub_m))  => update(),
+        _ => Err(Error::ExecError(
+            "Invalid account command. Use `emerald account -h` for help".to_string(),
+        )),
     }
 }
 
