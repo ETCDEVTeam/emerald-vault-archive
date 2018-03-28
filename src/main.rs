@@ -22,6 +22,8 @@ extern crate serde;
 extern crate serde_derive;
 extern crate serde_json;
 extern crate url;
+#[macro_use]
+extern crate clap;
 
 mod cmd;
 mod rpc;
@@ -32,8 +34,9 @@ use env_logger::LogBuilder;
 use log::LogRecord;
 use std::env;
 use std::process::*;
+use clap::App;
 
-const USAGE: &str = include_str!("../usage.txt");
+
 const VERSION: Option<&'static str> = option_env!("CARGO_PKG_VERSION");
 
 /// Get the current Emerald version.
@@ -42,36 +45,41 @@ pub fn version() -> &'static str {
 }
 
 fn main() {
-    env::set_var("RUST_BACKTRACE", "1");
+    let yaml = load_yaml!("cli.yml");
+    let matches = App::from_yaml(yaml).get_matches();
 
-    let args: Args = Docopt::new(USAGE)
-        .and_then(|d| d.deserialize())
-        .unwrap_or_else(|e| e.exit());
-
-    let flags = vec![(args.flag_verbose, "trace"), (args.flag_quiet, "error")];
-
-    let (_, verbosity) = *flags
-        .into_iter()
-        .filter(|&(flag, _)| flag)
-        .collect::<Vec<(bool, &str)>>()
-        .last()
-        .unwrap_or(&(true, "emerald=info"));
-
-    env::set_var("RUST_LOG", verbosity);
-
-    let mut log_builder = LogBuilder::new();
-    if env::var("RUST_LOG").is_ok() {
-        log_builder.parse(&env::var("RUST_LOG").unwrap());
+    if let Some(matches) = matches.subcommand_matches("transaction").subcommand_matches("send") {
+        if matches.is_present("debug") {
+            println!("Printing debug info...");
+        } else {
+            println!("Printing normally...");
+        }
     }
-    log_builder.format(|record: &LogRecord| format!("[{}]\t{}", record.level(), record.args()));
-    log_builder.init().expect("Expect to initialize logger");
 
-    if args.flag_version {
+//    let flags = vec![(args.flag_verbose, "trace"), (args.flag_quiet, "error")];
+//
+//    let (_, verbosity) = *flags
+//        .into_iter()
+//        .filter(|&(flag, _)| flag)
+//        .collect::<Vec<(bool, &str)>>()
+//        .last()
+//        .unwrap_or(&(true, "emerald=info"));
+//
+//    env::set_var("RUST_LOG", verbosity);
+//
+//    let mut log_builder = LogBuilder::new();
+//    if env::var("RUST_LOG").is_ok() {
+//        log_builder.parse(&env::var("RUST_LOG").unwrap());
+//    }
+//    log_builder.format(|record: &LogRecord| format!("[{}]\t{}", record.level(), record.args()));
+//    log_builder.init().expect("Expect to initialize logger");
+
+    if matches.is_present("version") {
         println!("v{}", version());
         exit(0);
     }
 
-    let cmd = match CmdExecutor::new(&args) {
+    let cmd = match CmdExecutor::new(matches}) {
         Ok(c) => c,
         Err(e) => {
             error!("{}", e.to_string());

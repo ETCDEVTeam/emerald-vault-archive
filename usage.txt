@@ -12,7 +12,7 @@ Usage:
   emerald export        [--chain=<chain>]  ([-a | --all] | <address>) <path>
   emerald update        [--chain=<chain>]  <address> [--name=<name>] [--description=<description>]
   emerald transaction   [--chain=<chain>] <from> <to> <value> [--gas=<gas>] [--gas-price=<price>] [--data=<data>]\
-                            (--nonce=<nonce> | --upstream=<upstream>) (--raw <raw_tx>)
+                            (--nonce=<nonce> | --upstream=<upstream>) (--raw [<raw_tx> | - ])
   emerald balance       <address> [--upstream=<upstream>]
   emerald -V | --version
   emerald -h | --help

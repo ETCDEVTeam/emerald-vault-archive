@@ -19,6 +19,9 @@ use rpc::{self, RpcConnector};
 use hex::ToHex;
 use std::path::PathBuf;
 use std::sync::Arc;
+use std::io::{self, Read};
+use clap::ArgMatches;
+
 
 #[derive(Debug, Deserialize, Clone, Default)]
 pub struct Args {
@@ -73,14 +76,14 @@ pub struct CmdExecutor {
     chain: String,
     sec_level: KdfDepthLevel,
     storage_ctrl: Arc<Box<StorageController>>,
-    args: Args,
+    args: ArgMatcher,
     vars: EnvVars,
     connector: Option<RpcConnector>,
 }
 
 impl CmdExecutor {
     /// Create new command executor
-    pub fn new(args: &Args) -> Result<Self, Error> {
+    pub fn new(matches: ArgMatches) -> Result<Self, Error> {
         let env = EnvVars::parse();
 
         let chain = match arg_or_default(&args.flag_chain, &env.emerald_chain) {
@@ -116,7 +119,7 @@ impl CmdExecutor {
             .ok();
 
         Ok(CmdExecutor {
-            args: args.clone(),
+            args: matches,
             chain,
             sec_level,
             storage_ctrl,
@@ -335,7 +338,10 @@ impl CmdExecutor {
         let pk = kf.decrypt_key(&pass)?;
 
         if self.args.flag_raw {
-            unimplemented!("raw transaction sending")
+            let mut raw_tx = String::new();
+            io::stdin().read_to_string(&mut raw_tx)?;
+            println!("raw tx {}", raw_tx);
+            Ok(())
         } else {
             let tr = self.build_tx()?;
             let raw = self.sign_transaction(&tr, pk)?;

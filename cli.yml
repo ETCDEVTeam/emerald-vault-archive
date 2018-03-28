@@ -1,0 +1,164 @@
+#Emerald offline wallet command line interface.
+#
+#Usage:
+#  emerald mnemonic
+#  emerald server        [--chain=<chain>] [--port=<port>] [--host=<host>] [--base-path=<path>] [-v | --verbose] [-q | --quite]
+#  emerald new           [--chain=<chain>]  ([[--security-level=<level>] [--name=<name>] [--description=<description>]] | --raw <key>)
+#  emerald list          [--chain=<chain>]  [--show-hidden]
+#  emerald hide          [--chain=<chain>]  <address>
+#  emerald unhide        [--chain=<chain>]  ([-a | --all] | <address>)
+#  emerald strip         [--chain=<chain>] <address>
+#  emerald import        [--chain=<chain>]  [-a | --all] [-f | --force] <path>
+#  emerald export        [--chain=<chain>]  ([-a | --all] | <address>) <path>
+#  emerald update        [--chain=<chain>]  <address> [--name=<name>] [--description=<description>]
+#  emerald transaction   [--chain=<chain>] <from> <to> <value> [--gas=<gas>] [--gas-price=<price>] [--data=<data>]\
+#                            (--nonce=<nonce> | --upstream=<upstream>) (--raw [<raw_tx> | - ])
+#  emerald balance       <address> [--upstream=<upstream>]
+#  emerald -V | --version
+#  emerald -h | --help
+#
+#Options:
+#  -a, --all                                   Apply action to all accounts
+#  -c, --chain=<mainnet|testnet>               Chain name
+#  -f, --force                                 Override existing keystore file
+#  -h, --help                                  Show this message
+#  -V, --version                               Show current version
+#  -r, --raw                                   Use raw input as value (ex.: private key, rlp-encoded signed transaction)
+#  -q, --quiet                                 Only errors printed to the output
+#  -v, --verbose                               Verbose output
+#      --data=<data>                           Optional data included in a transaction
+#      --name=<name>                           Account name
+#      --description=<description>             Account description
+#      --host=<host>                           Listen host [default: 127.0.0.1]
+#      --port=<port>                           Listen port [default: 1920]
+#      --base-path=<path>                      Base directory path, if omitted default os-specific value will be used:
+#                                                  + Mac OS X: ~/Library/Emerald
+#                                                  + Linux: ~/.emerald
+#                                                  + Windows: %USERDIR%\.emerald
+#      --security-level=<normal|high|ultra>    Level of security for cryptographic operations [default: ultra]
+#      --show-hidden                           Include hidden keyfiles
+#      --upstream=<upstream>                   URL to ethereum node
+#      --gas=<gas>                             Gas limit for transaction, hex-encoded value  in `wei`
+#      --gas-price=<price>                     Gas price for transaction, hex-encoded value  in `wei`
+#      --nonce=<nonce>                         Transaction count of sender
+
+
+name: emerald
+version: "0.20.0"
+author: Kevin K. <kbknapp@gmail.com>
+about: Does awesome things
+args:
+    - chain:
+        short: c
+        help: Sets a chain name
+        default_value: mainnet
+        takes_value: true
+    - version:
+    short: V
+        help: Display version
+    - verbose:
+        short: v
+        multiple: true
+        help: Sets the level of verbosity
+subcommands:
+  - transaction:
+      about: Transaction related oprations
+      subcommands:
+        - build:
+          about:
+          args:
+            - from:
+              help: Senders address
+              required: true
+              takes_value: true
+            - to:
+              help: Receiver address
+              required: true
+              takes_value: true
+            - value:
+              help: Amount ot send
+              required: true
+              takes_value: true
+            - gas:
+              help: Gas limit for transaction
+              takes_value: true
+            - gas-price:
+              help: Gas price
+              takes_value: true
+            - data:
+              help: Transation data
+              takes_value: true
+            - nonce:
+              help: Nonce value for sender
+              takes_value: true
+
+        - send:
+          about: Send raw rlp-encoded transaction
+          args:
+            - upstream:
+              help: Upstream address
+              required: true
+              takes_value: true
+
+#  - test:
+#    about: controls testing features
+#    version: "1.3"
+#    author: Someone E. <someone_else@other.com>
+#    args:
+#      - debug:
+#        short: d
+#        help: print debug information
+#
+#  - mnemonic:
+#    about:
+#    args:
+#      -
+#
+#  - server:
+#    about:
+#    args:
+#      -
+#
+#  - new:
+#    about:
+#    args:
+#      -
+#
+#  - list:
+#    about:
+#    args:
+#      -
+#
+#  - hide:
+#    about:
+#    args:
+#      -
+#
+#  - unhide:
+#    about:
+#    args:
+#      -
+#
+#  - strip:
+#    about:
+#    args:
+#      -
+#
+#  - import:
+#    about:
+#    args:
+#      -
+#
+#  - export:
+#    about:
+#    args:
+#      -
+#
+#  - update:
+#    about:
+#    args:
+#      -
+#  - balance:
+#    about:
+#    args:
+#      -
