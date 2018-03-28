@@ -20,31 +20,15 @@ use hex::ToHex;
 use std::path::PathBuf;
 use std::sync::Arc;
 
-#[derive(Debug, Deserialize, Clone, Default)]
-pub struct Args {
-    /// Commands
-    pub cmd_server: bool,
-    pub cmd_list: bool,
-    pub cmd_new: bool,
-    pub cmd_mnemonic: bool,
-    pub cmd_balance: bool,
-    pub cmd_hide: bool,
-    pub cmd_unhide: bool,
-    pub cmd_update: bool,
-    pub cmd_strip: bool,
-    pub cmd_import: bool,
-    pub cmd_export: bool,
-    pub cmd_transaction: bool,
 
-    /// Required arguments
+#[derive(Debug, Deserialize, Clone)]
+pub struct Args {
     pub arg_address: String,
     pub arg_path: String,
     pub arg_from: String,
     pub arg_to: String,
     pub arg_value: String,
     pub arg_key: String,
-
-    /// Optional flags
     pub flag_raw: bool,
     pub flag_version: bool,
     pub flag_quiet: bool,
@@ -64,11 +48,22 @@ pub struct Args {
     pub flag_upstream: String,
     pub flag_show_hidden: bool,
     pub flag_all: bool,
+    pub cmd_server: bool,
+    pub cmd_list: bool,
+    pub cmd_new: bool,
+    pub cmd_mnemonic: bool,
+    pub cmd_balance: bool,
+    pub cmd_hide: bool,
+    pub cmd_unhide: bool,
+    pub cmd_update: bool,
+    pub cmd_strip: bool,
+    pub cmd_import: bool,
+    pub cmd_export: bool,
+    pub cmd_transaction: bool,
 }
 
-type ExecResult = Result<(), Error>;
+type ExecResult<Error> = Result<(), Error>;
 
-#[derive(Default)]
 pub struct CmdExecutor {
     chain: String,
     sec_level: KdfDepthLevel,
@@ -95,7 +90,7 @@ impl CmdExecutor {
         let sec_level = match KdfDepthLevel::from_str(&sec_level_str) {
             Ok(sec) => sec,
             Err(_) => {
-                info!("Missed `--security-level` argument. Use default `ultra`");
+                info!("Missed `--security-level` argument. Use default: `ultra`");
                 KdfDepthLevel::default()
             }
         };
@@ -126,7 +121,7 @@ impl CmdExecutor {
     }
 
     /// Dispatch command to proper handler
-    pub fn run(&self) -> ExecResult {
+    pub fn run(&self) -> ExecResult<Error> {
         if self.args.cmd_server {
             self.server()
         } else if self.args.cmd_list {
@@ -150,7 +145,24 @@ impl CmdExecutor {
         } else if self.args.cmd_export {
             self.export()
         } else if self.args.cmd_transaction {
-            self.transaction()
+            let st = self.storage_ctrl.get_keystore(&self.chain)?;
+            let from = parse_address(&self.args.arg_from)?;
+            let (_, kf) = st.search_by_address(&from)?;
+
+            let pass = request_passphrase()?;
+            let pk = kf.decrypt_key(&pass)?;
+
+            let tr = self.build_tx()?;
+            let raw = self.sign_transaction(&tr, pk)?;
+
+            match self.connector {
+                Some(_) => self.send_transaction(&raw),
+                None => {
+                    println!("Signed transaction: ");
+                    println!("{}", raw.to_hex());
+                    Ok(())
+                }
+            }
         } else {
             Err(Error::ExecError(
                 "No command selected. Use `-h` for help".to_string(),
@@ -159,7 +171,7 @@ impl CmdExecutor {
     }
 
     /// Launch connector in a `server` mode
-    fn server(&self) -> ExecResult {
+    fn server(&self) -> ExecResult<Error> {
         info!("Starting Emerald Connector - v{}", emerald::version());
         info!("Chain set to '{}'", self.chain);
         info!("Security level set to '{}'", self.sec_level);
@@ -174,7 +186,7 @@ impl CmdExecutor {
     }
 
     /// List all accounts
-    fn list(&self) -> ExecResult {
+    fn list(&self) -> ExecResult<Error> {
         let st = self.storage_ctrl.get_keystore(&self.chain)?;
         let accounts_info = st.list_accounts(self.args.flag_show_hidden)?;
 
@@ -187,7 +199,7 @@ impl CmdExecutor {
     }
 
     /// Creates new account
-    fn new_account(&self) -> ExecResult {
+    fn new_account(&self) -> ExecResult<Error> {
         println!("! Warning: passphrase can't be restored. Don't forget it !");
         let passphrase = request_passphrase()?;
         let name = arg_to_opt(&self.args.flag_name)?;
@@ -210,7 +222,7 @@ impl CmdExecutor {
     }
 
     /// Creates new BIP32 mnemonic phrase
-    fn new_mnemonic(&self) -> ExecResult {
+    fn new_mnemonic(&self) -> ExecResult<Error> {
         let entropy = gen_entropy(ENTROPY_BYTE_LENGTH)?;
         let mn = Mnemonic::new(Language::English, &entropy)?;
         println!("{}", mn.sentence());
@@ -218,7 +230,7 @@ impl CmdExecutor {
     }
 
     /// Show user balance
-    fn balance(&self) -> ExecResult {
+    fn balance(&self) -> ExecResult<Error> {
         match self.connector {
             Some(ref conn) => {
                 let address = parse_address(&self.args.arg_address)?;
@@ -232,7 +244,7 @@ impl CmdExecutor {
     }
 
     /// Hide account from being listed
-    fn hide(&self) -> ExecResult {
+    fn hide(&self) -> ExecResult<Error> {
         let address = parse_address(&self.args.arg_address)?;
         let st = self.storage_ctrl.get_keystore(&self.chain)?;
         st.hide(&address)?;
@@ -241,7 +253,7 @@ impl CmdExecutor {
     }
 
     /// Unhide account from being listed
-    fn unhide(&self) -> ExecResult {
+    fn unhide(&self) -> ExecResult<Error> {
         let address = parse_address(&self.args.arg_address)?;
         let st = self.storage_ctrl.get_keystore(&self.chain)?;
         st.unhide(&address)?;
@@ -250,7 +262,7 @@ impl CmdExecutor {
     }
 
     /// Extract private key from a keyfile
-    fn strip(&self) -> ExecResult {
+    fn strip(&self) -> ExecResult<Error> {
         let address = parse_address(&self.args.arg_address)?;
         let st = self.storage_ctrl.get_keystore(&self.chain)?;
 
@@ -264,7 +276,7 @@ impl CmdExecutor {
     }
 
     /// Export accounts
-    fn export(&self) -> ExecResult {
+    fn export(&self) -> ExecResult<Error> {
         let path = parse_path_or_default(&self.args.arg_path, &self.vars.emerald_base_path)?;
 
         if self.args.flag_all {
@@ -289,7 +301,7 @@ impl CmdExecutor {
     }
 
     /// Import accounts
-    fn import(&self) -> ExecResult {
+    fn import(&self) -> ExecResult<Error> {
         let path = parse_path_or_default(&self.args.arg_path, &self.vars.emerald_base_path)?;
         let mut counter = 0;
 
@@ -314,7 +326,7 @@ impl CmdExecutor {
     }
 
     /// Update `name` and `description` for existing account
-    fn update(&self) -> ExecResult {
+    fn update(&self) -> ExecResult<Error> {
         let address = parse_address(&self.args.arg_address)?;
         let name = arg_to_opt(&self.args.flag_name)?;
         let desc = arg_to_opt(&self.args.flag_description)?;
@@ -323,32 +335,6 @@ impl CmdExecutor {
         st.update(&address, name, desc)?;
 
         Ok(())
-    }
-
-    ///
-    fn transaction(&self) -> ExecResult {
-        let st = self.storage_ctrl.get_keystore(&self.chain)?;
-        let from = parse_address(&self.args.arg_from)?;
-        let (_, kf) = st.search_by_address(&from)?;
-
-        let pass = request_passphrase()?;
-        let pk = kf.decrypt_key(&pass)?;
-
-        if self.args.flag_raw {
-            unimplemented!("raw transaction sending")
-        } else {
-            let tr = self.build_tx()?;
-            let raw = self.sign_transaction(&tr, pk)?;
-
-            match self.connector {
-                Some(_) => self.send_transaction(&raw),
-                None => {
-                    println!("Signed transaction: ");
-                    println!("{}", raw.to_hex());
-                    Ok(())
-                }
-            }
-        }
     }
 
     /// Sign transaction with
@@ -362,7 +348,7 @@ impl CmdExecutor {
     }
 
     /// Send transaction into network through provided node
-    fn send_transaction(&self, raw: &[u8]) -> ExecResult {
+    fn send_transaction(&self, raw: &[u8]) -> ExecResult<Error> {
         match self.connector {
             Some(ref conn) => {
                 let tx_hash = rpc::send_transaction(conn, raw)?;
