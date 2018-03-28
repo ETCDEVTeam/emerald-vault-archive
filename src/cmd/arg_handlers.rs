@@ -20,33 +20,33 @@ use std::net::SocketAddr;
 
 /// Environment variables used to change default variables
 #[derive(Default, Debug)]
-pub struct EnvVars {
-    pub emerald_base_path: Option<String>,
-    pub emerald_host: Option<String>,
-    pub emerald_port: Option<String>,
-    pub emerald_chain: Option<String>,
-    pub emerald_chain_id: Option<String>,
-    pub emerald_gas: Option<String>,
-    pub emerald_gas_price: Option<String>,
-    pub emerald_security_level: Option<String>,
-    pub emerald_node: Option<String>,
+pub struct EnvVars<'a> {
+    pub emerald_base_path: Option<&'a str>,
+    pub emerald_host: Option<&'a str>,
+    pub emerald_port: Option<&'a str>,
+    pub emerald_chain: Option<&'a str>,
+    pub emerald_chain_id: Option<&'a str>,
+    pub emerald_gas: Option<&'a str>,
+    pub emerald_gas_price: Option<&'a str>,
+    pub emerald_security_level: Option<&'a str>,
+    pub emerald_node: Option<&'a str>,
 }
 
-impl EnvVars {
+impl<'a> EnvVars<'a> {
     /// Collect environment variables to overwrite default values
-    pub fn parse() -> EnvVars {
+    pub fn parse() -> EnvVars<'a> {
         let mut vars = EnvVars::default();
         for (key, value) in env::vars() {
             match key.as_ref() {
-                "EMERALD_BASE_PATH" => vars.emerald_base_path = Some(value),
-                "EMERALD_HOST" => vars.emerald_host = Some(value),
-                "EMERALD_PORT" => vars.emerald_port = Some(value),
-                "EMERALD_CHAIN" => vars.emerald_chain = Some(value),
-                "EMERALD_CHAIN_ID" => vars.emerald_chain_id = Some(value),
-                "EMERALD_GAS" => vars.emerald_gas = Some(value),
-                "EMERALD_GAS_PRICE" => vars.emerald_gas_price = Some(value),
-                "EMERALD_SECURITY_LEVEL" => vars.emerald_security_level = Some(value),
-                "EMERALD_NODE" => vars.emerald_node = Some(value),
+                "EMERALD_BASE_PATH" => vars.emerald_base_path = Some(&value),
+                "EMERALD_HOST" => vars.emerald_host = Some(&value),
+                "EMERALD_PORT" => vars.emerald_port = Some(&value),
+                "EMERALD_CHAIN" => vars.emerald_chain = Some(&value),
+                "EMERALD_CHAIN_ID" => vars.emerald_chain_id = Some(&value),
+                "EMERALD_GAS" => vars.emerald_gas = Some(&value),
+                "EMERALD_GAS_PRICE" => vars.emerald_gas_price = Some(&value),
+                "EMERALD_SECURITY_LEVEL" => vars.emerald_security_level = Some(&value),
+                "EMERALD_NODE" => vars.emerald_node = Some(&value),
                 _ => (),
             }
         }
@@ -229,75 +229,75 @@ pub fn request_passphrase() -> Result<String, Error> {
     Ok(passphrase)
 }
 
-impl CmdExecutor {
-    /// Import Keyfile into storage
-    pub fn import_keyfile<P: AsRef<Path>>(&self, path: P, force_mode: bool) -> Result<(), Error> {
-        let mut json = String::new();
-        File::open(path).and_then(|mut f| f.read_to_string(&mut json))?;
-
-        let kf = KeyFile::decode(&json)?;
-        let st = self.storage_ctrl.get_keystore(&self.chain)?;
-
-        match st.is_addr_exist(&kf.address) {
-            Ok(_) => {
-                if force_mode {
-                    st.put(&kf)?;
-                }
-            }
-            Err(_) => st.put(&kf)?,
-        }
-
-        Ok(())
-    }
-
-    /// Export Keyfile for selected address
-    /// into into specified file
-    ///
-    /// # Arguments:
-    ///
-    /// * addr - target addr
-    /// * path - target file path
-    ///
-    pub fn export_keyfile(&self, addr: &Address, path: &Path) -> Result<(), Error> {
-        let st = self.storage_ctrl.get_keystore(&self.chain)?;
-        let (info, kf) = st.search_by_address(addr)?;
-
-        let mut p = PathBuf::from(path);
-        p.push(&info.filename);
-
-        let json = json::encode(&kf).and_then(|s| Ok(s.into_bytes()))?;
-        let mut f = fs::File::create(p)?;
-        f.write_all(&json)?;
-
-        Ok(())
-    }
-
-    /// Build transaction for provided arguments
-    pub fn build_tx(&self) -> Result<Transaction, Error> {
-        let from = parse_address(&self.args.arg_from)?;
-        let tr = Transaction {
-            nonce: parse_nonce(&self.args.flag_nonce, &self.connector, Some(from))?,
-            gas_price: parse_gas_price_or_default(
-                &self.args.flag_gas_price,
-                &self.vars.emerald_gas_price,
-                &self.connector,
-            )?,
-            gas_limit: parse_gas_or_default(
-                &self.args.flag_gas,
-                &self.vars.emerald_gas,
-                &self.connector,
-            )?,
-            to: match parse_address(&self.args.arg_to) {
-                Ok(a) => Some(a),
-                Err(_) => None,
-            },
-            value: parse_value(&self.args.arg_value)?,
-            data: parse_data(&self.args.flag_data)?,
-        };
-
-        Ok(tr)
-    }
-}
+//impl<'a> CmdExecutor<'a> {
+//    /// Import Keyfile into storage
+//    pub fn import_keyfile<P: AsRef<Path>>(&self, path: P, force_mode: bool) -> Result<(), Error> {
+//        let mut json = String::new();
+//        File::open(path).and_then(|mut f| f.read_to_string(&mut json))?;
+//
+//        let kf = KeyFile::decode(&json)?;
+//        let st = self.storage_ctrl.get_keystore(&self.chain)?;
+//
+//        match st.is_addr_exist(&kf.address) {
+//            Ok(_) => {
+//                if force_mode {
+//                    st.put(&kf)?;
+//                }
+//            }
+//            Err(_) => st.put(&kf)?,
+//        }
+//
+//        Ok(())
+//    }
+//
+//    /// Export Keyfile for selected address
+//    /// into into specified file
+//    ///
+//    /// # Arguments:
+//    ///
+//    /// * addr - target addr
+//    /// * path - target file path
+//    ///
+//    pub fn export_keyfile(&self, addr: &Address, path: &Path) -> Result<(), Error> {
+//        let st = self.storage_ctrl.get_keystore(&self.chain)?;
+//        let (info, kf) = st.search_by_address(addr)?;
+//
+//        let mut p = PathBuf::from(path);
+//        p.push(&info.filename);
+//
+//        let json = json::encode(&kf).and_then(|s| Ok(s.into_bytes()))?;
+//        let mut f = fs::File::create(p)?;
+//        f.write_all(&json)?;
+//
+//        Ok(())
+//    }
+//
+//    /// Build transaction for provided arguments
+//    pub fn build_tx(&self) -> Result<Transaction, Error> {
+//        let from = parse_address(&self.args.arg_from)?;
+//        let tr = Transaction {
+//            nonce: parse_nonce(&self.args.flag_nonce, &self.connector, Some(from))?,
+//            gas_price: parse_gas_price_or_default(
+//                &self.args.flag_gas_price,
+//                &self.vars.emerald_gas_price,
+//                &self.connector,
+//            )?,
+//            gas_limit: parse_gas_or_default(
+//                &self.args.flag_gas,
+//                &self.vars.emerald_gas,
+//                &self.connector,
+//            )?,
+//            to: match parse_address(&self.args.arg_to) {
+//                Ok(a) => Some(a),
+//                Err(_) => None,
+//            },
+//            value: parse_value(&self.args.arg_value)?,
+//            data: parse_data(&self.args.flag_data)?,
+//        };
+//
+//        Ok(tr)
+//    }
+//}
 
 #[cfg(test)]
 mod tests {

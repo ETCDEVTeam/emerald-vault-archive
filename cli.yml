@@ -54,12 +54,14 @@ args:
         default_value: mainnet
         takes_value: true
     - version:
-    short: V
+        short: V
         help: Display version
     - verbose:
         short: v
         multiple: true
         help: Sets the level of verbosity
+    - base-path:
+      help: Set path for chain storage
 subcommands:
   - transaction:
       about: Transaction related oprations
