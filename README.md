@@ -1,31 +1,29 @@
-Emerald Command Line Interface (CLI)
-====================================
-
-[![CircleCI](https://circleci.com/gh/ETCDEVTeam/emerald-cli/tree/master.svg?style=shield)](https://circleci.com/gh/etcdevteam/emerald-cli)
-[![Appveyor](https://ci.appveyor.com/api/projects/status/9h3kobw811vmynk7?svg=true)](https://ci.appveyor.com/project/splix/emerald-cli-759r3)
-[![Crates](https://img.shields.io/crates/v/emerald-cli.svg?style=flat-square)](https://crates.io/crates/emerald-cli)
-[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg?style=flat-square)]()
-
+```shell                                                  __       __                  __    _ 
+          ___    ____ ___   ___    _____  ____ _   / /  ____/ /         _____   / /   (_)
+         / _ \  / __ `__ \ / _ \  / ___/ / __ `/  / /  / __  /  ______ / ___/  / /   / / 
+        /  __/ / / / / / //  __/ / /    / /_/ /  / /  / /_/ /  /_____// /__   / /   / /  
+        \___/ /_/ /_/ /_/ \___/ /_/     \__,_/  /_/   \__,_/          \___/  /_/   /_/   
+                                                                                 
 ```
-                                                       .__       .___      /\         .__  .__
-                      ____   _____   ________________  |  |    __| _/     / /    ____ |  | |__|
-                    _/ __ \ /     \_/ __ \_  __ \__  \ |  |   / __ |     / /   _/ ___\|  | |  |
-                    \  ___/|  Y Y  \  ___/|  | \// __ \|  |__/ /_/ |    / /    \  \___|  |_|  |
-                     \___  >__|_|  /\___  >__|  (____  /____/\____ |   / /      \___  >____/__|
-                        \/      \/     \/           \/           \/   \/           \/
-
-```
+<p align="center">
+  <p align="center">
+    <a href="https://circleci.com/gh/etcdevteam/emerald-cli"><img alt="CircleCI" src="https://circleci.com/gh/ETCDEVTeam/emerald-cli/tree/master.svg?style=shield"></a>
+    <a href="https://ci.appveyor.com/project/splix/emerald-cli-759r3"><img alt="AppVeyor" src="https://ci.appveyor.com/api/projects/status/9h3kobw811vmynk7?svg=true"></a>
+    <a href="https://crates.io/crates/emerald-cli"><img alt="crates.io" src="https://img.shields.io/crates/v/emerald-cli.svg?style=flat-square"></a>
+    <a href="LICENSE"><img alt="Software License" src="https://img.shields.io/badge/License-Apache%202.0-blue.svg?style=flat-square&maxAge=2592000"></a>
+  </p>
+</p>
 
 ## About
 
-Emerald Platform is a set of tools to build and integrate other apps with Ethereum ETC blockchain.
-
-Emerald CLI is a tool to access Ethereum ETC from command line. It connects to an external node (_"Upstream"_) and
+`Emerald Platform` is a set of tools to build and integrate other apps with Ethereum ETC blockchain.
+`Emerald CLI(Command Line Interface)`  is a tool to access Ethereum ETC from command line. It connects to an external node (_"Upstream"_) and
 allows to read information from blockchain and send new transactions. At the later case it provides functionality
 to sign transaction by provided Private Key. The tool integrates Emerald Vault with designed to generate, import and/or
 store Ethereum Private Keys
 
 It's compatible with both Ethereum ETC and ETH
+
 
 ## Usage
 
@@ -125,7 +123,7 @@ cd target\debug
 - Issues: https://github.com/ETCDEVTeam/emerald-cli/issues
 - Development binaries: http://builds.etcdevteam.com/
 
-## Demonstration
+## Demo
 
 <a href="https://asciinema.org/a/WbivFQXwm5lUXenNsTvzfQxRY?speed=2" target="_blank">
   <img src="https://asciinema.org/a/WbivFQXwm5lUXenNsTvzfQxRY.png" />
