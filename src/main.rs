@@ -34,7 +34,7 @@ use env_logger::LogBuilder;
 use log::LogRecord;
 use std::env;
 use std::process::*;
-use clap::App;
+use clap::{App, SubCommand};
 
 const VERSION: Option<&'static str> = option_env!("CARGO_PKG_VERSION");
 
@@ -46,7 +46,6 @@ pub fn version() -> &'static str {
 fn main() {
     let yaml = load_yaml!("../cli.yml");
     let matches = App::from_yaml(yaml).get_matches();
-
     if let Some(matches) = matches
         .subcommand_matches("transaction")
         .and_then(|m| m.subcommand_matches("send"))
