@@ -1,9 +1,8 @@
 name: emerald
-version: "0.20.0"
 about: Command-line interface for Emerald platform
 
 settings:
-- ArgRequiredElseHelp
+    - ArgRequiredElseHelp
 
 args:
     - chain:
@@ -14,6 +13,7 @@ args:
     - version:
         short: V
         help: Display version
+        global: false
     - verbose:
         short: v
         multiple: true
@@ -22,6 +22,18 @@ args:
         help: Set path for chain storage
         takes_value: true
 subcommands:
+    - server:
+        about: Start local RPC server
+        args:
+        - host:
+            help: Senders address
+            required: true
+            takes_value: true
+        - port:
+            help: Receiver address
+            required: true
+            takes_value: true
+
     - transaction:
         about: Transaction related oprations
         subcommands:
@@ -59,3 +71,110 @@ subcommands:
                     help: Upstream address
                     required: true
                     takes_value: true
+
+    - account:
+        about: Account related oprations
+        subcommands:
+        - list:
+            about: List account from `Keyfile` storage
+            args:
+            - show-hidden:
+                help: Show hidden accounts
+                long: show-hidden
+                global: false
+        - new:
+            about: Create new account
+            args:
+            - name:
+                short: n
+                long: name
+                help: Name for a new account
+                takes_value: true
+            - description:
+                short: d
+                long: description
+                help: Description for a new account
+                takes_value: true
+            - security-level:
+                short: s
+                long: security-level
+                help: Specify security level(key derivation depth) for Keyfile encryption.Higher value requires more CPU time
+                takes_value: true
+                multiple: true
+                possible_values: [normal, high, ultra]
+            - raw:
+                help: Create new account from private key
+                short: r
+                long: raw
+        - update:
+            about: Update `name` and `description` for selected account
+            args:
+            - address:
+                help: Address of account to be updated
+                required: true
+                takes_value: true
+            - name:
+                short: n
+                long: name
+                help: Name for a new account
+                takes_value: true
+            - description:
+                short: d
+                long: description
+                help: Description for a new account
+                takes_value: true
+        - hide:
+            about: Hide selected account from being listed
+            args:
+            - address:
+                help: Address of account to be hided
+                takes_value: true
+            - all:
+                help: Unhide all accounts
+                short: a
+                long: all
+                global: false
+                conflicts_with:
+                    - address
+        - unhide:
+            about: Unhide selected account from being listed
+            args:
+            - address:
+                help: Address of account to be unhided
+                takes_value: true
+            - all:
+                help: Unhide all accounts
+                short: a
+                long: all
+                global: false
+                conflicts_with:
+                    - address
+        - strip:
+            about: Extract private key from a keyfile
+            args:
+            - address:
+                help: Address of account to be striped
+                required: true
+                takes_value: true
+        - import:
+            about: Import keyfile(s) into storage
+            args:
+            - path:
+                help: Path to keyfile to be imported into keystore, or folder with keyfiles.
+                required: true
+                takes_value: true
+            - force:
+                help: Force to overwrite existing keyfiles(s) with a new one
+                short: f
+                global: false
+        - export:
+            about: Export keyfile(s) from keystore
+            args:
+            - path:
+                help: Export folder path
+                required: true
+                takes_value: true
+            - all:
+                help: Show hidden accounts
+                short: a
+                global: false

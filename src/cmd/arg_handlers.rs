@@ -8,7 +8,6 @@ use std::fs::File;
 use std::str::FromStr;
 use std::env;
 use hex::FromHex;
-use rustc_serialize::json;
 use std::fs;
 use std::io::Write;
 use rpassword;

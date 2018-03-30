@@ -32,7 +32,6 @@ const DEFAULT_UPSTREAM: &str = "localhost:8545";
 
 pub struct CmdExecutor<'a> {
     chain: &'a str,
-    sec_level: KdfDepthLevel,
     storage_ctrl: Arc<Box<StorageController>>,
     matches: &'a ArgMatches<'a>,
     env: EnvVars,
@@ -46,12 +45,6 @@ impl<'a> CmdExecutor<'a> {
 
         let chain = matches.value_of("chain").unwrap_or(DEFAULT_CHAIN_NAME);
         info!("Chain name: {}", DEFAULT_CHAIN_NAME);
-
-        let sec_level = matches
-            .value_of("security-level")
-            .and_then(|s| KdfDepthLevel::from_str(s).ok())
-            .unwrap_or(KdfDepthLevel::default());
-        info!("Security level: `normal`");
 
         let mut base_path = PathBuf::new();
         if let Some(p) = matches
@@ -73,7 +66,6 @@ impl<'a> CmdExecutor<'a> {
         Ok(CmdExecutor {
             matches,
             chain,
-            sec_level,
             storage_ctrl,
             env,
             connector,
@@ -83,11 +75,11 @@ impl<'a> CmdExecutor<'a> {
     /// Dispatch command to proper handler
     pub fn run(&self) -> ExecResult {
         match self.matches.subcommand() {
-            ("server", Some(sub_m)) => {
+            ("server", Some(sub_m)) => Ok(()),
+            ("account", Some(sub_m)) => {
                 let keystore = self.storage_ctrl.get_keystore(self.chain)?;
-                account_cmd(sub_m, keystore)
+                account_cmd(sub_m, keystore, &self.env)
             }
-            ("account", Some(sub_m)) => Ok(()),
             ("balance", Some(sub_m)) => Ok(()),
             ("mnemonic", Some(sub_m)) => Ok(()),
             ("transaction", Some(sub_m)) => Ok(()),

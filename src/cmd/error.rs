@@ -36,13 +36,13 @@ impl From<AddrParseError> for Error {
 from_err!(io::Error);
 from_err!(KeyStorageError);
 from_err!(string::ParseError);
-from_err!(emerald::Error);
 from_err!(keystore::Error);
 from_err!(keystore::SerializeError);
 from_err!(json::EncoderError);
 from_err!(reqwest::Error);
 from_err!(num::ParseIntError);
 from_err!(hex::FromHexError);
+from_err!(emerald::Error);
 from_err!(emerald::mnemonic::Error);
 from_err!(url::ParseError);
 
