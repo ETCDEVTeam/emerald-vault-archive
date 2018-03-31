@@ -37,7 +37,7 @@ subcommands:
     - transaction:
         about: Transaction related oprations
         subcommands:
-        - build:
+        - new:
             about: Build new transaction
             args:
             - from:
@@ -67,8 +67,13 @@ subcommands:
         - send:
             about: Send raw rlp-encoded transaction
             args:
+                - signed-tx:
+                    help: Signed RLP-encoded transaction
+                    takes_value: true
                 - upstream:
-                    help: Upstream address
+                    short: u
+                    long: upstream
+                    help: Network address for a remote ethereum node with RPC endpoint
                     required: true
                     takes_value: true
 

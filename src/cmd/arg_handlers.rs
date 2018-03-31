@@ -1,7 +1,8 @@
 //! # Helpers for command execution
 
 use super::Error;
-use super::{align_bytes, to_arr, to_even_str, trim_hex, Address, CmdExecutor, KeyFile, PrivateKey};
+use super::{align_bytes, to_arr, to_even_str, trim_hex, Address, ArgMatches, CmdExecutor, KeyFile,
+            PrivateKey, DEFAULT_UPSTREAM};
 use std::path::{Path, PathBuf};
 use std::io::Read;
 use std::fs::File;
@@ -114,10 +115,30 @@ pub fn hex_to_32bytes(hex: &str) -> Result<[u8; 32], Error> {
     Ok(to_arr(&align_bytes(&bytes, 32)))
 }
 
-/// Parse `address` from input arguments
-pub fn parse_address(s: &str) -> Result<Address, Error> {
-    let str = s.parse::<String>()?;
-    Ok(Address::from_str(&str)?)
+/// Parse address from command-line argument
+///
+/// # Arguments:
+///
+/// * matches - arguments supplied from command-line
+///
+pub fn get_address(matches: &ArgMatches) -> Result<Address, Error> {
+    let s = &matches
+        .value_of("address")
+        .expect("Required address for account");
+    Address::from_str(a)
+}
+
+/// Parse address from command-line argument
+///
+/// # Arguments:
+///
+/// * matches - arguments supplied from command-line
+///
+pub fn get_upstream(matches: &ArgMatches) -> Result<RpcConnector, Error> {
+    let ups = matches.value_of("upstream").unwrap_or(DEFAULT_UPSTREAM);
+    parse_socket(&ups)
+        .or_else(|_| parse_url(&ups))
+        .and_then(RpcConnector::new)
 }
 
 /// Parse private key for account creation
@@ -151,60 +172,6 @@ pub fn parse_path_or_default(s: &str, default: &Option<String>) -> Result<PathBu
     Ok(PathBuf::from(&path_str))
 }
 
-/// Parse nonce value,
-/// or try to request from network node
-pub fn parse_nonce(
-    s: &str,
-    rpc: &Option<RpcConnector>,
-    addr: Option<Address>,
-) -> Result<u64, Error> {
-    match parse_arg(s) {
-        Ok(nonce) => Ok(u64::from_str_radix(&nonce, 16)?),
-        Err(e) => match *rpc {
-            Some(ref conn) => {
-                if let Some(a) = addr {
-                    Ok(rpc::get_nonce(conn, &a)?)
-                } else {
-                    Err(e)
-                }
-            }
-            None => Err(e),
-        },
-    }
-}
-
-/// Parse gas limit for transaction execution,
-///  or try to request from network node
-pub fn parse_gas_or_default(
-    s: &str,
-    default: &Option<String>,
-    rpc: &Option<RpcConnector>,
-) -> Result<u64, Error> {
-    match arg_or_default(s, default).and_then(|s| parse_arg(&s)) {
-        Ok(gas) => Ok(u64::from_str_radix(&gas, 16)?),
-        Err(e) => match *rpc {
-            Some(ref conn) => Ok(rpc::get_gas(conn)?),
-            None => Err(e),
-        },
-    }
-}
-
-/// Parse gas price for transaction execution,
-/// or try to request from network node
-pub fn parse_gas_price_or_default(
-    s: &str,
-    default: &Option<String>,
-    rpc: &Option<RpcConnector>,
-) -> Result<[u8; 32], Error> {
-    match arg_or_default(s, default).and_then(|s| parse_arg(&s)) {
-        Ok(s) => hex_to_32bytes(&s),
-        Err(e) => match *rpc {
-            Some(ref conn) => Ok(rpc::get_gas_price(conn)?),
-            None => Err(e),
-        },
-    }
-}
-
 /// Parse URL for ethereum node
 pub fn parse_url(s: &str) -> Result<Url, Error> {
     let addr = Url::parse(s).map_err(Error::from)?;
@@ -227,76 +194,6 @@ pub fn request_passphrase() -> Result<String, Error> {
 
     Ok(passphrase)
 }
-
-//impl<'a> CmdExecutor<'a> {
-//    /// Import Keyfile into storage
-//    pub fn import_keyfile<P: AsRef<Path>>(&self, path: P, force_mode: bool) -> Result<(), Error> {
-//        let mut json = String::new();
-//        File::open(path).and_then(|mut f| f.read_to_string(&mut json))?;
-//
-//        let kf = KeyFile::decode(&json)?;
-//        let st = self.storage_ctrl.get_keystore(&self.chain)?;
-//
-//        match st.is_addr_exist(&kf.address) {
-//            Ok(_) => {
-//                if force_mode {
-//                    st.put(&kf)?;
-//                }
-//            }
-//            Err(_) => st.put(&kf)?,
-//        }
-//
-//        Ok(())
-//    }
-//
-//    /// Export Keyfile for selected address
-//    /// into into specified file
-//    ///
-//    /// # Arguments:
-//    ///
-//    /// * addr - target addr
-//    /// * path - target file path
-//    ///
-//    pub fn export_keyfile(&self, addr: &Address, path: &Path) -> Result<(), Error> {
-//        let st = self.storage_ctrl.get_keystore(&self.chain)?;
-//        let (info, kf) = st.search_by_address(addr)?;
-//
-//        let mut p = PathBuf::from(path);
-//        p.push(&info.filename);
-//
-//        let json = json::encode(&kf).and_then(|s| Ok(s.into_bytes()))?;
-//        let mut f = fs::File::create(p)?;
-//        f.write_all(&json)?;
-//
-//        Ok(())
-//    }
-//
-//    /// Build transaction for provided arguments
-//    pub fn build_tx(&self) -> Result<Transaction, Error> {
-//        let from = parse_address(&self.args.arg_from)?;
-//        let tr = Transaction {
-//            nonce: parse_nonce(&self.args.flag_nonce, &self.connector, Some(from))?,
-//            gas_price: parse_gas_price_or_default(
-//                &self.args.flag_gas_price,
-//                &self.vars.emerald_gas_price,
-//                &self.connector,
-//            )?,
-//            gas_limit: parse_gas_or_default(
-//                &self.args.flag_gas,
-//                &self.vars.emerald_gas,
-//                &self.connector,
-//            )?,
-//            to: match parse_address(&self.args.arg_to) {
-//                Ok(a) => Some(a),
-//                Err(_) => None,
-//            },
-//            value: parse_value(&self.args.arg_value)?,
-//            data: parse_data(&self.args.flag_data)?,
-//        };
-//
-//        Ok(tr)
-//    }
-//}
 
 #[cfg(test)]
 mod tests {

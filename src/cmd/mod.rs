@@ -9,6 +9,7 @@ mod arg_handlers;
 pub use self::error::Error;
 pub use self::arg_handlers::*;
 use self::account::account_cmd;
+use self::transaction::transaction_cmd;
 use super::emerald::keystore::{KdfDepthLevel, KeyFile};
 use super::emerald::{self, align_bytes, to_arr, to_chain_id, to_even_str, trim_hex, Address,
                      Transaction};
@@ -74,56 +75,56 @@ impl<'a> CmdExecutor<'a> {
 
     /// Dispatch command to proper handler
     pub fn run(&self) -> ExecResult {
+        let keystore = self.storage_ctrl.get_keystore(self.chain)?;
+
         match self.matches.subcommand() {
-            ("server", Some(sub_m)) => Ok(()),
-            ("account", Some(sub_m)) => {
-                let keystore = self.storage_ctrl.get_keystore(self.chain)?;
-                account_cmd(sub_m, keystore, &self.env)
+            ("server", Some(sub_m)) => server_cmd,
+            ("account", Some(sub_m)) => account_cmd(sub_m, keystore, &self.env),
+            ("transaction", Some(sub_m)) => {
+                transaction_cmd(sub_m, keystore, &self.env, self.connector)
             }
-            ("balance", Some(sub_m)) => Ok(()),
-            ("mnemonic", Some(sub_m)) => Ok(()),
-            ("transaction", Some(sub_m)) => Ok(()),
+            ("balance", Some(sub_m)) => balance_cmd,
+            ("mnemonic", Some(sub_m)) => mnemonic_cmd(),
             _ => Err(Error::ExecError(
                 "No command selected. Use `-h` for help".to_string(),
             )),
         }
     }
 
-    //    /// Launch connector in a `server` mode
-    //    fn server(&self) -> ExecResult {
-    //        info!("Starting Emerald Connector - v{}", emerald::version());
-    //        info!("Chain set to '{}'", self.chain);
-    //        info!("Security level set to '{}'", self.sec_level);
-    //
-    //        let addr =
-    //            format!("{}:{}", self.args.flag_host, self.args.flag_port).parse::<SocketAddr>()?;
-    //
-    //        let storage_ctrl = Arc::clone(&self.storage_ctrl);
-    //        emerald::rpc::start(&addr, &self.chain, storage_ctrl, Some(self.sec_level));
-    //
-    //        Ok(())
-    //    }
-    //
-    //
-    //    /// Show user balance
-    //    fn balance(&self) -> ExecResult {
-    //        match self.connector {
-    //            Some(ref conn) => {
-    //                let address = parse_address(&self.args.arg_address)?;
-    //                let balance = rpc::get_balance(conn, &address)?;
-    //                println!("Address: {}, balance: {}", &address, &balance);
-    //
-    //                Ok(())
-    //            }
-    //            None => Err(Error::ExecError("no connection to client".to_string())),
-    //        }
-    //    }
-    //
-    //    /// Creates new BIP32 mnemonic phrase
-    //    fn new_mnemonic(&self) -> ExecResult {
-    //        let entropy = gen_entropy(ENTROPY_BYTE_LENGTH)?;
-    //        let mn = Mnemonic::new(Language::English, &entropy)?;
-    //        println!("{}", mn.sentence());
-    //        Ok(())
-    //    }
+    /// Launch connector in a `server` mode
+    fn server_cmd(&self) -> ExecResult {
+        info!("Starting Emerald Connector - v{}", emerald::version());
+        info!("Chain set to '{}'", self.chain);
+        info!("Security level set to '{}'", self.sec_level);
+
+        let addr =
+            format!("{}:{}", self.args.flag_host, self.args.flag_port).parse::<SocketAddr>()?;
+
+        let storage_ctrl = Arc::clone(&self.storage_ctrl);
+        emerald::rpc::start(&addr, &self.chain, storage_ctrl, Some(self.sec_level));
+
+        Ok(())
+    }
+
+    /// Show user balance
+    fn balance_cmd(&self) -> ExecResult {
+        match self.connector {
+            Some(ref conn) => {
+                let address = parse_address(&self.args.arg_address)?;
+                let balance = rpc::get_balance(conn, &address)?;
+                println!("Address: {}, balance: {}", &address, &balance);
+
+                Ok(())
+            }
+            None => Err(Error::ExecError("no connection to client".to_string())),
+        }
+    }
+
+    /// Creates new BIP32 mnemonic phrase
+    fn mnemonic_cmd() -> ExecResult {
+        let entropy = gen_entropy(ENTROPY_BYTE_LENGTH)?;
+        let mn = Mnemonic::new(Language::English, &entropy)?;
+        println!("{}", mn.sentence());
+        Ok(())
+    }
 }

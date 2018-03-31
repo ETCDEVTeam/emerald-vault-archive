@@ -37,7 +37,7 @@ pub fn account_cmd(
         ("export", Some(sub_m)) => export(sub_m, storage.clone(), env),
         ("update", Some(sub_m)) => update(sub_m, storage.clone()),
         _ => Err(Error::ExecError(
-            "Invalid account command. Use `emerald account -h` for help".to_string(),
+            "Invalid account subcommand. Use `emerald account -h` for help".to_string(),
         )),
     }
 }
@@ -216,19 +216,6 @@ fn update(matches: &ArgMatches, storage: &Box<KeyfileStorage>) -> ExecResult {
     storage.update(&address, name, desc)?;
 
     Ok(())
-}
-
-/// Parse address from command-line argument
-///
-/// # Arguments:
-///
-/// * matches - arguments supplied from command-line
-///
-fn get_address(matches: &ArgMatches) -> Result<Address, Error> {
-    let s = &matches
-        .value_of("address")
-        .expect("Required address for account");
-    parse_address(s)
 }
 
 /// Parse address from command-line argument
