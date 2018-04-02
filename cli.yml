@@ -2,7 +2,7 @@ name: emerald
 about: Command-line interface for Emerald platform
 
 settings:
-    - ArgRequiredElseHelp
+    - [ArgRequiredElseHelp, GlobalVersion]
 
 args:
     - version:

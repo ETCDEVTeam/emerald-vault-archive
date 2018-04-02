@@ -29,9 +29,12 @@ teardown() {
 @test "succeeds: --help" {
     run $EMERALD_CLI --help
     [ "$status" -eq 0 ]
-    [[ "$output" == *"Emerald"* ]]
-    [[ "$output" == *"Usage"* ]]
-    [[ "$output" == *"Options"* ]]
+    [[ "$output" == *"emerald"* ]]
+    [[ "$output" == *"Command-line"* ]]
+    [[ "$output" == *"USAGE"* ]]
+    [[ "$output" == *"FLAGS"* ]]
+    [[ "$output" == *"OPTIONS"* ]]
+    [[ "$output" == *"SUBCOMMANDS"* ]]
 }
 
 @test "succeeds: --chain=morden account new [empty options]" {
@@ -94,8 +97,7 @@ teardown() {
         --description="NewDescription"
     [ "$status" -eq 0 ]
 
-    run $EMERALD_CLI account list \
-        --chain=morden
+    run $EMERALD_CLI --chain=morden account list
 
     [ "$status" -eq 0 ]
     [[ "$output" == *"NewName"* ]]
