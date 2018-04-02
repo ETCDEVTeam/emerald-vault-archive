@@ -29,22 +29,23 @@ teardown() {
 @test "succeeds: --help" {
     run $EMERALD_CLI --help
     [ "$status" -eq 0 ]
-    [[ "$output" == *"Emerald"* ]]
-    [[ "$output" == *"Usage"* ]]
-    [[ "$output" == *"Options"* ]]
+    [[ "$output" == *"emerald"* ]]
+    [[ "$output" == *"Command-line"* ]]
+    [[ "$output" == *"USAGE"* ]]
+    [[ "$output" == *"FLAGS"* ]]
+    [[ "$output" == *"OPTIONS"* ]]
+    [[ "$output" == *"SUBCOMMANDS"* ]]
 }
 
-@test "succeeds: new --chain=morden [empty options]" {
-    run $EMERALD_CLI new \
-        --chain=morden \
-        <<< $'foo\n'
+@test "succeeds: --chain=morden account new [empty options]" {
+    run $EMERALD_CLI --chain=morden account new <<< $'foo\n'
     [ "$status" -eq 0 ]
     [[ "$output" == *"Created new account"* ]]
 }
 
-@test "succeeds: new --chain=mainnet --security=high --name='Test account' --description='Some description'" {
-    run $EMERALD_CLI new \
-        --chain=mainnet \
+@test "succeeds: --chain=mainnet new --security=high --name='Test account' --description='Some description'" {
+    run $EMERALD_CLI --chain=mainnet \
+        account new \
         --security-level=high \
         --name="Test account" \
         --description="Some description" \
@@ -53,9 +54,9 @@ teardown() {
     [[ "$output" == *"Created new account"* ]]
 }
 
-@test "succeeds: list" {
-    run $EMERALD_CLI new \
-        --chain=morden \
+@test "succeeds: account list" {
+    run $EMERALD_CLI --chain=morden \
+        account new \
         <<< $'foo\n'
     [ "$status" -eq 0 ]
     [[ "$output" == *"Created new account"* ]]
@@ -68,8 +69,7 @@ teardown() {
     [[ "$address" != "" ]]
     [[ "$address" == *"0x"* ]]
 
-    run $EMERALD_CLI list \
-        --chain=morden
+    run $EMERALD_CLI --chain=morden account list
     echo "$output" # prints in case fails
     echo "$address"
 
@@ -77,9 +77,8 @@ teardown() {
     [[ "$output" == *"$address"* ]]
 }
 
-@test "succeeds: update" {
-    run $EMERALD_CLI new \
-        --chain=morden \
+@test "succeeds: account update" {
+    run $EMERALD_CLI --chain=morden account new \
         <<< $'foo\n'
     [ "$status" -eq 0 ]
     [[ "$output" == *"Created new account"* ]]
@@ -92,23 +91,20 @@ teardown() {
     [[ "$address" != "" ]]
     [[ "$address" == *"0x"* ]]
 
-    run $EMERALD_CLI update \
-        --chain=morden \
+    run $EMERALD_CLI --chain=morden account update \
         "$address" \
         --name="NewName" \
         --description="NewDescription"
     [ "$status" -eq 0 ]
 
-    run $EMERALD_CLI list \
-        --chain=morden
+    run $EMERALD_CLI --chain=morden account list
 
     [ "$status" -eq 0 ]
     [[ "$output" == *"NewName"* ]]
 }
 
-@test "succeeds: strip" {
-    run $EMERALD_CLI new \
-        --chain=morden \
+@test "succeeds: account strip" {
+    run $EMERALD_CLI --chain=morden account new \
         <<< $'foo\n'
     [ "$status" -eq 0 ]
     [[ "$output" == *"Created new account"* ]]
@@ -121,8 +117,7 @@ teardown() {
     [[ "$address" != "" ]]
     [[ "$address" == *"0x"* ]]
 
-    run $EMERALD_CLI strip \
-        --chain=morden \
+    run $EMERALD_CLI --chain=morden account strip \
         "$address" \
         <<< $'foo\n'
 
@@ -130,9 +125,8 @@ teardown() {
     [[ "$output" == *"Private key: 0x"* ]]
 }
 
-@test "succeeds: hide && unhide" {
-    run $EMERALD_CLI new \
-        --chain=morden \
+@test "succeeds: account hide && unhide" {
+    run $EMERALD_CLI --chain=morden account new \
         <<< $'foo\n'
     [ "$status" -eq 0 ]
     [[ "$output" == *"Created new account"* ]]
@@ -146,26 +140,22 @@ teardown() {
     [[ "$address" == *"0x"* ]]
 
     # Hide account.
-    run $EMERALD_CLI hide \
-        --chain=morden \
+    run $EMERALD_CLI --chain=morden account hide \
         "$address"
     [ "$status" -eq 0 ]
 
     # Ensure is hidden; doesn't show up in list.
-    run $EMERALD_CLI list \
-        --chain=morden
+    run $EMERALD_CLI --chain=morden account list \
 
     [ "$status" -eq 0 ]
     [[ "$output" != *"$address"* ]]
 
     # Unhide account.
-    run $EMERALD_CLI unhide \
-        --chain=morden \
+    run $EMERALD_CLI --chain=morden account unhide \
         "$address"
 
-    # Esnure is not hidden; shows up in list.
-    run $EMERALD_CLI list \
-        --chain=morden
+    # Ensure is not hidden; shows up in list.
+    run $EMERALD_CLI --chain=morden account list
 
     [ "$status" -eq 0 ]
     [[ "$output" == *"$address"* ]]

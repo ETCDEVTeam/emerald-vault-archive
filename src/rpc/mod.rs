@@ -7,8 +7,7 @@ pub use self::http::{ClientMethod, MethodParams, RpcConnector};
 use jsonrpc_core::{Params, Value};
 use cmd::Error;
 use hex::ToHex;
-use emerald::{trim_hex, Address};
-use cmd::hex_to_32bytes;
+use emerald::Address;
 
 /// Get nonce for address from remote node
 ///
@@ -16,7 +15,7 @@ use cmd::hex_to_32bytes;
 ///
 /// * addr - target address
 ///
-pub fn get_nonce(rpc: &RpcConnector, addr: &Address) -> Result<u64, Error> {
+pub fn request_nonce(rpc: &RpcConnector, addr: &Address) -> Result<String, Error> {
     let data = vec![
         Value::String(addr.to_string()),
         Value::String("latest".to_string()),
@@ -25,7 +24,7 @@ pub fn get_nonce(rpc: &RpcConnector, addr: &Address) -> Result<u64, Error> {
     let val = rpc.send_post(&MethodParams(ClientMethod::EthGetTxCount, &params))?;
 
     match val.as_str() {
-        Some(s) => Ok(u64::from_str_radix(trim_hex(s), 16)?),
+        Some(s) => Ok(s.to_string()),
         None => Err(Error::ExecError("Can't parse tx count".to_string())),
     }
 }
@@ -34,13 +33,14 @@ pub fn get_nonce(rpc: &RpcConnector, addr: &Address) -> Result<u64, Error> {
 ///
 /// # Arguments:
 ///
+/// * rpc -
 /// * addr - target account
 ///
 /// # Return:
 ///
 /// * String - latest balance
 ///
-pub fn get_balance(rpc: &RpcConnector, addr: &Address) -> Result<String, Error> {
+pub fn request_balance(rpc: &RpcConnector, addr: &Address) -> Result<String, Error> {
     let data = vec![
         Value::String(addr.to_string()),
         Value::String("latest".to_string()),
@@ -55,24 +55,34 @@ pub fn get_balance(rpc: &RpcConnector, addr: &Address) -> Result<String, Error> 
 }
 
 /// Get estimated gas from remote node
-pub fn get_gas(rpc: &RpcConnector) -> Result<u64, Error> {
+///
+/// # Arguments:
+///
+/// * rpc -
+///
+pub fn request_gas(rpc: &RpcConnector) -> Result<String, Error> {
     let data = vec![Value::String("latest".to_string())];
     let params = Params::Array(data);
     let val = rpc.send_post(&MethodParams(ClientMethod::EthEstimateGas, &params))?;
 
     match val.as_str() {
-        Some(s) => Ok(u64::from_str_radix(trim_hex(s), 16)?),
+        Some(s) => Ok(s.to_string()),
         None => Err(Error::ExecError("Can't estimate required gas".to_string())),
     }
 }
 
 /// Get gas price from remote node
-pub fn get_gas_price(rpc: &RpcConnector) -> Result<[u8; 32], Error> {
+///
+/// # Arguments:
+///
+/// * rpc -
+///
+pub fn request_gas_price(rpc: &RpcConnector) -> Result<String, Error> {
     let params = Params::Array(vec![]);
     let val = rpc.send_post(&MethodParams(ClientMethod::EthGasPrice, &params))?;
 
     match val.as_str() {
-        Some(s) => Ok(hex_to_32bytes(trim_hex(s))?),
+        Some(s) => Ok(s.to_string()),
         None => Err(Error::ExecError("Can't estimate gas price".to_string())),
     }
 }

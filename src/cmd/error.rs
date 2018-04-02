@@ -1,7 +1,7 @@
 //! # Errors for command executor
 
 use std::{error, fmt, io, str, string};
-use emerald::storage::KeyStorageError;
+use emerald::storage::KeystoreError;
 use emerald::{self, keystore};
 use std::net::AddrParseError;
 use rustc_serialize::json;
@@ -34,15 +34,15 @@ impl From<AddrParseError> for Error {
 }
 
 from_err!(io::Error);
-from_err!(KeyStorageError);
+from_err!(KeystoreError);
 from_err!(string::ParseError);
-from_err!(emerald::Error);
 from_err!(keystore::Error);
 from_err!(keystore::SerializeError);
 from_err!(json::EncoderError);
 from_err!(reqwest::Error);
 from_err!(num::ParseIntError);
 from_err!(hex::FromHexError);
+from_err!(emerald::Error);
 from_err!(emerald::mnemonic::Error);
 from_err!(url::ParseError);
 
