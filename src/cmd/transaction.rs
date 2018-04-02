@@ -1,11 +1,12 @@
 //! # Transaction related subcommands
 
-use super::{rpc, ArgMatches, EnvVars, Error, ExecResult, KeyfileStorage, RpcConnector, Transaction};
+use super::{rpc, ArgMatches, EnvVars, Error, ExecResult, KeyfileStorage, PrivateKey, Transaction};
 use super::arg_handlers::*;
 use std::io;
 use std::io::Read;
-use emerald::{trim_hex, Address};
-use super::hex_to_32bytes;
+use emerald::{to_chain_id, Address};
+use hex::{FromHex, ToHex};
+use std::str::FromStr;
 
 /// Hide account from being listed
 ///
@@ -14,14 +15,16 @@ use super::hex_to_32bytes;
 /// * matches - arguments supplied from command-line
 /// * storage - `Keyfile` storage
 /// * sec_level - key derivation depth
+/// * chain - chain name
 ///
 pub fn transaction_cmd(
     matches: &ArgMatches,
     storage: &Box<KeyfileStorage>,
     env: &EnvVars,
+    chain: &str,
 ) -> ExecResult {
     match matches.subcommand() {
-        ("new", Some(sub_m)) => new(sub_m, env, storage),
+        ("new", Some(sub_m)) => new(sub_m, env, storage, chain),
         ("send", Some(sub_m)) => send(sub_m),
         _ => Err(Error::ExecError(
             "Invalid transaction subcommand. Use `emerald transaction -h` for help".to_string(),
@@ -36,12 +39,18 @@ pub fn transaction_cmd(
 ///  * matches -
 ///  * env -
 ///  * storage -
-///  * rpc -
+///  * chain - chain name
 ///
-fn new(matches: &ArgMatches, env: &EnvVars, storage: &Box<KeyfileStorage>) -> ExecResult {
-    let (_, kf) = get_address(matches).and_then(|from| storage.search_by_address(&from))?;
-    let pk = request_passphrase().and_then(|pass| kf.decrypt_key(&pass))?;
-    let signed = build_tx(matches, env).and_then(|tr| sign_tx(&tr, pk))?;
+fn new(
+    matches: &ArgMatches,
+    env: &EnvVars,
+    storage: &Box<KeyfileStorage>,
+    chain: &str,
+) -> ExecResult {
+    let (_, kf) = get_address(matches, "address")
+        .and_then(|from| storage.search_by_address(&from).map_err(Error::from))?;
+    let pk = request_passphrase().and_then(|pass| kf.decrypt_key(&pass).map_err(Error::from))?;
+    let signed = build_tx(matches, env).and_then(|tr| sign_tx(&tr, pk, chain))?;
 
     println!("{}", signed.to_hex());
 
@@ -53,23 +62,21 @@ fn new(matches: &ArgMatches, env: &EnvVars, storage: &Box<KeyfileStorage>) -> Ex
 ///  # Arguments:
 ///
 ///  * matches -
-///  * rpc -
 ///
-fn send(matches: &ArgMatches, raw: &[u8]) -> ExecResult {
-    let mut tx = String::new();
-
-    let tx = match matches.value_of("signed-tx") {
-        Some(t) => t,
-        None =>  {
+fn send(matches: &ArgMatches) -> ExecResult {
+    let s = match matches.value_of("signed-tx") {
+        Some(t) => t.to_string(),
+        None => {
             let mut tx = String::new();
             io::stdin().read_to_string(&mut tx)?;
             tx
         }
     };
+    let tx = Vec::from_hex(s)?;
 
     match get_upstream(matches) {
         Ok(rpc) => {
-            let tx_hash = rpc::send_transaction(conn, tx)?;
+            let tx_hash = rpc::send_transaction(&rpc, &tx)?;
             println!("Tx hash: ");
             println!("{}", tx_hash);
             Ok(())
@@ -89,48 +96,29 @@ fn send(matches: &ArgMatches, raw: &[u8]) -> ExecResult {
 ///
 ///  * matches -
 ///  * env -
-///  * rpc -
 ///
 fn build_tx(matches: &ArgMatches, env: &EnvVars) -> Result<Transaction, Error> {
-    let from = get_address(matches)?;
-    let get_upstream = get_upstream(matches);
-
-    let gas_price = matches
-        .value_of("gas-price")
-        .or(env.emerald_gas_price.as_ref().map(String::as_str))
-        .or_else(get_upstream.and_then(|rpc| Some(rpc::get_gas_price(rpc)?)))
-        .and_then(|s| Some(hex_to_32bytes(trim_hex(s))?))
-        .expect("Required gas price");
-
-    let gas = matches
-        .value_of("gas")
-        .or(env.emerald_gas.as_ref().map(String::as_str))
-        .or_else(get_upstream.and_then(|rpc| Some(rpc::get_gas(rpc)?)))
-        .and_then(|s| Some(u64::from_str_radix(trim_hex(s), 16)?))
-        .expect("Required amount of gas");
-
-    let nonce = matches
-        .value_of("nonce")
-        .or_else(get_upstream.and_then(|rpc| Some(rpc::get_nonce(rpc, &from)?)))
-        .and_then(|s| Some(u64::from_str_radix(trim_hex(s), 16)?))
-        .expect("Required nonce value for sender");
-
-    let to = matches.value_of("to").and_then(|| parse_address);
+    let from = get_address(matches, "from")?;
 
     let value = matches
         .value_of("value")
-        .and_then(|v| Some(hex_to_32bytes(v)?))
-        .expect("Required value to send");
+        .ok_or_else(|| Error::ExecError("Required value to send".to_string()))
+        .and_then(|s| parse_value(s))?;
 
-    let data = matches
-        .value_of("value")
-        .and_then(Vec::from_hex)
-        .unwrap_or(vec![]);
+    let to = match matches.value_of("to") {
+        Some(s) => Some(Address::from_str(s)?),
+        None => None,
+    };
+
+    let data = match matches.value_of("data") {
+        Some(s) => parse_data(s)?,
+        None => vec![],
+    };
 
     Ok(Transaction {
-        nonce,
-        gas_price,
-        gas_limit,
+        nonce: get_nonce(matches, &from)?,
+        gas_price: get_gas_price(matches, env)?,
+        gas_limit: get_gas_limit(matches, env)?,
         to,
         value,
         data,
@@ -143,84 +131,12 @@ fn build_tx(matches: &ArgMatches, env: &EnvVars) -> Result<Transaction, Error> {
 ///
 ///  * matches -
 ///  * env -
-///  * rpc -
 ///
-fn sign_tx(tr: &Transaction, pk: PrivateKey) -> Result<Vec<u8>, Error> {
-    if let Some(chain_id) = to_chain_id(&self.chain) {
+fn sign_tx(tr: &Transaction, pk: PrivateKey, chain: &str) -> Result<Vec<u8>, Error> {
+    if let Some(chain_id) = to_chain_id(chain) {
         let raw = tr.to_signed_raw(pk, chain_id)?;
         Ok(raw)
     } else {
         Err(Error::ExecError("Invalid chain name".to_string()))
     }
 }
-
-/// Parse nonce value,
-/// or try to request from network node
-///
-///  # Arguments:
-///
-///  * matches -
-///  * env -
-///  * rpc -
-///
-fn parse_nonce(s: &str, rpc: &Option<RpcConnector>, addr: Option<Address>) -> Result<u64, Error> {
-    match parse_arg(s) {
-        Ok(nonce) => Ok(u64::from_str_radix(&nonce, 16)?),
-        Err(e) => match *rpc {
-            Some(ref conn) => {
-                if let Some(a) = addr {
-                    Ok(rpc::get_nonce(conn, &a)?)
-                } else {
-                    Err(e)
-                }
-            }
-            None => Err(e),
-        },
-    }
-}
-
-///// Parse gas limit for transaction execution,
-/////  or try to request from network node
-/////
-/////  # Arguments:
-/////
-/////  * matches -
-/////  * env -
-/////  * rpc -
-/////
-//fn parse_gas_or_default(
-//    s: &str,
-//    default: &Option<String>,
-//    rpc: &Option<RpcConnector>,
-//) -> Result<u64, Error> {
-//    match arg_or_default(s, default).and_then(|s| parse_arg(&s)) {
-//        Ok(gas) => Ok(u64::from_str_radix(&gas, 16)?),
-//        Err(e) => match *rpc {
-//            Some(ref conn) => Ok(rpc::get_gas(conn)?),
-//            None => Err(e),
-//        },
-//    }
-//}
-//
-///// Parse gas price for transaction execution,
-///// or try to request from network node
-/////
-/////  # Arguments:
-/////
-/////  * matches -
-/////  * env -
-/////  * rpc -
-/////
-//fn parse_gas_price_or_default(
-//    s: &str,
-//    default: &Option<String>,
-//    rpc: &Option<RpcConnector>,
-//) -> Result<[u8; 32], Error> {
-//    match arg_or_default(s, default).and_then(|s| parse_arg(&s)) {
-//        Ok(s) => hex_to_32bytes(&s),
-//        Err(e) => match *rpc {
-//            Some(ref conn) => Ok(rpc::get_gas_price(conn)?),
-//            None => Err(e),
-//        },
-//    }
-//}

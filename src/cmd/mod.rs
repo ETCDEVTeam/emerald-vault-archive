@@ -1,4 +1,4 @@
-//! # Command executor
+//! # Execute command
 
 mod account;
 mod transaction;
@@ -11,120 +11,112 @@ pub use self::arg_handlers::*;
 use self::account::account_cmd;
 use self::transaction::transaction_cmd;
 use super::emerald::keystore::{KdfDepthLevel, KeyFile};
-use super::emerald::{self, align_bytes, to_arr, to_chain_id, to_even_str, trim_hex, Address,
-                     Transaction};
+use super::emerald::{self, align_bytes, to_arr, to_even_str, trim_hex, Address, Transaction};
 use super::emerald::PrivateKey;
 use super::emerald::mnemonic::{gen_entropy, Language, Mnemonic, ENTROPY_BYTE_LENGTH};
 use super::emerald::storage::{default_path, KeyfileStorage, StorageController};
 use std::net::SocketAddr;
-use std::str::FromStr;
-use std::fs;
-use rpc::{self, RpcConnector};
-use hex::ToHex;
+use rpc;
 use std::path::PathBuf;
 use std::sync::Arc;
-use std::io::{self, Read};
 use clap::ArgMatches;
 
 type ExecResult = Result<(), Error>;
 
 const DEFAULT_CHAIN_NAME: &str = "mainnet";
 const DEFAULT_UPSTREAM: &str = "localhost:8545";
+const DEFAULT_RPC_HOST: &str = "127.0.0.1";
+const DEFAULT_RPC_PORT: &str = "1920";
 
-pub struct CmdExecutor<'a> {
-    chain: &'a str,
-    storage_ctrl: Arc<Box<StorageController>>,
-    matches: &'a ArgMatches<'a>,
-    env: EnvVars,
-    connector: Option<RpcConnector>,
+/// Create new command executor
+pub fn execute(matches: &ArgMatches) -> ExecResult {
+    let env = EnvVars::parse();
+
+    let chain = matches.value_of("chain").unwrap_or(DEFAULT_CHAIN_NAME);
+    info!("Chain name: {}", DEFAULT_CHAIN_NAME);
+
+    let mut base_path = PathBuf::new();
+    if let Some(p) = matches
+        .value_of("base-path")
+        .or_else(|| env.emerald_base_path.as_ref().map(String::as_str))
+    {
+        base_path.push(&p)
+    } else {
+        base_path = default_path();
+    }
+    let storage_ctrl = Arc::new(Box::new(StorageController::new(base_path)?));
+    let keystore = storage_ctrl.get_keystore(chain)?;
+
+    match matches.subcommand() {
+        ("server", Some(sub_m)) => server_cmd(sub_m, storage_ctrl.clone(), chain),
+        ("account", Some(sub_m)) => account_cmd(sub_m, keystore, &env),
+        ("transaction", Some(sub_m)) => transaction_cmd(sub_m, keystore, &env, chain),
+        ("balance", Some(sub_m)) => balance_cmd(sub_m),
+        ("mnemonic", Some(_)) => mnemonic_cmd(),
+        _ => Err(Error::ExecError(
+            "No command selected. Use `-h` for help".to_string(),
+        )),
+    }
 }
 
-impl<'a> CmdExecutor<'a> {
-    /// Create new command executor
-    pub fn new(matches: &'a ArgMatches<'a>) -> Result<Self, Error> {
-        let env = EnvVars::parse();
+/// Launch connector in a `server` mode
+///
+/// # Arguments:
+///
+/// * matches - arguments supplied from command-line
+/// * storage - `Keyfile` storage
+/// * chain - chain name
+///
+fn server_cmd(
+    matches: &ArgMatches,
+    storage_ctrl: Arc<Box<StorageController>>,
+    chain: &str,
+) -> ExecResult {
+    info!("Starting Emerald Connector - v{}", emerald::version());
+    let host = matches.value_of("host").unwrap_or(DEFAULT_RPC_HOST);
+    let port = matches.value_of("host").unwrap_or(DEFAULT_RPC_PORT);
+    let addr = format!("{}:{}", host, port).parse::<SocketAddr>()?;
+    let sec_lvl = get_security_lvl(matches)?;
 
-        let chain = matches.value_of("chain").unwrap_or(DEFAULT_CHAIN_NAME);
-        info!("Chain name: {}", DEFAULT_CHAIN_NAME);
+    info!("Chain set to '{}'", chain);
+    info!("Security level set to '{}'", sec_lvl);
 
-        let mut base_path = PathBuf::new();
-        if let Some(p) = matches
-            .value_of("base-path")
-            .or(env.emerald_base_path.as_ref().map(String::as_str))
-        {
-            base_path.push(&p)
-        } else {
-            base_path = default_path();
+    emerald::rpc::start(&addr, chain, storage_ctrl, Some(sec_lvl));
+
+    Ok(())
+}
+
+/// Show user balance
+///
+/// # Arguments:
+///
+/// * matches - arguments supplied from command-line
+/// * storage - `Keyfile` storage
+/// * sec_level - key derivation depth
+///
+fn balance_cmd(matches: &ArgMatches) -> ExecResult {
+    match get_upstream(matches) {
+        Ok(ref rpc) => {
+            let addr = get_address(matches, "address").expect("Required account address");
+            let balance = rpc::request_balance(rpc, &addr)?;
+            println!("Address: {}, balance: {}", &addr, &balance);
+
+            Ok(())
         }
-        let storage_ctrl = Arc::new(Box::new(StorageController::new(base_path)?));
-
-        let ups = matches.value_of("upstream").unwrap_or(DEFAULT_UPSTREAM);
-        let connector = parse_socket(&ups)
-            .or_else(|_| parse_url(&ups))
-            .and_then(RpcConnector::new)
-            .ok();
-
-        Ok(CmdExecutor {
-            matches,
-            chain,
-            storage_ctrl,
-            env,
-            connector,
-        })
+        Err(e) => Err(Error::ExecError(format!(
+            "Can't connect to upstream: {}",
+            e.to_string()
+        ))),
     }
+}
 
-    /// Dispatch command to proper handler
-    pub fn run(&self) -> ExecResult {
-        let keystore = self.storage_ctrl.get_keystore(self.chain)?;
-
-        match self.matches.subcommand() {
-            ("server", Some(sub_m)) => server_cmd,
-            ("account", Some(sub_m)) => account_cmd(sub_m, keystore, &self.env),
-            ("transaction", Some(sub_m)) => {
-                transaction_cmd(sub_m, keystore, &self.env, self.connector)
-            }
-            ("balance", Some(sub_m)) => balance_cmd,
-            ("mnemonic", Some(sub_m)) => mnemonic_cmd(),
-            _ => Err(Error::ExecError(
-                "No command selected. Use `-h` for help".to_string(),
-            )),
-        }
-    }
-
-    /// Launch connector in a `server` mode
-    fn server_cmd(&self) -> ExecResult {
-        info!("Starting Emerald Connector - v{}", emerald::version());
-        info!("Chain set to '{}'", self.chain);
-        info!("Security level set to '{}'", self.sec_level);
-
-        let addr =
-            format!("{}:{}", self.args.flag_host, self.args.flag_port).parse::<SocketAddr>()?;
-
-        let storage_ctrl = Arc::clone(&self.storage_ctrl);
-        emerald::rpc::start(&addr, &self.chain, storage_ctrl, Some(self.sec_level));
-
-        Ok(())
-    }
-
-    /// Show user balance
-    fn balance_cmd(&self) -> ExecResult {
-        match self.connector {
-            Some(ref conn) => {
-                let address = parse_address(&self.args.arg_address)?;
-                let balance = rpc::get_balance(conn, &address)?;
-                println!("Address: {}, balance: {}", &address, &balance);
-
-                Ok(())
-            }
-            None => Err(Error::ExecError("no connection to client".to_string())),
-        }
-    }
-
-    /// Creates new BIP32 mnemonic phrase
-    fn mnemonic_cmd() -> ExecResult {
-        let entropy = gen_entropy(ENTROPY_BYTE_LENGTH)?;
-        let mn = Mnemonic::new(Language::English, &entropy)?;
-        println!("{}", mn.sentence());
-        Ok(())
-    }
+/// Creates new BIP39 mnemonic phrase
+/// Refer [BIP39](https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki)
+/// for more info
+///
+fn mnemonic_cmd() -> ExecResult {
+    let entropy = gen_entropy(ENTROPY_BYTE_LENGTH)?;
+    let mn = Mnemonic::new(Language::English, &entropy)?;
+    println!("{}", mn.sentence());
+    Ok(())
 }

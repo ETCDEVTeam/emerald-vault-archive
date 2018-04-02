@@ -5,21 +5,24 @@ settings:
     - ArgRequiredElseHelp
 
 args:
-    - chain:
-        short: c
-        help: Sets a chain name
-        default_value: mainnet
-        takes_value: true
     - version:
         short: V
+        long: version
         help: Display version
-        global: false
     - verbose:
         short: v
         multiple: true
         help: Sets the level of verbosity
     - base-path:
+        short: p
+        long: base-path
         help: Set path for chain storage
+        takes_value: true
+    - chain:
+        short: c
+        long: chain
+        help: Sets a chain name
+        default_value: mainnet
         takes_value: true
 subcommands:
     - server:
@@ -33,9 +36,17 @@ subcommands:
             help: Receiver address
             required: true
             takes_value: true
-
+    - mnemonic:
+        about: Create mnemonic phrase according to BIP39 spec
+    - balance:
+        about: Request account's balance from ethereum node through RPC
+        args:
+            - address:
+                help: account address
+                required: true
+                takes_value: true
     - transaction:
-        about: Transaction related oprations
+        about: Transaction related commands
         subcommands:
         - new:
             about: Build new transaction
@@ -78,7 +89,7 @@ subcommands:
                     takes_value: true
 
     - account:
-        about: Account related oprations
+        about: Account related commands
         subcommands:
         - list:
             about: List account from `Keyfile` storage
@@ -108,7 +119,7 @@ subcommands:
                 multiple: true
                 possible_values: [normal, high, ultra]
             - raw:
-                help: Create new account from private key
+                help: Create new account from a hex encoded private key
                 short: r
                 long: raw
         - update:

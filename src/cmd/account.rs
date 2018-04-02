@@ -1,6 +1,6 @@
 //! # Account related subcommands
 
-use super::emerald::storage::KeyStorageError;
+use super::emerald::storage::KeystoreError;
 use super::{EnvVars, Error, ExecResult, KeyfileStorage};
 use super::arg_handlers::*;
 use std::path::{Path, PathBuf};
@@ -9,7 +9,7 @@ use std::fs::File;
 use rustc_serialize::json;
 use std::io::Write;
 
-use super::{Address, KdfDepthLevel, KeyFile};
+use super::{Address, KeyFile};
 use clap::ArgMatches;
 use std::fs;
 use std::str::FromStr;
@@ -20,7 +20,7 @@ use std::str::FromStr;
 ///
 /// * matches - arguments supplied from command-line
 /// * storage - `Keyfile` storage
-/// * sec_level - key derivation depth
+/// * env - environment variables
 ///
 pub fn account_cmd(
     matches: &ArgMatches,
@@ -28,14 +28,14 @@ pub fn account_cmd(
     env: &EnvVars,
 ) -> ExecResult {
     match matches.subcommand() {
-        ("list", Some(sub_m)) => list(sub_m, storage.clone()),
-        ("new", Some(sub_m)) => new(sub_m, storage.clone()),
+        ("list", Some(sub_m)) => list(sub_m, storage),
+        ("new", Some(sub_m)) => new(sub_m, storage),
         ("hide", Some(sub_m)) => toggle_visibility(sub_m, storage, |a| storage.hide(a)),
         ("unhide", Some(sub_m)) => toggle_visibility(sub_m, storage, |a| storage.unhide(a)),
-        ("strip", Some(sub_m)) => strip(sub_m, storage.clone()),
-        ("import", Some(sub_m)) => import(sub_m, storage.clone(), env),
-        ("export", Some(sub_m)) => export(sub_m, storage.clone(), env),
-        ("update", Some(sub_m)) => update(sub_m, storage.clone()),
+        ("strip", Some(sub_m)) => strip(sub_m, storage),
+        ("import", Some(sub_m)) => import(sub_m, storage, env),
+        ("export", Some(sub_m)) => export(sub_m, storage, env),
+        ("update", Some(sub_m)) => update(sub_m, storage),
         _ => Err(Error::ExecError(
             "Invalid account subcommand. Use `emerald account -h` for help".to_string(),
         )),
@@ -72,11 +72,8 @@ fn new(matches: &ArgMatches, storage: &Box<KeyfileStorage>) -> ExecResult {
     let passphrase = request_passphrase()?;
     let name = matches.value_of("name").map(String::from);
     let desc = matches.value_of("description").map(String::from);
-    let sec_level = matches
-        .value_of("security-level")
-        .and_then(|s| KdfDepthLevel::from_str(s).ok())
-        .unwrap_or_default();
-    info!("Security level: `normal`");
+    let sec_level = get_security_lvl(matches)?;
+    info!("Security level: {}", sec_level);
 
     let kf = match matches.value_of("raw") {
         Some(raw) => {
@@ -101,7 +98,7 @@ fn new(matches: &ArgMatches, storage: &Box<KeyfileStorage>) -> ExecResult {
 /// * storage - `Keyfile` storage
 /// * op - toggle operation to hide/unhide account(s)
 ///
-fn toggle_visibility<U, F: Fn(&Address) -> Result<U, KeyStorageError>>(
+fn toggle_visibility<U, F: Fn(&Address) -> Result<U, KeystoreError>>(
     matches: &ArgMatches,
     storage: &Box<KeyfileStorage>,
     toggle_op: F,
@@ -113,7 +110,7 @@ fn toggle_visibility<U, F: Fn(&Address) -> Result<U, KeyStorageError>>(
             toggle_op(&addr)?;
         }
     } else {
-        let addr = get_address(matches)?;
+        let addr = get_address(matches, "address")?;
         toggle_op(&addr)?;
     }
 
@@ -128,7 +125,7 @@ fn toggle_visibility<U, F: Fn(&Address) -> Result<U, KeyStorageError>>(
 /// * storage - `Keyfile` storage
 ///
 fn strip(matches: &ArgMatches, storage: &Box<KeyfileStorage>) -> ExecResult {
-    let address = get_address(matches)?;
+    let address = get_address(matches, "address")?;
 
     let (_, kf) = storage.search_by_address(&address)?;
     let passphrase = request_passphrase()?;
@@ -163,7 +160,7 @@ fn export(matches: &ArgMatches, storage: &Box<KeyfileStorage>, env: &EnvVars) ->
             export_keyfile(&path, storage, &addr)?
         }
     } else {
-        get_address(matches).and_then(|addr| export_keyfile(&path, storage, &addr))?
+        get_address(matches, "address").and_then(|addr| export_keyfile(&path, storage, &addr))?
     }
 
     Ok(())
@@ -209,7 +206,7 @@ fn import(matches: &ArgMatches, storage: &Box<KeyfileStorage>, env: &EnvVars) ->
 /// * storage - `Keyfile` storage
 ///
 fn update(matches: &ArgMatches, storage: &Box<KeyfileStorage>) -> ExecResult {
-    let address = get_address(matches)?;
+    let address = get_address(matches, "address")?;
     let name = matches.value_of("name").map(String::from);
     let desc = matches.value_of("description").map(String::from);
 
@@ -230,7 +227,7 @@ fn get_path(matches: &ArgMatches, env: &EnvVars) -> Result<PathBuf, Error> {
         .value_of("path")
         .or_else(|| env.emerald_base_path.as_ref().map(String::as_str))
         .and_then(|p| Some(PathBuf::from(p)))
-        .ok_or(Error::ExecError("Expected path".to_string()))
+        .ok_or_else(|| Error::ExecError("Expected path".to_string()))
 }
 
 /// Import single `Keyfile` into storage
