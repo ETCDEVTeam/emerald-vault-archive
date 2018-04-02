@@ -8,7 +8,6 @@
 ```
 <p align="center">
   <p align="center">
-    
     <a href="https://travis-ci.org/ETCDEVTeam/emerald-cli"><img alt="Travis" src="https://travis-ci.org/ETCDEVTeam/emerald-cli.svg?branch=master"></a>
     <a href="https://circleci.com/gh/etcdevteam/emerald-cli"><img alt="CircleCI" src="https://circleci.com/gh/ETCDEVTeam/emerald-cli/tree/master.svg?style=shield"></a>
     <a href="https://ci.appveyor.com/project/etcdevteam/emerald-cli"><img alt="AppVeyor" src="https://ci.appveyor.com/api/projects/status/9h3kobw811vmynk7?svg=true"></a>
