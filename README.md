@@ -1,79 +1,58 @@
-Emerald Command Line Interface (CLI)
-====================================
-
-[![CircleCI](https://circleci.com/gh/ETCDEVTeam/emerald-cli/tree/master.svg?style=shield)](https://circleci.com/gh/etcdevteam/emerald-cli)
-[![Appveyor](https://ci.appveyor.com/api/projects/status/9h3kobw811vmynk7?svg=true)](https://ci.appveyor.com/project/splix/emerald-cli-759r3)
-[![Crates](https://img.shields.io/crates/v/emerald-cli.svg?style=flat-square)](https://crates.io/crates/emerald-cli)
-[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg?style=flat-square)]()
-
+```shell
+                                                    __       __                  __    _
+          ___    ____ ___   ___    _____  ____ _   / /  ____/ /         _____   / /   (_)
+         / _ \  / __ `__ \ / _ \  / ___/ / __ `/  / /  / __  /  ______ / ___/  / /   / / 
+        /  __/ / / / / / //  __/ / /    / /_/ /  / /  / /_/ /  /_____// /__   / /   / /  
+        \___/ /_/ /_/ /_/ \___/ /_/     \__,_/  /_/   \__,_/          \___/  /_/   /_/   
+                                                                                 
 ```
-                                                       .__       .___      /\         .__  .__
-                      ____   _____   ________________  |  |    __| _/     / /    ____ |  | |__|
-                    _/ __ \ /     \_/ __ \_  __ \__  \ |  |   / __ |     / /   _/ ___\|  | |  |
-                    \  ___/|  Y Y  \  ___/|  | \// __ \|  |__/ /_/ |    / /    \  \___|  |_|  |
-                     \___  >__|_|  /\___  >__|  (____  /____/\____ |   / /      \___  >____/__|
-                        \/      \/     \/           \/           \/   \/           \/
-
-```
+<p align="center">
+  <p align="center">
+    <a href="https://circleci.com/gh/etcdevteam/emerald-cli"><img alt="CircleCI" src="https://circleci.com/gh/ETCDEVTeam/emerald-cli/tree/master.svg?style=shield"></a>
+    <a href="https://ci.appveyor.com/project/etcdevteam/emerald-cli"><img alt="AppVeyor" src="https://ci.appveyor.com/api/projects/status/9h3kobw811vmynk7?svg=true"></a>
+    <a href="https://crates.io/crates/emerald-cli"><img alt="crates.io" src="https://img.shields.io/crates/v/emerald-cli.svg?style=flat-square"></a>
+    <a href="LICENSE"><img alt="Software License" src="https://img.shields.io/badge/License-Apache%202.0-blue.svg?style=flat-square&maxAge=2592000"></a>
+  </p>
+</p>
 
 ## About
 
-Emerald Platform is a set of tools to build and integrate other apps with Ethereum ETC blockchain.
-
-Emerald CLI is a tool to access Ethereum ETC from command line. It connects to an external node (_"Upstream"_) and
+`Emerald Platform` is a set of tools to build and integrate other apps with Ethereum ETC blockchain.
+`Emerald CLI(Command Line Interface)`  is a tool to access Ethereum ETC from command line. It connects to an external node (_"Upstream"_) and
 allows to read information from blockchain and send new transactions. At the later case it provides functionality
 to sign transaction by provided Private Key. The tool integrates Emerald Vault with designed to generate, import and/or
 store Ethereum Private Keys
 
 It's compatible with both Ethereum ETC and ETH
 
+
 ## Usage
 
-```
-emerald --help
+```shell
+$ emerald --help
 
-Emerald offline wallet command line interface.
+emerald
+Command-line interface for Emerald platform
 
-Usage:
-  emerald server    [--chain=<chain>] [--port=<port>] [--host=<host>] [--base-path=<path>] [-v | --verbose] [-q | --quite]
-  emerald mnemonic
-  emerald new       [--chain=<chain>]  ([[--security-level=<level>] [--name=<name>] [--description=<description>]] | --raw <key>)
-  emerald list      [--chain=<chain>]  [--show-hidden]
-  emerald hide      [--chain=<chain>]  <address>
-  emerald unhide    [--chain=<chain>]  ([-a | --all] | <address>)
-  emerald strip     [--chain=<chain>] <address>
-  emerald import    [--chain=<chain>]  [-a | --all] [-f | --force] <path>
-  emerald export    [--chain=<chain>]  ([-a | --all] | <address>) <path>
-  emerald update    [--chain=<chain>]  <address> [--name=<name>] [--description=<description>]
-  emerald transaction   [--chain=<chain>] <from> <to> <value> [--gas=<gas>] [--gas-price=<price>] [--data=<data>] (--nonce=<nonce> | --upstream=<upstream>)
-  emerald balance   <address> [--upstream=<upstream>]
-  emerald -V | --version
-  emerald -h | --help
+USAGE:
+    emerald [FLAGS] [OPTIONS] [SUBCOMMAND]
 
-Options:
-  -a, --all                                   Apply action to all accounts
-  -c, --chain=<mainnet|testnet>               Chain name
-  -f, --force                                 Override existing keystore file
-  -h, --help                                  Show this message
-  -V, --version                               Show current version
-  -r, --raw                                   Create Keyfile directly from a private key
-  -q, --quiet                                 Only errors printed to the output
-  -v, --verbose                               Verbose output
-      --data=<data>                           Optional data included in a transaction
-      --name=<name>                           Account name
-      --description=<description>             Account description
-      --host=<host>                           Listen host [default: 127.0.0.1]
-      --port=<port>                           Listen port [default: 1920]
-      --base-path=<path>                      Base directory path, if omitted default os-specific value will be used:
-                                                  + Mac OS X: ~/Library/Emerald
-                                                  + Linux: ~/.emerald
-                                                  + Windows: %USERDIR%\.emerald
-      --security-level=<normal|high|ultra>    Level of security for cryptographic operations [default: ultra]
-      --show-hidden                           Include hidden keyfiles
-      --upstream=<upstream>                   URL to ethereum node [default: 127.0.0.1:8545]
-      --gas=<gas>                             Gas limit for transaction, hex-encoded value  in `wei`
-      --gas-price=<price>                     Gas price for transaction, hex-encoded value  in `wei`
-      --nonce=<nonce>                         Transaction count of sender
+FLAGS:
+    -h, --help       Prints help information
+    -v               Sets the level of verbosity
+    -V, --version    Display version
+
+OPTIONS:
+    -p, --base-path <base-path>    Set path for chain storage
+    -c, --chain <chain>            Sets a chain name [default: mainnet]
+
+SUBCOMMANDS:
+    account        Account related commands
+    balance        Request account's balance from ethereum node through RPC
+    help           Prints this message or the help of the given subcommand(s)
+    mnemonic       Create mnemonic phrase according to BIP39 spec
+    server         Start local RPC server
+    transaction    Transaction related commands
 
 ```
 
@@ -125,11 +104,11 @@ cd target\debug
 - Issues: https://github.com/ETCDEVTeam/emerald-cli/issues
 - Development binaries: http://builds.etcdevteam.com/
 
-## Demonstration
+<!-- ## Demo --> 
 
-<a href="https://asciinema.org/a/WbivFQXwm5lUXenNsTvzfQxRY?speed=2" target="_blank">
-  <img src="https://asciinema.org/a/WbivFQXwm5lUXenNsTvzfQxRY.png" />
-</a>
+<!-- <a href="https://asciinema.org/a/WbivFQXwm5lUXenNsTvzfQxRY?speed=2" target="_blank"> -->
+  <!-- <img src="https://asciinema.org/a/WbivFQXwm5lUXenNsTvzfQxRY.png" /> -->
+<!-- </a> -->
 
 ## License
 
