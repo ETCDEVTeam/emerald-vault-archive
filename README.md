@@ -27,51 +27,31 @@ It's compatible with both Ethereum ETC and ETH
 
 ## Usage
 
-```
-emerald --help
+```shell
+$ emerald --help
 
-Emerald offline wallet command line interface.
+emerald
+Command-line interface for Emerald platform
 
-Usage:
-  emerald server    [--chain=<chain>] [--port=<port>] [--host=<host>] [--base-path=<path>] [-v | --verbose] [-q | --quite]
-  emerald mnemonic
-  emerald new       [--chain=<chain>]  ([[--security-level=<level>] [--name=<name>] [--description=<description>]] | --raw <key>)
-  emerald list      [--chain=<chain>]  [--show-hidden]
-  emerald hide      [--chain=<chain>]  <address>
-  emerald unhide    [--chain=<chain>]  ([-a | --all] | <address>)
-  emerald strip     [--chain=<chain>] <address>
-  emerald import    [--chain=<chain>]  [-a | --all] [-f | --force] <path>
-  emerald export    [--chain=<chain>]  ([-a | --all] | <address>) <path>
-  emerald update    [--chain=<chain>]  <address> [--name=<name>] [--description=<description>]
-  emerald transaction   [--chain=<chain>] <from> <to> <value> [--gas=<gas>] [--gas-price=<price>] [--data=<data>] (--nonce=<nonce> | --upstream=<upstream>)
-  emerald balance   <address> [--upstream=<upstream>]
-  emerald -V | --version
-  emerald -h | --help
+USAGE:
+    emerald [FLAGS] [OPTIONS] [SUBCOMMAND]
 
-Options:
-  -a, --all                                   Apply action to all accounts
-  -c, --chain=<mainnet|testnet>               Chain name
-  -f, --force                                 Override existing keystore file
-  -h, --help                                  Show this message
-  -V, --version                               Show current version
-  -r, --raw                                   Create Keyfile directly from a private key
-  -q, --quiet                                 Only errors printed to the output
-  -v, --verbose                               Verbose output
-      --data=<data>                           Optional data included in a transaction
-      --name=<name>                           Account name
-      --description=<description>             Account description
-      --host=<host>                           Listen host [default: 127.0.0.1]
-      --port=<port>                           Listen port [default: 1920]
-      --base-path=<path>                      Base directory path, if omitted default os-specific value will be used:
-                                                  + Mac OS X: ~/Library/Emerald
-                                                  + Linux: ~/.emerald
-                                                  + Windows: %USERDIR%\.emerald
-      --security-level=<normal|high|ultra>    Level of security for cryptographic operations [default: ultra]
-      --show-hidden                           Include hidden keyfiles
-      --upstream=<upstream>                   URL to ethereum node [default: 127.0.0.1:8545]
-      --gas=<gas>                             Gas limit for transaction, hex-encoded value  in `wei`
-      --gas-price=<price>                     Gas price for transaction, hex-encoded value  in `wei`
-      --nonce=<nonce>                         Transaction count of sender
+FLAGS:
+    -h, --help       Prints help information
+    -v               Sets the level of verbosity
+    -V, --version    Display version
+
+OPTIONS:
+    -p, --base-path <base-path>    Set path for chain storage
+    -c, --chain <chain>            Sets a chain name [default: mainnet]
+
+SUBCOMMANDS:
+    account        Account related commands
+    balance        Request account's balance from ethereum node through RPC
+    help           Prints this message or the help of the given subcommand(s)
+    mnemonic       Create mnemonic phrase according to BIP39 spec
+    server         Start local RPC server
+    transaction    Transaction related commands
 
 ```
 
