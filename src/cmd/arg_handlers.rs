@@ -243,12 +243,6 @@ mod tests {
     }
 
     #[test]
-    fn should_convert_arg_to_opt() {
-        assert_eq!(arg_to_opt("").unwrap(), None);
-        assert_eq!(arg_to_opt("test").unwrap(), Some("test".to_string()));
-    }
-
-    #[test]
     fn should_parse_private_key() {
         let pk = PrivateKey::try_from(&[0u8; 32]).unwrap();
         assert_eq!(
@@ -274,29 +268,6 @@ mod tests {
         assert_eq!(parse_data("").unwrap(), Vec::new() as Vec<u8>);
         assert!(parse_data("00_10000").is_err());
         assert!(parse_data("01000z").is_err());
-    }
-
-    #[test]
-    fn should_parse_gas() {
-        assert_eq!(parse_gas_or_default("0x000", &None, &None).unwrap(), 0);
-        assert_eq!(
-            parse_gas_or_default("", &Some("0x000".to_string()), &None).unwrap(),
-            0
-        );
-        assert!(parse_gas_or_default("", &None, &None).is_err());
-    }
-
-    #[test]
-    fn should_parse_gas_price() {
-        assert_eq!(
-            parse_gas_price_or_default("0x000", &None, &None).unwrap(),
-            [0u8; 32]
-        );
-        assert_eq!(
-            parse_gas_price_or_default("", &Some("0x000".to_string()), &None).unwrap(),
-            [0u8; 32]
-        );
-        assert!(parse_gas_price_or_default("", &None, &None).is_err());
     }
 
     #[test]
