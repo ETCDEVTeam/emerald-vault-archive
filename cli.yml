@@ -30,11 +30,9 @@ subcommands:
         args:
         - host:
             help: Senders address
-            required: true
             takes_value: true
         - port:
             help: Receiver address
-            required: true
             takes_value: true
     - mnemonic:
         about: Create mnemonic phrase according to BIP39 spec

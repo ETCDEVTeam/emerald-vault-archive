@@ -8,6 +8,11 @@ setup() {
 	export EMERALD_BASE_PATH=`mktemp -d`
 }
 
+teardown() {
+	rm -rf $EMERALD_BASE_PATH
+    unset EMERALD_BASE_PATH
+}
+
 @test "[meta] succeeds: set env var and tmp dir EMERALD_BASE_PATH" {
     run echo "$EMERALD_BASE_PATH"
     [ "$status" -eq 0 ]
