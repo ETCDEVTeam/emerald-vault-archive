@@ -73,8 +73,8 @@ fn server_cmd(
     chain: &str,
 ) -> ExecResult {
     info!("Starting Emerald Connector - v{}", emerald::version());
-    let host = matches.value_of("host").unwrap_or(DEFAULT_RPC_HOST);
-    let port = matches.value_of("host").unwrap_or(DEFAULT_RPC_PORT);
+    let host = matches.value_of("host").unwrap_or_default();
+    let port = matches.value_of("port").unwrap_or_default();
     let addr = format!("{}:{}", host, port).parse::<SocketAddr>()?;
     let sec_lvl = get_security_lvl(matches)?;
 

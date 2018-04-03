@@ -44,10 +44,10 @@ fn main() {
     let yaml = load_yaml!("../cli.yml");
     let matches = App::from_yaml(yaml).get_matches();
 
-    match matches.occurrences_of("v") {
-        0 => env::set_var("RUST_LOG", "emerald=error"),
-        1 => env::set_var("RUST_LOG", "emerald=info"),
-        2 | _ => env::set_var("RUST_LOG", "emerald=trace"),
+    match matches.occurrences_of("verbose") {
+        0 => env::set_var("RUST_LOG", "error"),
+        1 => env::set_var("RUST_LOG", "info"),
+        2 | _ => env::set_var("RUST_LOG", "debug"),
     }
 
     let mut log_builder = LogBuilder::new();

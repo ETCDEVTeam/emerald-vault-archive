@@ -29,18 +29,20 @@ subcommands:
         about: Start local RPC server
         args:
         - host:
-            help: Senders address
+            help: Host for RPC server
             takes_value: true
+            default_value: "127.0.0.1"
         - port:
-            help: Receiver address
+            help: Port for RPC server
             takes_value: true
+            default_value: "1920"
     - mnemonic:
         about: Create mnemonic phrase according to BIP39 spec
     - balance:
         about: Request account's balance from ethereum node through RPC
         args:
             - address:
-                help: account address
+                help: Account address
                 required: true
                 takes_value: true
     - transaction:
