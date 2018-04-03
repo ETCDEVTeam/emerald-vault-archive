@@ -1,13 +1,14 @@
 ```shell
-                                                    __       __                  __    _
-          ___    ____ ___   ___    _____  ____ _   / /  ____/ /         _____   / /   (_)
-         / _ \  / __ `__ \ / _ \  / ___/ / __ `/  / /  / __  /  ______ / ___/  / /   / / 
-        /  __/ / / / / / //  __/ / /    / /_/ /  / /  / /_/ /  /_____// /__   / /   / /  
-        \___/ /_/ /_/ /_/ \___/ /_/     \__,_/  /_/   \__,_/          \___/  /_/   /_/   
+                                                          __       __                  __    _
+                ___    ____ ___   ___    _____  ____ _   / /  ____/ /         _____   / /   (_)
+               / _ \  / __ `__ \ / _ \  / ___/ / __ `/  / /  / __  /  ______ / ___/  / /   / / 
+              /  __/ / / / / / //  __/ / /    / /_/ /  / /  / /_/ /  /_____// /__   / /   / /  
+              \___/ /_/ /_/ /_/ \___/ /_/     \__,_/  /_/   \__,_/          \___/  /_/   /_/   
                                                                                  
 ```
 <p align="center">
   <p align="center">
+    <a href="https://travis-ci.org/ETCDEVTeam/emerald-cli"><img alt="Travis" src="https://travis-ci.org/ETCDEVTeam/emerald-cli.svg?branch=master"></a>
     <a href="https://circleci.com/gh/etcdevteam/emerald-cli"><img alt="CircleCI" src="https://circleci.com/gh/ETCDEVTeam/emerald-cli/tree/master.svg?style=shield"></a>
     <a href="https://ci.appveyor.com/project/etcdevteam/emerald-cli"><img alt="AppVeyor" src="https://ci.appveyor.com/api/projects/status/9h3kobw811vmynk7?svg=true"></a>
     <a href="https://crates.io/crates/emerald-cli"><img alt="crates.io" src="https://img.shields.io/crates/v/emerald-cli.svg?style=flat-square"></a>
