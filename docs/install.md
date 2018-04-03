@@ -10,7 +10,7 @@
 
 # Installing emerald-cli
 
-#### :beers: Install with Homebrew (OSX only)
+## :beers: Install with Homebrew (OSX only)
 ```
 $ brew install ethereumproject/classic/emerald-cli
 ```
