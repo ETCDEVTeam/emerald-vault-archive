@@ -2,9 +2,9 @@
 ### How to get balance for address
 If using client that running on a local host (127.0.0.1:8545):
 ```
-emerald balance 0x0e7c045110b8dbf29765047380898919c5cb56f4
+$ emerald balance 0x0e7c045110b8dbf29765047380898919c5cb56f4
 ```
 or connecting to some specific host & port:
 ```
-emerald balance 0x0e7c045110b8dbf29765047380898919c5cb56f4 --upstream=8.8.8.8:8545
+$ emerald balance 0x0e7c045110b8dbf29765047380898919c5cb56f4 --upstream=8.8.8.8:8545
 ```

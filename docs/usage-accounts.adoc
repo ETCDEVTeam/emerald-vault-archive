@@ -1,25 +1,25 @@
 ### How to show all available accounts
 
 ```
-emerald list --chain=morden
+$ emerald --chain=morden account list
 ```
 
 ### How to exclude some accounts from the showing list
 
 ```
-emerald hide --chain=morden 0x0e7c045110b8dbf29765047380898919c5cb56f4
+$ emerald --chain=morden account hide  0x0e7c045110b8dbf29765047380898919c5cb56f4
 ```
 
 To undo in the future:
 
 ```
-emerald unhide --chain=morden --all
+$ emerald --chain=morden account unhide --all
 ```
 
 ### How to create new account
 
 ```
-emerald new --chain=morden \
+$ emerald --chain=morden account new \
     --security-level=high \
     --name="Test account" \
     --description="Some description" \
@@ -29,20 +29,20 @@ emerald new --chain=morden \
 ### How to show private key
 
 ```
-emerald strip --chain=morden 0x0e7c045110b8dbf29765047380898919c5cb56f4 < echo "secret passphrase"
+$ emerald --chain=morden account strip 0x0e7c045110b8dbf29765047380898919c5cb56f4 < echo "secret passphrase"
 ```
 
 ### How to change `passphrase`
 
 ```
-emerald strip --chain=morden 0x0e7c045110b8dbf29765047380898919c5cb56f4 < echo "old passphrase" \
-emerald new --chain=morden --raw < echo "new passphrase"
+$ emerald --chain=morden account strip 0x0e7c045110b8dbf29765047380898919c5cb56f4 < echo "old passphrase" \
+$ emerald --chain=morden account new --raw < echo "new passphrase"
 ```
 
 ### How to change account name
 
 ```
-emerald update --chain=morden \
+$ emerald --chain=morden account update \
     0x0e7c045110b8dbf29765047380898919c5cb56f4 \
     --name="New name" \
     --description="A new description"
@@ -52,25 +52,25 @@ emerald update --chain=morden \
 
 Import content of whole folder:
 ```
-emerald import --chain=morden --all <path_to_files>
+$ emerald --chain=morden account import --all <path_to_files>
 ```
 or single keyfile:
 ```
-emerald import --chain=morden <path_to_file>
+$ emerald --chain=morden account import <path_to_file>
 ```
 If keyfile already exist in a storage, import will be ignore.
 
 To override existing Keyfile, use `-f | --force` option:
 ```
-    emerald import --chain=morden --force <path_to_file>
+$ emerald --chain=morden account import --force <path_to_file>
 ```
 
 
 Export all keyfiles into directory:
 ```
-    emerald export --chain=morden --all <path_to_export_dir>
+$ emerald --chain=morden account export --all <path_to_export_dir>
 ```
 or single keyfile for selected <address>:
 ```
-    emerald export --chain=morden <address> <path_to_export_dir>
+$ emerald --chain=morden account export <address> <path_to_export_dir>
 ```

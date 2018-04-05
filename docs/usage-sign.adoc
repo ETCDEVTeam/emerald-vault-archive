@@ -2,8 +2,7 @@
 
 Offline:
 ```
-EMERALD_GAS_COST=21 \
-emerald transaction \
+$ EMERALD_GAS_COST=21 emerald transaction \
     0x0e7c045110b8dbf29765047380898919c5cb56f4 \
     0x0e7c045110b8dbf29765047380898919c5cb56f4 \
     0x1000 \
@@ -14,8 +13,7 @@ emerald transaction \
 
 or sent transaction for execution through remote node:
 ```
-EMERALD_GAS_COST=21 \
-emerald transaction \
+$ EMERALD_GAS_COST=21 emerald transaction \
     0x0e7c045110b8dbf29765047380898919c5cb56f4 \
     0x0e7c045110b8dbf29765047380898919c5cb56f4 \
     0x1000 \
