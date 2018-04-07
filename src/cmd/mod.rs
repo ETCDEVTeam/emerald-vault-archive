@@ -25,8 +25,6 @@ type ExecResult = Result<(), Error>;
 
 const DEFAULT_CHAIN_NAME: &str = "mainnet";
 const DEFAULT_UPSTREAM: &str = "localhost:8545";
-const DEFAULT_RPC_HOST: &str = "127.0.0.1";
-const DEFAULT_RPC_PORT: &str = "1920";
 
 /// Create new command executor
 pub fn execute(matches: &ArgMatches) -> ExecResult {

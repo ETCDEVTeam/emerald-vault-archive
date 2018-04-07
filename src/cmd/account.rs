@@ -4,10 +4,12 @@ use super::emerald::storage::KeystoreError;
 use super::{EnvVars, Error, ExecResult, KeyfileStorage};
 use super::arg_handlers::*;
 use std::path::{Path, PathBuf};
-use std::io::Read;
+use std::io::{stdout, Read};
 use std::fs::File;
 use rustc_serialize::json;
 use std::io::Write;
+use std::{thread, time};
+use std::sync::mpsc::{self, TryRecvError};
 
 use super::{Address, KeyFile};
 use clap::ArgMatches;
@@ -75,6 +77,24 @@ fn new(matches: &ArgMatches, storage: &Box<KeyfileStorage>) -> ExecResult {
     let sec_level = get_security_lvl(matches)?;
     info!("Security level: {}", sec_level);
 
+
+    let (tx, rx) = mpsc::channel();
+    thread::spawn(move || {
+        print!("Processing");
+        loop {
+            match rx.try_recv() {
+                Ok(_) | Err(TryRecvError::Disconnected) => {
+                    println!(">");
+                    break
+                },
+                Err(TryRecvError::Empty) => {
+                    print!(".");
+                },
+            }
+            thread::sleep(time::Duration::new(1, 0));
+        };
+    });
+
     let kf = match matches.value_of("raw") {
         Some(raw) => {
             let pk = parse_pk(raw)?;
@@ -85,6 +105,7 @@ fn new(matches: &ArgMatches, storage: &Box<KeyfileStorage>) -> ExecResult {
         None => KeyFile::new(&passphrase, &sec_level, name, desc)?,
     };
     storage.put(&kf)?;
+    let _ = tx.send(());
     println!("Created new account: {}", &kf.address.to_string());
 
     Ok(())
