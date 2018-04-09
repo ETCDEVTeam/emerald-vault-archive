@@ -8,6 +8,7 @@ use std::io::Read;
 use std::fs::File;
 use rustc_serialize::json;
 use std::io::Write;
+use indicator::ProgressIndicator;
 
 use super::{Address, KeyFile};
 use clap::ArgMatches;
@@ -75,6 +76,7 @@ fn new(matches: &ArgMatches, storage: &Box<KeyfileStorage>) -> ExecResult {
     let sec_level = get_security_lvl(matches)?;
     info!("Security level: {}", sec_level);
 
+    let ind = ProgressIndicator::start(Some("Generating new account".to_string()));
     let kf = match matches.value_of("raw") {
         Some(raw) => {
             let pk = parse_pk(raw)?;
@@ -85,6 +87,8 @@ fn new(matches: &ArgMatches, storage: &Box<KeyfileStorage>) -> ExecResult {
         None => KeyFile::new(&passphrase, &sec_level, name, desc)?,
     };
     storage.put(&kf)?;
+
+    ind.stop();
     println!("Created new account: {}", &kf.address.to_string());
 
     Ok(())
@@ -147,6 +151,7 @@ fn strip(matches: &ArgMatches, storage: &Box<KeyfileStorage>) -> ExecResult {
 fn export(matches: &ArgMatches, storage: &Box<KeyfileStorage>, env: &EnvVars) -> ExecResult {
     let path = get_path(matches, env)?;
 
+    let ind = ProgressIndicator::start(Some("Exporting Keyfiles".to_string()));
     if matches.is_present("all") {
         if !path.is_dir() {
             return Err(Error::ExecError(
@@ -162,6 +167,7 @@ fn export(matches: &ArgMatches, storage: &Box<KeyfileStorage>, env: &EnvVars) ->
     } else {
         get_address(matches, "address").and_then(|addr| export_keyfile(&path, storage, &addr))?
     }
+    ind.stop();
 
     Ok(())
 }
@@ -178,6 +184,7 @@ fn import(matches: &ArgMatches, storage: &Box<KeyfileStorage>, env: &EnvVars) ->
     let path = get_path(matches, env)?;
     let mut counter = 0;
 
+    let ind = ProgressIndicator::start(Some("Importing Keyfiles".to_string()));
     if path.is_file() {
         import_keyfile(path, storage, matches.is_present("force"))?;
         counter += 1;
@@ -192,6 +199,7 @@ fn import(matches: &ArgMatches, storage: &Box<KeyfileStorage>, env: &EnvVars) ->
             counter += 1;
         }
     }
+    ind.stop();
 
     println!("Imported accounts: {}", counter);
 
