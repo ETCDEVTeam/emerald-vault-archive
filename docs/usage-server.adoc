@@ -1,6 +1,6 @@
 ### How to run http://github.com/ethereumproject/emerald-rs/blob/master/docs/api.md[JSON-RPC] endpoint
 
 ```
-emerald server --host=127.0.0.1 --port=1920
+$ emerald server --host=127.0.0.1 --port=1920
 ```
 
