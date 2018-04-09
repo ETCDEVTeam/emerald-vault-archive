@@ -26,6 +26,7 @@ extern crate clap;
 
 mod cmd;
 mod rpc;
+mod indicator;
 
 use env_logger::LogBuilder;
 use log::LogRecord;
