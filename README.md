@@ -18,13 +18,10 @@
 
 ## About
 
-`Emerald Platform` is a set of tools to build and integrate other apps with Ethereum ETC blockchain.
-`Emerald CLI(Command Line Interface)`  is a tool to access Ethereum ETC from command line. It connects to an external node (_"Upstream"_) and
-allows to read information from blockchain and send new transactions. At the later case it provides functionality
-to sign transaction by provided Private Key. The tool integrates Emerald Vault with designed to generate, import and/or
-store Ethereum Private Keys
+`Emerald Platform` is a set of tools to build and integrate other applications with the Ethereum Classic (ETC) blockchain.
+`Emerald CLI(Command Line Interface)` is a tool to access Ethereum ETC from the command line. It connects to an external node (_"upstream"_) and allows a user or application to read information from the blockchain and to send new transactions. In the latter case it provides functionality to sign transactions by a provided Private Key. The tool integrates Emerald Vault with the intention of generation, import, and/or storing of Ethereum Private Keys.
 
-It's compatible with both Ethereum ETC and ETH
+`emerald-cli` is compatible with both Ethereum ETC and ETH.
 
 
 ## Usage
