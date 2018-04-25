@@ -82,4 +82,4 @@ Will set verbose level to 1 - only info messages.
 
 # emerald -vv
 
-Well set verbose level to 2 - info and debug messages.
+Will set verbose level to 2 - info and debug messages.
