@@ -34,7 +34,7 @@ image: Visual Studio 2015
 # matrix entries to test different combinations of features.
 environment:
   GCP_PASSWD:
-    secure: erzLJz7qT0kCJa+jZG6Sf9wwkfLYO2UDLzydkKTdwqA=
+    secure: GiLB9xoSis0z90cMZO88dhWAhRYpXI65mTuYYQsEOdnf+R1CZkuptKRB6mhdEbDliHu6jGWdW+7A6rpYmmTgpYuXcijONGn8mfXHenW7k48=
 
   matrix:
     ### MSVC Toolchains ###

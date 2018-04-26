@@ -10,7 +10,9 @@
   <p align="center">
     <a href="https://travis-ci.org/ETCDEVTeam/emerald-cli"><img alt="Travis" src="https://travis-ci.org/ETCDEVTeam/emerald-cli.svg?branch=master"></a>
     <a href="https://circleci.com/gh/etcdevteam/emerald-cli"><img alt="CircleCI" src="https://circleci.com/gh/ETCDEVTeam/emerald-cli/tree/master.svg?style=shield"></a>
-    <a href="https://ci.appveyor.com/project/etcdevteam/emerald-cli"><img alt="AppVeyor" src="https://ci.appveyor.com/api/projects/status/9h3kobw811vmynk7?svg=true"></a>
+    <a href="https://ci.appveyor.com/project/etcdevteam/emerald-cli">
+        <img alt="AppVeyor" src="https://ci.appveyor.com/api/projects/status/e5nqu33xo8y4nk0v?svg=true">
+    </a>
     <a href="https://crates.io/crates/emerald-cli"><img alt="crates.io" src="https://img.shields.io/crates/v/emerald-cli.svg?style=flat-square"></a>
     <a href="LICENSE"><img alt="Software License" src="https://img.shields.io/badge/License-Apache%202.0-blue.svg?style=flat-square&maxAge=2592000"></a>
   </p>
