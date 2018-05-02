@@ -1,10 +1,10 @@
 ```shell
                                                           __       __                  __    _
                 ___    ____ ___   ___    _____  ____ _   / /  ____/ /         _____   / /   (_)
-               / _ \  / __ `__ \ / _ \  / ___/ / __ `/  / /  / __  /  ______ / ___/  / /   / / 
-              /  __/ / / / / / //  __/ / /    / /_/ /  / /  / /_/ /  /_____// /__   / /   / /  
-              \___/ /_/ /_/ /_/ \___/ /_/     \__,_/  /_/   \__,_/          \___/  /_/   /_/   
-                                                                                 
+               / _ \  / __ `__ \ / _ \  / ___/ / __ `/  / /  / __  /  ______ / ___/  / /   / /
+              /  __/ / / / / / //  __/ / /    / /_/ /  / /  / /_/ /  /_____// /__   / /   / /
+              \___/ /_/ /_/ /_/ \___/ /_/     \__,_/  /_/   \__,_/          \___/  /_/   /_/
+
 ```
 <p align="center">
   <p align="center">
@@ -64,6 +64,14 @@ For detailed documentation see [https://docs.etcdevteam.com/html/emerald-cli](ht
 
 Binaries for all platforms are currently published at https://github.com/ETCDEVTeam/emerald-cli/releases
 
+### :beers: Install with Homebrew (OSX only)
+
+Install latest stable binary.
+
+```
+$ brew install ethereumproject/classic/emerald-cli
+```
+
 ### Download development build
 
 
@@ -80,15 +88,15 @@ To download a latest development build, please open https://builds.etcdevteam.co
 
 Install Rust from https://www.rust-lang.org/en-US/install.html
 
-  
+
 Unix one-liner:
 ```
 curl https://sh.rustup.rs -sSf | sh
 ```
-  
+
 On Windows, Rust additionally requires the C++ build tools for Visual Studio 2013 or later. The easiest way to acquire
 the build tools is by installing Microsoft Visual C++ Build Tools 2017 which provides just the Visual C++ build tools.
-  
+
 #### Compile
 
 ```
@@ -104,7 +112,7 @@ cd target\debug
 - Issues: https://github.com/ETCDEVTeam/emerald-cli/issues
 - Development binaries: http://builds.etcdevteam.com/
 
-<!-- ## Demo --> 
+<!-- ## Demo -->
 
 <!-- <a href="https://asciinema.org/a/WbivFQXwm5lUXenNsTvzfQxRY?speed=2" target="_blank"> -->
   <!-- <img src="https://asciinema.org/a/WbivFQXwm5lUXenNsTvzfQxRY.png" /> -->

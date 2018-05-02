@@ -4,6 +4,14 @@
 
 Binaries for all platforms are currently published at https://github.com/ETCDEVTeam/emerald-cli/releases
 
+## Install with Homebrew (OSX only)
+
+Installs latest stable binary.
+
+```
+$ brew install ethereumproject/classic/emerald-cli
+```
+
 ## Download development build
 
 [WARNING]
