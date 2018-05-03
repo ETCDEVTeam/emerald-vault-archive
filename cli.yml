@@ -39,10 +39,15 @@ subcommands:
     - balance:
             about: Request account's balance from ethereum node through RPC
             args:
-                - address:
-                    help: Account address
-                    required: true
-                    takes_value: true
+            - address:
+                help: Account address
+                required: true
+                takes_value: true
+            - upstream:
+                short: u
+                long: upstream
+                help: Network address for a remote ethereum node with RPC endpoint
+                takes_value: true
     - mnemonic:
         about: Create mnemonic phrase according to BIP39 spec
     - nonce:
@@ -50,6 +55,12 @@ subcommands:
         args:
         - address:
             help: Address of account
+            required: true
+            takes_value: true
+        - upstream:
+            short: u
+            long: upstream
+            help: Network address for a remote ethereum node with RPC endpoint
             required: true
             takes_value: true
         - hex:

@@ -24,7 +24,7 @@ use std::sync::Arc;
 type ExecResult = Result<(), Error>;
 
 const DEFAULT_CHAIN_NAME: &str = "mainnet";
-const DEFAULT_UPSTREAM: &str = "localhost:8545";
+const DEFAULT_UPSTREAM: &str = "127.0.0.1:8545";
 
 /// Create new command executor
 pub fn execute(matches: &ArgMatches) -> ExecResult {
@@ -51,6 +51,7 @@ pub fn execute(matches: &ArgMatches) -> ExecResult {
         ("transaction", Some(sub_m)) => transaction_cmd(sub_m, keystore, &env, chain),
         ("balance", Some(sub_m)) => balance_cmd(sub_m),
         ("mnemonic", Some(_)) => mnemonic_cmd(),
+        ("nonce", Some(sub_m)) => nonce_cmd(sub_m),
         _ => Err(Error::ExecError(
             "No command selected. Use `-h` for help".to_string(),
         )),
@@ -96,12 +97,12 @@ fn balance_cmd(matches: &ArgMatches) -> ExecResult {
             let addr = get_address(matches, "address").expect("Required account address");
             let balance = rpc::request_balance(rpc, &addr)?;
             info!("Balance for {} account", &addr);
-            println!(balance);
+            println!("{}", balance);
 
             Ok(())
         }
         Err(e) => Err(Error::ExecError(format!(
-            "Can't connect to upstream: {}",
+            "Can't get balance: {}",
             e.to_string()
         ))),
     }
@@ -125,15 +126,22 @@ fn mnemonic_cmd() -> ExecResult {
 /// * matches - arguments supplied from command-line
 ///
 fn nonce_cmd(matches: &ArgMatches) -> ExecResult {
-    let addr = matches.value_of("address")?;
-    let nonce = get_nonce(&matches, &addr)?;
+    match get_upstream(matches) {
+        Ok(ref rpc) => {
+            let addr = get_address(matches, "address").expect("Required account address");
+            let nonce = get_nonce(&matches, &addr)?;
+            info!("Nonce for {} account", &addr);
+            if matches.is_present("hex") {
+                println!("{:x}", nonce);
+            } else {
+                println!("{}", nonce);
+            }
 
-    info!("Account address: {}, nonce:", &addr);
-    if matches.is_presetnt("hex") {
-        println!("{:x}", nonce);
-    } else {
-        println!("{}", nonce);
+            Ok(())
+        }
+        Err(e) => Err(Error::ExecError(format!(
+            "Can't get `nonce`: {}",
+            e.to_string()
+        ))),
     }
-
-    Ok(())
 }
