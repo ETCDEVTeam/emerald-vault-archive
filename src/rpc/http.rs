@@ -1,11 +1,11 @@
 //! # Send JSON encoded HTTP requests
 
-use hyper::Url;
+use cmd::Error;
 use hyper::client::IntoUrl;
+use hyper::Url;
 use jsonrpc_core::Params;
 use reqwest::Client;
 use serde_json::Value;
-use cmd::Error;
 
 lazy_static! {
     static ref CLIENT: Client = Client::new().expect("Expect to create an HTTP client");

@@ -1,8 +1,7 @@
 /// # Simple progress indication
-
 use std::io::{stdout, Write};
-use std::{thread, time};
 use std::sync::mpsc::{self, SyncSender, TryRecvError};
+use std::{thread, time};
 
 /// Printing interval in milliseconds
 const PRINT_PULSE_MILLISEC: u64 = 500;

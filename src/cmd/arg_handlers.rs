@@ -1,16 +1,18 @@
 //! # Helpers for command execution
 
 use super::Error;
-use super::{align_bytes, to_arr, to_even_str, trim_hex, Address, ArgMatches, KdfDepthLevel,
-            PrivateKey, DEFAULT_UPSTREAM};
-use std::str::FromStr;
-use std::env;
+use super::{
+    align_bytes, to_arr, to_even_str, trim_hex, Address, ArgMatches, KdfDepthLevel, PrivateKey,
+    DEFAULT_UPSTREAM,
+};
 use hex::FromHex;
+use hyper::client::IntoUrl;
+use hyper::Url;
 use rpassword;
 use rpc::{self, RpcConnector};
-use hyper::Url;
-use hyper::client::IntoUrl;
+use std::env;
 use std::net::SocketAddr;
+use std::str::FromStr;
 
 /// Environment variables used to change default variables
 #[derive(Default, Debug)]
