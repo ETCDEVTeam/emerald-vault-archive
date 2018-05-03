@@ -1,10 +1,10 @@
 //! # Serialize JSON RPC parameters
 
 use super::{ClientMethod, MethodParams};
-use serde::{Serialize, Serializer};
-use std::sync::Arc;
-use std::sync::atomic::{AtomicUsize, Ordering};
 use jsonrpc_core::Params;
+use serde::{Serialize, Serializer};
+use std::sync::atomic::{AtomicUsize, Ordering};
+use std::sync::Arc;
 
 lazy_static! {
     static ref REQ_ID: Arc<AtomicUsize> = Arc::new(AtomicUsize::new(1));

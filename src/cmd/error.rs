@@ -1,17 +1,17 @@
 //! # Errors for command executor
 
-use std::{error, fmt, io, str, string};
 use emerald::storage::KeystoreError;
 use emerald::{self, keystore};
-use std::net::AddrParseError;
-use rustc_serialize::json;
-use reqwest;
-use std::num;
 use hex;
+use reqwest;
+use rustc_serialize::json;
+use std::net::AddrParseError;
+use std::num;
+use std::{error, fmt, io, str, string};
 use url;
 
 macro_rules! from_err {
-    ($x: ty) => {
+    ($x:ty) => {
         impl From<$x> for Error {
             fn from(err: $x) -> Self {
                 Error::ExecError(err.to_string())

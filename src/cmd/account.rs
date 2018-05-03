@@ -1,14 +1,14 @@
 //! # Account related subcommands
 
+use super::arg_handlers::*;
 use super::emerald::storage::KeystoreError;
 use super::{EnvVars, Error, ExecResult, KeyfileStorage};
-use super::arg_handlers::*;
-use std::path::{Path, PathBuf};
-use std::io::Read;
-use std::fs::File;
-use rustc_serialize::json;
-use std::io::Write;
 use indicator::ProgressIndicator;
+use rustc_serialize::json;
+use std::fs::File;
+use std::io::Read;
+use std::io::Write;
+use std::path::{Path, PathBuf};
 
 use super::{Address, KeyFile};
 use clap::ArgMatches;

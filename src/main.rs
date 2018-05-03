@@ -25,14 +25,14 @@ extern crate url;
 extern crate clap;
 
 mod cmd;
-mod rpc;
 mod indicator;
+mod rpc;
 
+use clap::App;
 use env_logger::LogBuilder;
 use log::LogRecord;
-use std::process::*;
-use clap::App;
 use std::env;
+use std::process::*;
 
 const VERSION: Option<&'static str> = option_env!("CARGO_PKG_VERSION");
 

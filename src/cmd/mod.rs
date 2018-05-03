@@ -1,25 +1,25 @@
 //! # Execute command
 
 mod account;
-mod transaction;
 mod error;
+mod transaction;
 #[macro_use]
 mod arg_handlers;
 
-pub use self::error::Error;
-pub use self::arg_handlers::*;
 use self::account::account_cmd;
+pub use self::arg_handlers::*;
+pub use self::error::Error;
 use self::transaction::transaction_cmd;
 use super::emerald::keystore::{KdfDepthLevel, KeyFile};
-use super::emerald::{self, align_bytes, to_arr, to_even_str, trim_hex, Address, Transaction};
-use super::emerald::PrivateKey;
 use super::emerald::mnemonic::{gen_entropy, Language, Mnemonic, ENTROPY_BYTE_LENGTH};
 use super::emerald::storage::{default_path, KeyfileStorage, StorageController};
-use std::net::SocketAddr;
+use super::emerald::PrivateKey;
+use super::emerald::{self, align_bytes, to_arr, to_even_str, trim_hex, Address, Transaction};
+use clap::ArgMatches;
 use rpc;
+use std::net::SocketAddr;
 use std::path::PathBuf;
 use std::sync::Arc;
-use clap::ArgMatches;
 
 type ExecResult = Result<(), Error>;
 
@@ -117,7 +117,6 @@ fn mnemonic_cmd() -> ExecResult {
     println!("{}", mn.sentence());
     Ok(())
 }
-
 
 /// Request `nonce` for specified account from a remote node
 ///
