@@ -72,3 +72,14 @@ Environment variables allow you to redefine the default settings:
 * `EMERALD_NODE` - url to upstream node. Used for sign and send of transactions
 
 
+## Output details level
+
+Use `-v` flag to manipulate verbosity
+
+# emerld -v
+
+Will set verbose level to 1 - only info messages.
+
+# emerald -vv
+
+Will set verbose level to 2 - info and debug messages.

@@ -34,22 +34,16 @@ image: Visual Studio 2015
 # matrix entries to test different combinations of features.
 environment:
   GCP_PASSWD:
-    secure: erzLJz7qT0kCJa+jZG6Sf9wwkfLYO2UDLzydkKTdwqA=
+    secure: GiLB9xoSis0z90cMZO88dhWAhRYpXI65mTuYYQsEOdnf+R1CZkuptKRB6mhdEbDliHu6jGWdW+7A6rpYmmTgpYuXcijONGn8mfXHenW7k48=
 
   matrix:
     ### MSVC Toolchains ###
     # Stable 64-bit MSVC
     - channel: stable
       target: x86_64-pc-windows-msvc
-    # Stable 32-bit MSVC
-    - channel: stable
-      target: i686-pc-windows-msvc
     # Beta 64-bit MSVC
     - channel: beta
       target: x86_64-pc-windows-msvc
-    # Beta 32-bit MSVC
-    - channel: beta
-      target: i686-pc-windows-msvc
 
 # Only build against the branches that will have pull requests built against them (master).
 # Otherwise creating feature branches on this repository and a pull requests against them will
@@ -110,10 +104,10 @@ artifacts:
     name: emerald
 before_deploy:
   # Set up GCP upload.
-  - nuget install secure-file -ExcludeVersion
-  - secure-file\tools\secure-file -decrypt gcloud-appveyor.json.enc -secret %GCP_PASSWD% -out .gcloud.json
+  # - nuget install secure-file -ExcludeVersion
+  # - secure-file\tools\secure-file -decrypt gcloud-appveyor.json.enc -secret %GCP_PASSWD% -out .gcloud.json
 deploy_script:
   - ps: >-
       If ($env:APPVEYOR_REPO_BRANCH -eq 'master') {
-        janus.exe deploy -to="builds.etcdevteam.com/emerald-cli/$env:VERSION_BASE/" -files="./*.zip" -key="./.gcloud.json"
+        janus.exe deploy -to="builds.etcdevteam.com/emerald-cli/$env:VERSION_BASE/" -files="./*.zip" -key="./gcloud-appveyor.json.enc"
       }
