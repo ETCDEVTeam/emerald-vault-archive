@@ -186,7 +186,7 @@ pub fn parse_value(s: &str) -> Result<[u8; 32], Error> {
 
 /// Parse transaction data
 pub fn parse_data(s: &str) -> Result<Vec<u8>, Error> {
-    let data = to_even_str(trim_hex(s));
+    let data = parse_arg(s)?;
     Vec::from_hex(data).map_err(Error::from)
 }
 
