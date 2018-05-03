@@ -70,7 +70,7 @@ fn server_cmd(
     storage_ctrl: Arc<Box<StorageController>>,
     chain: &str,
 ) -> ExecResult {
-    info!("Starting Emerald Connector - v{}", emerald::version());
+    info!("Starting Emerald Vault - v{}", emerald::version());
     let host = matches.value_of("host").unwrap_or_default();
     let port = matches.value_of("port").unwrap_or_default();
     let addr = format!("{}:{}", host, port).parse::<SocketAddr>()?;
@@ -89,15 +89,14 @@ fn server_cmd(
 /// # Arguments:
 ///
 /// * matches - arguments supplied from command-line
-/// * storage - `Keyfile` storage
-/// * sec_level - key derivation depth
 ///
 fn balance_cmd(matches: &ArgMatches) -> ExecResult {
     match get_upstream(matches) {
         Ok(ref rpc) => {
             let addr = get_address(matches, "address").expect("Required account address");
             let balance = rpc::request_balance(rpc, &addr)?;
-            println!("Address: {}, balance: {}", &addr, &balance);
+            info!("Balance for {} account", &addr);
+            println!(balance);
 
             Ok(())
         }
@@ -116,5 +115,26 @@ fn mnemonic_cmd() -> ExecResult {
     let entropy = gen_entropy(ENTROPY_BYTE_LENGTH)?;
     let mn = Mnemonic::new(Language::English, &entropy)?;
     println!("{}", mn.sentence());
+    Ok(())
+}
+
+
+/// Request `nonce` for specified account from a remote node
+///
+/// # Arguments:
+///
+/// * matches - arguments supplied from command-line
+///
+fn nonce_cmd(matches: &ArgMatches) -> ExecResult {
+    let addr = matches.value_of("address")?;
+    let nonce = get_nonce(&matches, &addr)?;
+
+    info!("Account address: {}, nonce:", &addr);
+    if matches.is_presetnt("hex") {
+        println!("{:x}", nonce);
+    } else {
+        println!("{}", nonce);
+    }
+
     Ok(())
 }

@@ -111,7 +111,7 @@ pub fn get_gas_limit(matches: &ArgMatches, env: &EnvVars) -> Result<u64, Error> 
     u64::from_str_radix(trim_hex(&gas), 16).map_err(Error::from)
 }
 
-/// Parse address from command-line argument
+/// Get nonce value for provided address
 ///
 /// # Arguments:
 ///

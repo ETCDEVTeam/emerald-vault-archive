@@ -7,7 +7,7 @@ use std::sync::mpsc::{self, SyncSender, TryRecvError};
 /// Printing interval in milliseconds
 const PRINT_PULSE_MILLISEC: u64 = 500;
 
-/// Progress indicaion for long running tasks
+/// Progress indication for long running tasks
 pub struct ProgressIndicator {
     tx: SyncSender<()>,
 }
