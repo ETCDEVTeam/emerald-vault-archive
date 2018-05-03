@@ -36,15 +36,24 @@ subcommands:
             help: Port for RPC server
             takes_value: true
             default_value: "1920"
+    - balance:
+            about: Request account's balance from ethereum node through RPC
+            args:
+                - address:
+                    help: Account address
+                    required: true
+                    takes_value: true
     - mnemonic:
         about: Create mnemonic phrase according to BIP39 spec
-    - balance:
-        about: Request account's balance from ethereum node through RPC
+    - nonce:
+        about: Get `nonce` value for selected address
         args:
-            - address:
-                help: Account address
-                required: true
-                takes_value: true
+        - address:
+            help: Address of account
+            required: true
+            takes_value: true
+        - hex:
+            help: Print nonce in hexadecimal format
     - transaction:
         about: Transaction related commands
         subcommands:
@@ -191,6 +200,6 @@ subcommands:
                 required: true
                 takes_value: true
             - all:
-                help: Show hidden accounts
+                help: Export all accounts
                 short: a
                 global: false
