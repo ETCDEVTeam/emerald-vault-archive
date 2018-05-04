@@ -14,9 +14,10 @@ jobs:
               curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain stable
               brew install bats
               brew install gpg2
-#      - run:
-#          name: Tests
-#          command: |
+
+      - run:
+          name: Unit tests
+          command: cargo test
 
       - run:
           name: Build
