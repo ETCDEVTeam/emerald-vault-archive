@@ -17,7 +17,9 @@ jobs:
 
       - run:
           name: Unit tests
-          command: cargo test
+          command: |
+                export PATH=$PATH:$HOME/.cargo/bin
+                cargo test
 
       - run:
           name: Build
