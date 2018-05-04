@@ -126,22 +126,15 @@ fn mnemonic_cmd() -> ExecResult {
 /// * matches - arguments supplied from command-line
 ///
 fn nonce_cmd(matches: &ArgMatches) -> ExecResult {
-    match get_upstream(matches) {
-        Ok(ref rpc) => {
-            let addr = get_address(matches, "address").expect("Required account address");
-            let nonce = get_nonce(&matches, &addr)?;
-            info!("Nonce for {} account", &addr);
-            if matches.is_present("hex") {
-                println!("{:x}", nonce);
-            } else {
-                println!("{}", nonce);
-            }
+    let addr = get_address(matches, "address").expect("Required account address");
+    let nonce = get_nonce(&matches, &addr)?;
 
-            Ok(())
-        }
-        Err(e) => Err(Error::ExecError(format!(
-            "Can't get `nonce`: {}",
-            e.to_string()
-        ))),
+    info!("Nonce for {} account", &addr);
+    if matches.is_present("hex") {
+        println!("{:x}", nonce);
+    } else {
+        println!("{}", nonce);
     }
+
+    Ok(())
 }
