@@ -52,7 +52,8 @@ impl EnvVars {
 
 /// Parse raw hex string arguments from user
 fn parse_arg(raw: &str) -> Result<String, Error> {
-    let s = raw.parse::<String>()
+    let s = raw
+        .parse::<String>()
         .and_then(|s| Ok(to_even_str(trim_hex(&s))))?;
 
     if s.is_empty() {
@@ -187,7 +188,7 @@ pub fn parse_value(s: &str) -> Result<[u8; 32], Error> {
 /// Parse transaction data
 pub fn parse_data(s: &str) -> Result<Vec<u8>, Error> {
     match s.len() {
-        0 => Ok(vec!()),
+        0 => Ok(vec![]),
         _ => {
             let data = parse_arg(s)?;
             Vec::from_hex(data).map_err(Error::from)
@@ -203,7 +204,8 @@ pub fn parse_url(s: &str) -> Result<Url, Error> {
 
 /// Parse socket address for ethereum node
 pub fn parse_socket(s: &str) -> Result<Url, Error> {
-    let addr = s.parse::<SocketAddr>()
+    let addr = s
+        .parse::<SocketAddr>()
         .map_err(Error::from)
         .and_then(|a| format!("https://{}", a).into_url().map_err(Error::from))?;
 
