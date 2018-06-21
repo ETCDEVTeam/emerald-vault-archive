@@ -4,7 +4,7 @@ use super::arg_handlers::*;
 use super::emerald::storage::KeystoreError;
 use super::{EnvVars, Error, ExecResult, KeyfileStorage};
 use indicator::ProgressIndicator;
-use rustc_serialize::json;
+use serde_json;
 use std::fs::File;
 use std::io::Read;
 use std::io::Write;
@@ -285,7 +285,7 @@ pub fn export_keyfile(
     let mut p = PathBuf::from(path);
     p.push(&info.filename);
 
-    let json = json::encode(&kf).and_then(|s| Ok(s.into_bytes()))?;
+    let json = serde_json::to_string(&kf).and_then(|s| Ok(s.into_bytes()))?;
     let mut f = fs::File::create(p)?;
     f.write_all(&json)?;
 
