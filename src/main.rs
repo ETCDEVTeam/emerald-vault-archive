@@ -15,7 +15,6 @@ extern crate lazy_static;
 extern crate log;
 extern crate reqwest;
 extern crate rpassword;
-extern crate rustc_serialize;
 extern crate serde;
 #[macro_use]
 extern crate serde_derive;
