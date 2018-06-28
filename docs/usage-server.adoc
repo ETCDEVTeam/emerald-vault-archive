@@ -1,6 +1,8 @@
 = JSON-RPC API
+:toc:
+:toclevels: 2
 
-# Run as Server
+## Run as RPC Server
 
 ```
 $ emerald server --host=127.0.0.1 --port=1920
@@ -11,11 +13,11 @@ After execution of the previous command Emerald Server will listen on 127.0.0.0:
 JSON-RPC is a remote procedure call protocol encoded in JSON. We use the http://www.jsonrpc.org/specification[version 2 of the protocol].
 It's the same protocol as used by Geth, Parity and other Ethereum servers.
 
-# Methods
+## Methods
 
-## General
+### RPC Server Management
 
-### emerald_heartbeat
+#### emerald_heartbeat
 
 Identify if and when the originator fails or is no longer available.
 
@@ -30,7 +32,7 @@ Identify if and when the originator fails or is no longer available.
 <-- {"jsonrpc": "2.0", "result": 1497439590, "id": 1}
 ```
 
-### emerald_currentVersion
+#### emerald_currentVersion
 
 Returns the client current version.
 
@@ -45,9 +47,9 @@ Returns the client current version.
 <-- {"jsonrpc": "2.0", "result": "0.9", "id": 1}
 ```
 
-## Private Key management
+### Private Key management
 
-### emerald_listAccounts
+#### emerald_listAccounts
 
 Return the list of all not hidden (by default) accounts from the keystore.
 
@@ -81,7 +83,7 @@ Return the list of all not hidden (by default) accounts from the keystore.
      "id": 1}
 ```
 
-### emerald_hideAccount
+#### emerald_hideAccount
 
 Hide an account from the list returned by default by `emerald_listAccounts`.
 
@@ -109,7 +111,7 @@ If required account doesn't exist
 <-- {"jsonrpc": "2.0", "error": {"code": -32000, "message": "Account doesn't exist"}, "id": "1"}
 ```
 
-### emerald_unhideAccount
+#### emerald_unhideAccount
 
 Show an account that was hidden before by the command `emerald_hideAccount`.
 
@@ -137,7 +139,7 @@ If required account doesn't exist
 <-- {"jsonrpc": "2.0", "error": {"code": -32000, "message": "Account doesn't exist"}, "id": "1"}
 ```
 
-### emerald_newAccount
+#### emerald_newAccount
 
 Creates a new account and stores it locally as a passphrase-encoded keystore file.
 
@@ -174,7 +176,7 @@ Creates a new account and stores it locally as a passphrase-encoded keystore fil
 <-- {"jsonrpc": "2.0", "result": "0xe9a7e26bf5c05fe3bae272d4c940bd7158611ce9", "id": 1}
 ```
 
-### emerald_shakeAccount
+#### emerald_shakeAccount
 
 Recreate account with the same public address, but with a different passphrase.
 
@@ -197,7 +199,7 @@ Recreate account with the same public address, but with a different passphrase.
 <-- {"jsonrpc": "2.0", "result": true, "id": 1}
 ```
 
-### emerald_updateAccount
+#### emerald_updateAccount
 
 Update not secured by passphrase account metadata, like `name` and `description`.
 
@@ -227,7 +229,7 @@ If required account doesn't exist
 <-- {"jsonrpc": "2.0", "error": {"code": -32000, "message": "Account doesn't exist"}, "id": "1"}
 ```
 
-### emerald_importAccount
+#### emerald_importAccount
 
 Import a new account from an external keyfile. Handle both cases: normal account & HD wallet account,
 
@@ -292,7 +294,7 @@ Import a new account from an external keyfile. Handle both cases: normal account
 <-- {"jsonrpc": "2.0", "result": "0x8f5201aed0b69875b24b6accounaccoun14dda0e", "id": 1}
 ```
 
-### emerald_exportAccount
+#### emerald_exportAccount
 
 Returns an account keyfile associated with the account.
 
@@ -351,7 +353,7 @@ HD wallet account:
      "id": 1}
 ```
 
-### emerald_generateMnemonic
+#### emerald_generateMnemonic
 
 Generates a new 24 words long mnemonic phrase
 
@@ -367,7 +369,7 @@ Generates a new 24 words long mnemonic phrase
         food business side grid unable middle armed observe pair crouch tonight away coconut", "id": 1}
 ```
 
-### emerald_importMnemonic
+#### emerald_importMnemonic
 
 Creates a new account from a mnemonic and stores it locally as a passphrase-encoded keystore file.
 
@@ -406,9 +408,9 @@ Creates a new account from a mnemonic and stores it locally as a passphrase-enco
 <-- {"jsonrpc": "2.0", "result": "0xe9a7e26bf5c05fe3bae272d4c940bd7158611ce9", "id": 1}
 ```
 
-## Sign Transactions
+### Sign Transactions
 
-### emerald_signTransaction
+#### emerald_signTransaction
 
 Signs transaction offline with private key from keystore file with given passphrase.
 If `function` and `arguments` are provided, they will be encoded according smart contract ABI and used in the `data` field of the transaction.
@@ -472,9 +474,9 @@ If `function` and `arguments` are provided, they will be encoded according smart
 <-- {"jsonrpc": "2.0", "result": "0x085fb4f24031eaedbc2b611aa528f22343eb52dba9059cbb000000000000000000000000aa00000000bbbb000000000000000000000000aa000000000000000000000000000000000000000000000000000000000000000a", "id": 1}
 ```
 
-## Contract Management
+### Contract Management
 
-### emerald_listContracts
+#### emerald_listContracts
 
 Return the list of all not hidden (by default) smart contracts from the local storage.
 
@@ -515,7 +517,7 @@ curl -X POST -d '{"jsonrpc":"2.0", "method":"emerald_listContracts", "params":[{
 {"jsonrpc":"2.0","result":[{"address":"0x085fb4f24031eaedbc2b611aa528f22343eb52db","name":"BEC"}],"id":76}
 
 ```
-### emerald_hideContract
+#### emerald_hideContract
 
 Hide a smart contract from the list returned by default by `emerald_listContracts`.
 
@@ -543,7 +545,7 @@ If required contract doesn't exist
 <-- {"jsonrpc": "2.0", "error": {"code": -32000, "message": "Contract doesn't exist"}, "id": "1"}
 ```
 
-### emerald_unhideContract
+#### emerald_unhideContract
 
 Show a smart contract that was hidden before by the command `emerald_hideContract`.
 
@@ -571,7 +573,7 @@ If required contract doesn't exist
 <-- {"jsonrpc": "2.0", "error": {"code": -32000, "message": "Contract doesn't exist"}, "id": "1"}
 ```
 
-### emerald_updateContract
+#### emerald_updateContract
 
 Update contract metadata. Contract address and chain information are used to identify the contract, and may not be updated.
 
@@ -612,7 +614,7 @@ If required contract doesn't exist
 ```
 
 
-### emerald_importContract
+#### emerald_importContract
 
 Import a new smart contract Application Binary Interface (ABI) locally.
 
@@ -694,7 +696,7 @@ Import a new smart contract Application Binary Interface (ABI) locally.
 <-- {"jsonrpc": "2.0", "result": true, "id": 1}
 ```
 
-### emerald_exportContract
+#### emerald_exportContract
 
 Returns contract object associated with the contract.
 
@@ -740,10 +742,10 @@ Returns contract object associated with the contract.
      "id": 1}
 ```
 
-## Address Book
+### Address Book Management
 
 
-### emerald_importAddress
+#### emerald_importAddress
 
 Add new contact into address book
 
@@ -768,7 +770,7 @@ curl -X POST -d '{"jsonrpc":"2.0", "method":"emerald_importAddress", "params":[{
 {"jsonrpc":"2.0","result":"0xB3c9A2f3F96ffBC4b7DEd2D92C83175698147Ae2","id":76}
 ```
 
-### emerald_listAddresses
+#### emerald_listAddresses
 
 Return all addresses for particular chain
 
@@ -788,7 +790,7 @@ curl -X POST -d '{"jsonrpc":"2.0", "method":"emerald_listAddresses", "params":[{
 {"jsonrpc":"2.0","result":[{"address":"0xB3c9A2f3F96ffBC4b7DEd2D92C83175698147Ae2"}],"id":76}
 ```
 
-### emerald_deleteAddress
+#### emerald_deleteAddress
 
 Delete contact from address book
 
@@ -810,7 +812,7 @@ curl -X POST -d '{"jsonrpc":"2.0", "method":"emerald_deleteAddress", "params":["
 ```
 
 
-# Errors
+## Errors
 
 
 |===
