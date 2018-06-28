@@ -25,10 +25,6 @@ pub enum ClientMethod {
     /// https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_gettransactioncount)
     EthGetTxCount,
 
-    /// [eth_getTransactionByHash](
-    /// https://github.com/ethereumproject/wiki/wiki/JSON-RPC#eth_gettransactionbyhash)
-    EthGetTxByHash,
-
     /// [eth_sendRawTransaction](
     /// https://github.com/paritytech/parity/wiki/JSONRPC-eth-module#eth_sendrawtransaction)
     EthSendRawTransaction,
