@@ -22,7 +22,7 @@ args:
         short: c
         long: chain
         help: Sets a chain name
-        default_value: mainnet
+        default_value: etc
         takes_value: true
 subcommands:
     - server:

@@ -23,7 +23,7 @@ use std::sync::Arc;
 
 type ExecResult = Result<(), Error>;
 
-const DEFAULT_CHAIN_NAME: &str = "mainnet";
+const DEFAULT_CHAIN_NAME: &str = "etc";
 const DEFAULT_UPSTREAM: &str = "127.0.0.1:8545";
 
 /// Create new command executor

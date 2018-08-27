@@ -44,7 +44,7 @@ FLAGS:
 
 OPTIONS:
     -p, --base-path <base-path>    Set path for chain storage
-    -c, --chain <chain>            Sets a chain name [default: mainnet]
+    -c, --chain <chain>            Sets a chain name [default: etc]
 
 SUBCOMMANDS:
     account        Account related commands
