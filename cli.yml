@@ -25,6 +25,8 @@ args:
         default_value: etc
         takes_value: true
 subcommands:
+    - migrate:
+        about: Migrate to a new storage  structure
     - server:
         about: Start local RPC server
         args:
