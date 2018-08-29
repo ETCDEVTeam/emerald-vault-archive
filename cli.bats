@@ -93,14 +93,14 @@ teardown() {
 
     run $EMERALD_CLI --chain=morden account update \
         "$address" \
-        --name="NewName" \
-        --description="NewDescription"
+        --name="new name" \
+        --description="new description"
     [ "$status" -eq 0 ]
 
     run $EMERALD_CLI --chain=morden account list
 
     [ "$status" -eq 0 ]
-    [[ "$output" == *"NewName"* ]]
+    [[ "$output" == *"new name"* ]]
 }
 
 @test "succeeds: account strip" {
