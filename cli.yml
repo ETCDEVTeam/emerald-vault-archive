@@ -22,7 +22,7 @@ args:
         short: c
         long: chain
         help: Sets a chain name
-        default_value: etc
+        default_value: etc-main
         takes_value: true
 subcommands:
     - migrate:
