@@ -1,19 +1,19 @@
 [package]
-name = "emerald-cli"
+name = "emerald-vault"
 version = "0.23.0"
 authors = ["Constantine Kryvomaz <kostiyantynk@gmail.com>"]
 description = "Console utility for secure account management"
 homepage = "http://etcdevteam.com"
-repository = "https://github.com/ETCDEVTeam/emerald-cli"
-documentation = "https://docs.rs/emerald-cli"
+repository = "https://github.com/ETCDEVTeam/emerald-vault"
+documentation = "https://docs.rs/emerald-vault"
 keywords = ["ethereum-classic", "blockchain", "crypto-wallet", "cold-storage", "cli"]
 categories = ["console", "bash"]
 readme = "README.md"
 license = "Apache-2.0"
 
 [badges]
-travis-ci = { repository = "ETCDEVTeam/emerald-cli" }
-appveyor = { repository = "ETCDEVTeam/emerald-cli" }
+travis-ci = { repository = "ETCDEVTeam/emerald-vault" }
+appveyor = { repository = "ETCDEVTeam/emerald-vault" }
 
 [[bin]]
 name = "emerald"
