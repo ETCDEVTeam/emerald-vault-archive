@@ -16,7 +16,7 @@ travis-ci = { repository = "ETCDEVTeam/emerald-vault" }
 appveyor = { repository = "ETCDEVTeam/emerald-vault" }
 
 [[bin]]
-name = "emerald"
+name = "emerald-vault"
 path = "src/main.rs"
 
 [dependencies]
