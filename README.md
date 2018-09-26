@@ -8,12 +8,12 @@
 ```
 <p align="center">
   <p align="center">
-    <a href="https://travis-ci.org/ETCDEVTeam/emerald-cli"><img alt="Travis" src="https://travis-ci.org/ETCDEVTeam/emerald-cli.svg?branch=master"></a>
-    <a href="https://circleci.com/gh/etcdevteam/emerald-cli"><img alt="CircleCI" src="https://circleci.com/gh/ETCDEVTeam/emerald-cli/tree/master.svg?style=shield"></a>
-    <a href="https://ci.appveyor.com/project/etcdevteam/emerald-cli">
+    <a href="https://travis-ci.org/ETCDEVTeam/emerald-vault"><img alt="Travis" src="https://travis-ci.org/ETCDEVTeam/emerald-vault.svg?branch=master"></a>
+    <a href="https://circleci.com/gh/etcdevteam/emerald-vault"><img alt="CircleCI" src="https://circleci.com/gh/ETCDEVTeam/emerald-vault/tree/master.svg?style=shield"></a>
+    <a href="https://ci.appveyor.com/project/etcdevteam/emerald-vault">
         <img alt="AppVeyor" src="https://ci.appveyor.com/api/projects/status/e5nqu33xo8y4nk0v?svg=true">
     </a>
-    <a href="https://crates.io/crates/emerald-cli"><img alt="crates.io" src="https://img.shields.io/crates/v/emerald-cli.svg?style=flat-square"></a>
+    <a href="https://crates.io/crates/emerald-vault"><img alt="crates.io" src="https://img.shields.io/crates/v/emerald-vault.svg?style=flat-square"></a>
     <a href="LICENSE"><img alt="Software License" src="https://img.shields.io/badge/License-Apache%202.0-blue.svg?style=flat-square&maxAge=2592000"></a>
   </p>
 </p>
@@ -21,21 +21,21 @@
 ## About
 
 `Emerald Platform` is a set of tools to build and integrate other applications with the Ethereum Classic (ETC) blockchain.
-`Emerald CLI(Command Line Interface)` is a tool to access Ethereum ETC from the command line. It connects to an external node (_"upstream"_) and allows a user or application to read information from the blockchain and to send new transactions. In the latter case it provides functionality to sign transactions by a provided Private Key. The tool integrates Emerald Vault with the intention of generation, import, and/or storing of Ethereum Private Keys.
+`Emerald Vault` is a tool to access Ethereum ETC from the command line. It connects to an external node (_"upstream"_) and allows a user or application to read information from the blockchain and to send new transactions. In the latter case it provides functionality to sign transactions by a provided Private Key. The tool integrates [emerald-rs](https://github.com/ETCDEVTeam/emerald-rs) with the intention of generation, import, and/or storing of Ethereum Private Keys.
 
-`emerald-cli` is compatible with both Ethereum ETC and ETH.
+`emerald-vault` is compatible with both Ethereum ETC and ETH.
 
 
 ## Usage
 
 ```shell
-$ emerald --help
+$ emerald-vault --help
 
-emerald
+emerald-vault
 Command-line interface for Emerald platform
 
 USAGE:
-    emerald [FLAGS] [OPTIONS] [SUBCOMMAND]
+    emerald-vault [FLAGS] [OPTIONS] [SUBCOMMAND]
 
 FLAGS:
     -h, --help       Prints help information
@@ -56,20 +56,20 @@ SUBCOMMANDS:
 
 ```
 
-For detailed documentation see [https://docs.etcdevteam.com/html/emerald-cli](https://docs.etcdevteam.com/html/emerald-cli)
+For detailed documentation see [https://docs.etcdevteam.com/html/emerald-vault](https://docs.etcdevteam.com/html/emerald-vault)
 
 ## Installing Emerald CLI
 
 ### Download stable binary
 
-Binaries for all platforms are currently published at https://github.com/ETCDEVTeam/emerald-cli/releases
+Binaries for all platforms are currently published at https://github.com/ETCDEVTeam/emerald-vault/releases
 
 ### :beers: Install with Homebrew (OSX only)
 
 Install latest stable binary.
 
 ```
-$ brew install ethereumproject/classic/emerald-cli
+$ brew install ethereumproject/classic/emerald-vault
 ```
 
 ### Download development build
@@ -100,16 +100,16 @@ the build tools is by installing Microsoft Visual C++ Build Tools 2017 which pro
 #### Compile
 
 ```
-git clone https://github.com/etcdevteam/emerald-cli.git
-cd emerald-cli
+git clone https://github.com/etcdevteam/emerald-vault.git
+cd emerald-vault
 cargo build --release
 cd target\debug
 ```
 
 ## Links
 
-- Documentation: https://docs.etcdevteam.com/html/emerald-cli
-- Issues: https://github.com/ETCDEVTeam/emerald-cli/issues
+- Documentation: https://docs.etcdevteam.com/html/emerald-vault
+- Issues: https://github.com/ETCDEVTeam/emerald-vault/issues
 - Development binaries: http://builds.etcdevteam.com/
 
 <!-- ## Demo -->
