@@ -36,7 +36,7 @@ script:
   - export RUST_BACKTRACE=1
   - cargo test --all --verbose
   - cargo build --all --verbose --release
-  - cp ./target/release/emerald "$HOME/.cargo/bin/"
+  - cp ./target/release/emerald-vault "$HOME/.cargo/bin/"
   - bats cli.bats
 
 deploy:
