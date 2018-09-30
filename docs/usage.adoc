@@ -4,13 +4,13 @@ Usage help description is based on https://clap.rs/[clap].
 Use `-h | --help` for help menu:
 
 ```
-$ emerald --help
+$ emerald-vault --help
 
-emerald
+emerald-vault
 Command-line interface for Emerald platform
 
 USAGE:
-    emerald [FLAGS] [OPTIONS] [SUBCOMMAND]
+    emerald-vault [FLAGS] [OPTIONS] [SUBCOMMAND]
 
 FLAGS:
     -h, --help       Prints help information
@@ -33,13 +33,13 @@ SUBCOMMANDS:
 
 Use `-h | --help` for subcommand help menu:
 ```
-$ emerald account --help
+$ emerald-vault account --help
 
-emerald-account
+emerald-vault-account
 Account related commands
 
 USAGE:
-    emerald account [SUBCOMMAND]
+    emerald-vault account [SUBCOMMAND]
 
 FLAGS:
     -h, --help       Prints help information
@@ -76,10 +76,10 @@ Environment variables allow you to redefine the default settings:
 
 Use `-v` flag to manipulate verbosity
 
-# emerld -v
+# emerald-vault -v
 
 Will set verbose level to 1 - only info messages.
 
-# emerald -vv
+# emerald-vault -vv
 
 Will set verbose level to 2 - info and debug messages.
