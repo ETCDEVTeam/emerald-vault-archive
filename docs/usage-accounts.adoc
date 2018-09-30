@@ -3,25 +3,25 @@
 ## Show all available accounts
 
 ```
-$ emerald account list
+$ emerald-vault account list
 ```
 
 ## Exclude an account from the showing in the list
 
 ```
-$ emerald account hide  0x0e7c045110b8dbf29765047380898919c5cb56f4
+$ emerald-vault account hide  0x0e7c045110b8dbf29765047380898919c5cb56f4
 ```
 
 To undo in the future:
 
 ```
-$ emerald account unhide --all
+$ emerald-vault account unhide --all
 ```
 
 ## Create new account
 
 ```
-$ emerald account new \
+$ emerald-vault account new \
     --security-level=high \
     --name="Test account" \
     --description="Some description" \
@@ -31,20 +31,20 @@ $ emerald account new \
 ## Show private key
 
 ```
-$ emerald account strip 0x0e7c045110b8dbf29765047380898919c5cb56f4 < echo "secret passphrase"
+$ emerald-vault account strip 0x0e7c045110b8dbf29765047380898919c5cb56f4 < echo "secret passphrase"
 ```
 
 ## Change private key passphrase
 
 ```
-$ emerald account strip 0x0e7c045110b8dbf29765047380898919c5cb56f4 < echo "old passphrase" \
-$ emerald account new --raw < echo "new passphrase"
+$ emerald-vault account strip 0x0e7c045110b8dbf29765047380898919c5cb56f4 < echo "old passphrase" \
+$ emerald-vault account new --raw < echo "new passphrase"
 ```
 
 ## Change account name
 
 ```
-$ emerald account update \
+$ emerald-vault account update \
     0x0e7c045110b8dbf29765047380898919c5cb56f4 \
     --name="New name" \
     --description="A new description"
@@ -54,26 +54,26 @@ $ emerald account update \
 
 Import content of whole folder:
 ```
-$ emerald account import --all <path_to_files>
+$ emerald-vault account import --all <path_to_files>
 ```
 or single keyfile:
 ```
-$ emerald account import <path_to_file>
+$ emerald-vault account import <path_to_file>
 ```
 If keyfile already exist in a storage, import will be ignore.
 
 To override existing Keyfile, use `-f | --force` option:
 ```
-$ emerald account import --force <path_to_file>
+$ emerald-vault account import --force <path_to_file>
 ```
 
 ## Export keyfile
 
 Export all keyfiles into directory:
 ```
-$ emerald account export --all <path_to_export_dir>
+$ emerald-vault account export --all <path_to_export_dir>
 ```
 or single keyfile for selected <address>:
 ```
-$ emerald account export <address> <path_to_export_dir>
+$ emerald-vault account export <address> <path_to_export_dir>
 ```
