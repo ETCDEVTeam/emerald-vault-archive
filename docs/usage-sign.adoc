@@ -3,7 +3,7 @@
 # Offline
 
 ```
-$ emerald transaction \
+$ emerald-vault transaction \
     0x0e7c045110b8dbf29765047380898919c5cb56f4 \
     0x0e7c045110b8dbf29765047380898919c5cb56f4 \
     0x1000 \
@@ -16,7 +16,7 @@ $ emerald transaction \
 
 Send transaction for execution through a remote node:
 ```
-$ emerald transaction \
+$ emerald-vault transaction \
     0x0e7c045110b8dbf29765047380898919c5cb56f4 \
     0x0e7c045110b8dbf29765047380898919c5cb56f4 \
     0x1000 \
