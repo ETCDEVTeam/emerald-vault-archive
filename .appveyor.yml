@@ -7,7 +7,6 @@
 image: Visual Studio 2015
 
 ## Build Matrix ##
-
 # This configuration will setup a build for each channel & target combination (12 windows
 # combinations in all).
 #
@@ -109,5 +108,5 @@ before_deploy:
 deploy_script:
   - ps: >-
       If ($env:APPVEYOR_REPO_BRANCH -eq 'master') {
-        janus.exe deploy -to="builds.etcdevteam.com/emerald-cli/$env:VERSION_BASE/" -files="./*.zip" -key="./gcloud-appveyor.json.enc"
+        janus.exe deploy -to="builds.etcdevteam.com/emerald-vault/$env:VERSION_BASE/" -files="./*.zip" -key="./gcloud-appveyor.json.enc"
       }
