@@ -1,9 +1,9 @@
 ```shell
-                                                                __       __                                  __   __ 
-                      ___    ____ ___   ___    _____  ____ _   / /  ____/ /        _   __  ____ _  __  __   / /  / /_
-                     / _ \  / __ `__ \ / _ \  / ___/ / __ `/  / /  / __  /  ______| | / / / __ `/ / / / /  / /  / __/
-                    /  __/ / / / / / //  __/ / /    / /_/ /  / /  / /_/ /  /_____/| |/ / / /_/ / / /_/ /  / /  / /_  
-                    \___/ /_/ /_/ /_/ \___/ /_/     \__,_/  /_/   \__,_/          |___/  \__,_/  \__,_/  /_/   \__/  
+                                                        __       __                                  __   __ 
+              ___    ____ ___   ___    _____  ____ _   / /  ____/ /        _   __  ____ _  __  __   / /  / /_
+             / _ \  / __ `__ \ / _ \  / ___/ / __ `/  / /  / __  /  ______| | / / / __ `/ / / / /  / /  / __/
+            /  __/ / / / / / //  __/ / /    / /_/ /  / /  / /_/ /  /_____/| |/ / / /_/ / / /_/ /  / /  / /_  
+            \___/ /_/ /_/ /_/ \___/ /_/     \__,_/  /_/   \__,_/          |___/  \__,_/  \__,_/  /_/   \__/  
 ```
 <p align="center">
   <p align="center">
@@ -111,11 +111,6 @@ cd target\debug
 - Issues: https://github.com/ETCDEVTeam/emerald-vault/issues
 - Development binaries: http://builds.etcdevteam.com/
 
-<!-- ## Demo -->
-
-<!-- <a href="https://asciinema.org/a/WbivFQXwm5lUXenNsTvzfQxRY?speed=2" target="_blank"> -->
-  <!-- <img src="https://asciinema.org/a/WbivFQXwm5lUXenNsTvzfQxRY.png" /> -->
-<!-- </a> -->
 
 ## License
 

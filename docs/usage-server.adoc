@@ -5,7 +5,7 @@
 ## Run as RPC Server
 
 ```
-$ emerald server 127.0.0.1 1920
+$ emerald-vault server 127.0.0.1 1920
 ```
 
 After execution of the previous command Emerald Server will listen on 127.0.0.0:1920
