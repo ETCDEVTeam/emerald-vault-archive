@@ -1,8 +1,7 @@
 //! # Send JSON encoded HTTP requests
 
 use cmd::Error;
-use hyper::client::IntoUrl;
-use hyper::Url;
+use hyper::Uri;
 use jsonrpc_core::Params;
 use reqwest::Client;
 use serde_json::Value;
@@ -39,19 +38,19 @@ pub enum ClientMethod {
 pub struct MethodParams<'a>(pub ClientMethod, pub &'a Params);
 
 pub struct RpcConnector {
-    pub url: Url,
+    pub uri: Uri,
 }
 
 impl RpcConnector {
-    pub fn new<U: IntoUrl>(url: U) -> Result<RpcConnector, Error> {
-        let url = url.into_url()?;
+    pub fn new(s: &str) -> Result<RpcConnector, Error> {
+        let uri: Uri = s.parse()?;
 
-        Ok(RpcConnector { url })
+        Ok(RpcConnector { uri })
     }
 
     /// Send and JSON RPC HTTP post request
     pub fn send_post(&self, params: &MethodParams) -> Result<Value, Error> {
-        let mut res = CLIENT.post(self.url.clone()).json(params).send()?;
+        let mut res = CLIENT.post(self.uri.clone()).json(params).send()?;
         let json: Value = res.json()?;
 
         Ok(json["result"].clone())
