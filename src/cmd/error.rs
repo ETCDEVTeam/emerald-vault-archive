@@ -9,6 +9,7 @@ use std::net::AddrParseError;
 use std::num;
 use std::{error, fmt, io, str, string};
 use url;
+use hyper::uri;
 
 macro_rules! from_err {
     ($x:ty) => {
@@ -45,6 +46,7 @@ from_err!(emerald::Error);
 from_err!(emerald::mnemonic::Error);
 from_err!(url::ParseError);
 from_err!(serde_json::Error);
+from_err!(uri::InvalidUri);
 
 impl fmt::Display for Error {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
