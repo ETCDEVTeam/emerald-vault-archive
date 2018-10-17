@@ -1,9 +1,9 @@
 //! # JSON RPC module
 
-mod http;
+mod comm;
 mod serialize;
 
-pub use self::http::{ClientMethod, MethodParams, RpcConnector};
+pub use self::comm::{ClientMethod, MethodParams, RpcConnector};
 use cmd::Error;
 use emerald::Address;
 use hex::ToHex;

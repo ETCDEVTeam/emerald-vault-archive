@@ -6,8 +6,7 @@ use super::{
     DEFAULT_UPSTREAM,
 };
 use hex::FromHex;
-use hyper::client::IntoUrl;
-use hyper::Url;
+use reqwest::Url;
 use rpassword;
 use rpc::{self, RpcConnector};
 use std::env;
@@ -154,7 +153,7 @@ pub fn get_upstream(matches: &ArgMatches) -> Result<RpcConnector, Error> {
     let ups = matches.value_of("upstream").unwrap_or(DEFAULT_UPSTREAM);
     parse_socket(ups)
         .or_else(|_| parse_url(ups))
-        .and_then(RpcConnector::new)
+        .and_then(|url| Ok(RpcConnector { url }))
 }
 
 /// Parse address from command-line argument
@@ -198,7 +197,7 @@ pub fn parse_data(s: &str) -> Result<Vec<u8>, Error> {
 
 /// Parse URL for ethereum node
 pub fn parse_url(s: &str) -> Result<Url, Error> {
-    let addr = Url::parse(s)?;
+    let addr: Url = s.parse()?;
     Ok(addr)
 }
 
@@ -207,7 +206,7 @@ pub fn parse_socket(s: &str) -> Result<Url, Error> {
     let addr = s
         .parse::<SocketAddr>()
         .map_err(Error::from)
-        .and_then(|a| format!("https://{}", a).into_url().map_err(Error::from))?;
+        .and_then(|a| format!("https://{}", a).parse().map_err(Error::from))?;
 
     Ok(addr)
 }

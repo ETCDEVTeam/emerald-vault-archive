@@ -3,6 +3,8 @@
 use emerald::storage::KeystoreError;
 use emerald::{self, keystore};
 use hex;
+use http;
+use hyper;
 use reqwest;
 use serde_json;
 use std::net::AddrParseError;
@@ -45,6 +47,8 @@ from_err!(emerald::Error);
 from_err!(emerald::mnemonic::Error);
 from_err!(url::ParseError);
 from_err!(serde_json::Error);
+from_err!(hyper::error::Error);
+from_err!(http::uri::InvalidUri);
 
 impl fmt::Display for Error {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
