@@ -1,13 +1,14 @@
 //! # Send JSON encoded HTTP requests
 
 use cmd::Error;
-use hyper::Uri;
 use jsonrpc_core::Params;
-use reqwest::Client;
+use reqwest::{Client, Url};
 use serde_json::Value;
 
 lazy_static! {
-    static ref CLIENT: Client = Client::new().expect("Expect to create an HTTP client");
+    static ref CLIENT: Client = Client::builder()
+        .build()
+        .expect("Expect to create an HTTP client");
 }
 
 /// RPC methods
@@ -38,19 +39,13 @@ pub enum ClientMethod {
 pub struct MethodParams<'a>(pub ClientMethod, pub &'a Params);
 
 pub struct RpcConnector {
-    pub uri: Uri,
+    pub url: Url,
 }
 
 impl RpcConnector {
-    pub fn new(s: &str) -> Result<RpcConnector, Error> {
-        let uri: Uri = s.parse()?;
-
-        Ok(RpcConnector { uri })
-    }
-
     /// Send and JSON RPC HTTP post request
     pub fn send_post(&self, params: &MethodParams) -> Result<Value, Error> {
-        let mut res = CLIENT.post(self.uri.clone()).json(params).send()?;
+        let mut res = CLIENT.post(self.url.clone()).json(params).send()?;
         let json: Value = res.json()?;
 
         Ok(json["result"].clone())
