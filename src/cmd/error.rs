@@ -3,13 +3,14 @@
 use emerald::storage::KeystoreError;
 use emerald::{self, keystore};
 use hex;
+use http;
+use hyper;
 use reqwest;
 use serde_json;
 use std::net::AddrParseError;
 use std::num;
 use std::{error, fmt, io, str, string};
 use url;
-use hyper::uri;
 
 macro_rules! from_err {
     ($x:ty) => {
@@ -46,7 +47,8 @@ from_err!(emerald::Error);
 from_err!(emerald::mnemonic::Error);
 from_err!(url::ParseError);
 from_err!(serde_json::Error);
-from_err!(uri::InvalidUri);
+from_err!(hyper::error::Error);
+from_err!(http::uri::InvalidUri);
 
 impl fmt::Display for Error {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {

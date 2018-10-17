@@ -31,6 +31,7 @@ emerald-rs = {path = "../emerald-rs"}
 regex = "0.2"
 hyper = "0.12"
 reqwest = "0.9"
+http = "0.1"
 rpassword = "1.0"
 url = "1.7.0"
 text_io = "0.1"

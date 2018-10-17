@@ -13,6 +13,7 @@ extern crate jsonrpc_core;
 extern crate lazy_static;
 #[macro_use]
 extern crate log;
+extern crate http;
 extern crate reqwest;
 extern crate rpassword;
 extern crate serde;
