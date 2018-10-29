@@ -1,7 +1,7 @@
 //! # Storage migration related commands
 
-use std::path::Path;
 use super::ExecResult;
+use std::path::Path;
 
 /// Migrate storage from old scheme to new
 ///

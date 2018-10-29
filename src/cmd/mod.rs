@@ -2,15 +2,15 @@
 
 mod account;
 mod error;
-mod transaction;
 mod migrate;
+mod transaction;
 #[macro_use]
 mod arg_handlers;
 
-use self::migrate::migrate_cmd;
 use self::account::account_cmd;
 pub use self::arg_handlers::*;
 pub use self::error::Error;
+use self::migrate::migrate_cmd;
 use self::transaction::transaction_cmd;
 use super::emerald::keystore::{KdfDepthLevel, KeyFile};
 use super::emerald::mnemonic::{gen_entropy, Language, Mnemonic, ENTROPY_BYTE_LENGTH};
