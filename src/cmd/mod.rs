@@ -3,9 +3,11 @@
 mod account;
 mod error;
 mod transaction;
+mod migrate;
 #[macro_use]
 mod arg_handlers;
 
+use self::migrate::migrate_cmd;
 use self::account::account_cmd;
 pub use self::arg_handlers::*;
 pub use self::error::Error;
@@ -23,7 +25,7 @@ use std::sync::Arc;
 
 type ExecResult = Result<(), Error>;
 
-const DEFAULT_CHAIN_NAME: &str = "mainnet";
+const DEFAULT_CHAIN_NAME: &str = "etc-main";
 const DEFAULT_UPSTREAM: &str = "127.0.0.1:8545";
 
 /// Create new command executor
@@ -46,6 +48,7 @@ pub fn execute(matches: &ArgMatches) -> ExecResult {
     let keystore = storage_ctrl.get_keystore(chain)?;
 
     match matches.subcommand() {
+        ("migrate", Some(sub_m)) => migrate_cmd(),
         ("server", Some(sub_m)) => server_cmd(sub_m, storage_ctrl.clone(), chain),
         ("account", Some(sub_m)) => account_cmd(sub_m, keystore, &env),
         ("transaction", Some(sub_m)) => transaction_cmd(sub_m, keystore, &env, chain),
