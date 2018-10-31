@@ -43,7 +43,7 @@ FLAGS:
 
 OPTIONS:
     -p, --base-path <base-path>    Set path for chain storage
-    -c, --chain <chain>            Sets a chain name [default: etc]
+    -c, --chain <chain>            Sets a chain name [default: etc-main]
 
 SUBCOMMANDS:
     account        Account related commands
