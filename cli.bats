@@ -43,8 +43,8 @@ teardown() {
     [[ "$output" == *"Created new account"* ]]
 }
 
-@test "succeeds: --chain=mainnet new --security=high --name='Test account' --description='Some description'" {
-    run $EMERALD_VAULT --chain=mainnet \
+@test "succeeds: --chain=etc-main new --security=high --name='Test account' --description='Some description'" {
+    run $EMERALD_VAULT --chain=etc-main \
         account new \
         --security-level=high \
         --name="Test account" \
