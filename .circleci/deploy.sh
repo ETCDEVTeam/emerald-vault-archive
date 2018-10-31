@@ -4,9 +4,9 @@ set -e
 
 VERSION_BASE=$(janus version -format='v%M.%m.x')
 CLI_ARCHIVE_NAME="emerald-vault-osx-$APP_VERSION"
-mv target/release/emerald ./emerald
-zip -j "$CLI_ARCHIVE_NAME.zip" emerald
-tar -zcf "$CLI_ARCHIVE_NAME.tar.gz" emerald
+mv target/release/emerald-vault ./emerald-vault
+zip -j "$CLI_ARCHIVE_NAME.zip" emerald-vault
+tar -zcf "$CLI_ARCHIVE_NAME.tar.gz" emerald-vault
 echo "Deploy to http://builds.etcdevteam.com/emerald-vault/$VERSION_BASE/"
 
 mkdir deploy
