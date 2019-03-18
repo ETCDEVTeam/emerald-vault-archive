@@ -1,6 +1,6 @@
 #!/usr/bin/env bats
 
-: ${EMERALD_VAULT:=$HOME/.cargo/bin/emerald-vault}
+: ${EMERALD_VAULT:=./target/debug/emerald-vault}
 
 
 # Setup and teardown are called surrounding EACH @test.
@@ -44,7 +44,7 @@ teardown() {
 }
 
 @test "succeeds: --chain=etc new --security=high --name='Test account' --description='Some description'" {
-    run $EMERALD_VAULT --chain=etc-main \
+    run $EMERALD_VAULT --chain=etc \
         account new \
         --security-level=high \
         --name="Test account" \
