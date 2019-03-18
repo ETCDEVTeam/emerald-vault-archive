@@ -1,6 +1,6 @@
 #!/usr/bin/env bats
 
-: ${EMERALD_VAULT:=./target/debug/emerald-vault}
+: ${EMERALD_VAULT:=$HOME/.cargo/bin/emerald-vault}
 
 
 # Setup and teardown are called surrounding EACH @test.
