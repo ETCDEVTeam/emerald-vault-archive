@@ -37,7 +37,7 @@ script:
   - cargo test --all --verbose
   - cargo build --all --verbose --release
   - cp ./target/release/emerald-vault "$HOME/.cargo/bin/"
-  - cp ./target/release/emerald "./target/release/"
+  - cp ./target/release/emerald-vault "./target/release/emerald"
   - bats cli.bats
 
 deploy:
