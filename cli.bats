@@ -54,6 +54,44 @@ teardown() {
     [[ "$output" == *"Created new account"* ]]
 }
 
+@test "succeeds: create on mainnet read on etc" {
+    run $EMERALD_VAULT --chain=mainnet \
+        account new \
+        --name="Test account c693ad" \
+        --description="Some description" \
+        <<< $'foo\n'
+    echo $output
+    [ "$status" -eq 0 ]
+    [[ "$output" == *"Created new account"* ]]
+
+    run $EMERALD_VAULT --chain=etc account list
+    local output_clean=$(echo "$output" | tr -d "\n" | sed -e "s/0x[0-9a-f]*/0xADDR/" | sed -e 's/[[:blank:]][[:blank:]]*/ /g')
+    [[ "$output_clean" == *"ADDRESS NAME 0xADDR test account c693ad"* ]]
+
+    run $EMERALD_VAULT --chain=mainnet account list
+    local output_clean=$(echo "$output" | tr -d "\n" | sed -e "s/0x[0-9a-f]*/0xADDR/" | sed -e 's/[[:blank:]][[:blank:]]*/ /g')
+    [[ "$output_clean" == *"ADDRESS NAME 0xADDR test account c693ad"* ]]
+}
+
+
+@test "succeeds: create on etc read on mainnet" {
+    run $EMERALD_VAULT --chain=etc \
+        account new \
+        --name="Test account a14272" \
+        --description="Some description" \
+        <<< $'foo\n'
+    [ "$status" -eq 0 ]
+    [[ "$output" == *"Created new account"* ]]
+
+    run $EMERALD_VAULT --chain=mainnet account list
+    local output_clean=$(echo "$output" | tr -d "\n" | sed -e "s/0x[0-9a-f]*/0xADDR/" | sed -e 's/[[:blank:]][[:blank:]]*/ /g')
+    [[ "$output_clean" == *"ADDRESS NAME 0xADDR test account a14272"* ]]
+
+    run $EMERALD_VAULT --chain=etc account list
+    local output_clean=$(echo "$output" | tr -d "\n" | sed -e "s/0x[0-9a-f]*/0xADDR/" | sed -e 's/[[:blank:]][[:blank:]]*/ /g')
+    [[ "$output_clean" == *"ADDRESS NAME 0xADDR test account a14272"* ]]
+}
+
 @test "succeeds: account list" {
     run $EMERALD_VAULT --chain=morden \
         account new \
