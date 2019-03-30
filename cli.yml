@@ -22,9 +22,11 @@ args:
         short: c
         long: chain
         help: Sets a chain name
-        default_value: mainnet
+        default_value: etc-main
         takes_value: true
 subcommands:
+    - migrate:
+        about: Migrate to a new storage  structure
     - server:
         about: Start local RPC server
         args:

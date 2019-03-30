@@ -19,7 +19,7 @@ FLAGS:
 
 OPTIONS:
     -p, --base-path <base-path>    Set path for chain storage
-    -c, --chain <chain>            Sets a chain name [default: mainnet]
+    -c, --chain <chain>            Sets a chain name [default: etc-main]
 
 SUBCOMMANDS:
     account        Account related commands
@@ -64,13 +64,25 @@ Environment variables allow you to redefine the default settings:
 
 * `EMERALD_HOST` - RPC server listen host
 * `EMERALD_PORT` - RPC server listen port
-* `EMERALD_CHAIN` - chain name (`mainnet` | `morden`), has a higher priority relative to `EMERALD_CHAIN_ID`
+* `EMERALD_CHAIN` - chain name (see Table.1, `CLI argument` column), has a higher priority relative to `EMERALD_CHAIN_ID`
 * `EMERALD_CHAIN_ID` - chain id number, has a lower priority relative to `EMERALD_CHAIN`
 * `EMERALD_GAS` - maximum gas limit to use by transaction
 * `EMERALD_GAS_PRICE` - gas cost to use by transaction (in Gwei)
 * `EMERALD_SECURITY_LEVEL` - security level (`normal` | `high` | `ultra`)
 * `EMERALD_NODE` - url to upstream node. Used for sign and send of transactions
 
+| Chain id  | Description                       | CLI argument   |
+|-----------|-----------------------------------|----------------|
+| 1         | Ethereum mainnet                  | eth            |
+| 2         | Morden (disused), Expanse mainnet | morden         |
+| 3         | Ropsten                           | ropsten        |
+| 4         | Rinkeby                           | rinkeby        |
+| 30        | Rootstock mainnet                 | rootstock-main |
+| 31        | Rootstock testnet                 | rootstock-test |
+| 42        | Kovan                             | kovan          |
+| 61        | Ethereum Classic mainnet          | etc-main       |
+| 62        | Ethereum Classic testnet          | etc-test       |
+                Table 1. Chain id and name
 
 ## Output details level
 

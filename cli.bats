@@ -37,8 +37,8 @@ teardown() {
     [[ "$output" == *"SUBCOMMANDS"* ]]
 }
 
-@test "succeeds: --chain=morden account new [empty options]" {
-    run $EMERALD_VAULT --chain=morden account new <<< $'foo\n'
+@test "succeeds: --chain=etc-morden account new [empty options]" {
+    run $EMERALD_CLI --chain=etc-morden account new <<< $'foo\n'
     [ "$status" -eq 0 ]
     [[ "$output" == *"Created new account"* ]]
 }
@@ -93,7 +93,7 @@ teardown() {
 }
 
 @test "succeeds: account list" {
-    run $EMERALD_VAULT --chain=morden \
+    run $EMERALD_CLI --chain=etc-morden \
         account new \
         <<< $'foo\n'
     [ "$status" -eq 0 ]
@@ -107,7 +107,7 @@ teardown() {
     [[ "$address" != "" ]]
     [[ "$address" == *"0x"* ]]
 
-    run $EMERALD_VAULT --chain=morden account list
+    run $EMERALD_CLI --chain=etc-morden account list
     echo "$output" # prints in case fails
     echo "$address"
 
@@ -116,7 +116,7 @@ teardown() {
 }
 
 @test "succeeds: account update" {
-    run $EMERALD_VAULT --chain=morden account new \
+    run $EMERALD_CLI --chain=etc-morden account new \
         <<< $'foo\n'
     [ "$status" -eq 0 ]
     [[ "$output" == *"Created new account"* ]]
@@ -129,20 +129,20 @@ teardown() {
     [[ "$address" != "" ]]
     [[ "$address" == *"0x"* ]]
 
-    run $EMERALD_VAULT --chain=morden account update \
+    run $EMERALD_CLI --chain=etc-morden account update \
         "$address" \
         --name="new name" \
         --description="new description"
     [ "$status" -eq 0 ]
 
-    run $EMERALD_VAULT --chain=morden account list
+    run $EMERALD_CLI --chain=etc-morden account list
 
     [ "$status" -eq 0 ]
     [[ "$output" == *"new name"* ]]
 }
 
 @test "succeeds: account strip" {
-    run $EMERALD_VAULT --chain=morden account new \
+    run $EMERALD_CLI --chain=etc-morden account new \
         <<< $'foo\n'
     [ "$status" -eq 0 ]
     [[ "$output" == *"Created new account"* ]]
@@ -155,7 +155,7 @@ teardown() {
     [[ "$address" != "" ]]
     [[ "$address" == *"0x"* ]]
 
-    run $EMERALD_VAULT --chain=morden account strip \
+    run $EMERALD_CLI --chain=etc-morden account strip \
         "$address" \
         <<< $'foo\n'
 
@@ -164,7 +164,7 @@ teardown() {
 }
 
 @test "succeeds: account hide && unhide" {
-    run $EMERALD_VAULT --chain=morden account new \
+    run $EMERALD_CLI --chain=etc-morden account new \
         <<< $'foo\n'
     [ "$status" -eq 0 ]
     [[ "$output" == *"Created new account"* ]]
@@ -178,22 +178,22 @@ teardown() {
     [[ "$address" == *"0x"* ]]
 
     # Hide account.
-    run $EMERALD_VAULT --chain=morden account hide \
+    run $EMERALD_CLI --chain=etc-morden account hide \
         "$address"
     [ "$status" -eq 0 ]
 
     # Ensure is hidden; doesn't show up in list.
-    run $EMERALD_VAULT --chain=morden account list \
+    run $EMERALD_CLI --chain=etc-morden account list \
 
     [ "$status" -eq 0 ]
     [[ "$output" != *"$address"* ]]
 
     # Unhide account.
-    run $EMERALD_VAULT --chain=morden account unhide \
+    run $EMERALD_CLI --chain=etc-morden account unhide \
         "$address"
 
     # Ensure is not hidden; shows up in list.
-    run $EMERALD_VAULT --chain=morden account list
+    run $EMERALD_CLI --chain=etc-morden account list
 
     [ "$status" -eq 0 ]
     [[ "$output" == *"$address"* ]]
