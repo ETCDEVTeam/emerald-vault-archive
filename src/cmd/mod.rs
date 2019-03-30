@@ -46,7 +46,7 @@ pub fn execute(matches: &ArgMatches) -> ExecResult {
     let keystore = storage_ctrl.get_keystore(chain)?;
 
     match matches.subcommand() {
-        ("server", Some(sub_m)) => server_cmd(sub_m, storage_ctrl.clone(), chain),
+        ("server", Some(sub_m)) => server_cmd(sub_m, storage_ctrl.clone()),
         ("account", Some(sub_m)) => account_cmd(sub_m, keystore, &env),
         ("transaction", Some(sub_m)) => transaction_cmd(sub_m, keystore, &env, chain),
         ("balance", Some(sub_m)) => balance_cmd(sub_m),
@@ -69,7 +69,6 @@ pub fn execute(matches: &ArgMatches) -> ExecResult {
 fn server_cmd(
     matches: &ArgMatches,
     storage_ctrl: Arc<Box<StorageController>>,
-    chain: &str,
 ) -> ExecResult {
     info!("Starting Emerald Vault - v{}", emerald::version());
     let host = matches.value_of("host").unwrap_or_default();
@@ -80,7 +79,7 @@ fn server_cmd(
     info!("Chain set to '{}'", chain);
     info!("Security level set to '{}'", sec_lvl);
 
-    emerald::rpc::start(&addr, chain, storage_ctrl, Some(sec_lvl));
+    emerald::rpc::start(&addr, storage_ctrl, Some(sec_lvl));
 
     Ok(())
 }
