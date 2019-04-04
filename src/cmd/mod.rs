@@ -19,7 +19,6 @@ use clap::ArgMatches;
 use rpc;
 use std::net::SocketAddr;
 use std::path::PathBuf;
-use std::sync::Arc;
 
 type ExecResult = Result<(), Error>;
 
@@ -42,13 +41,15 @@ pub fn execute(matches: &ArgMatches) -> ExecResult {
     } else {
         base_path = default_path();
     }
-    let storage_ctrl = Arc::new(Box::new(StorageController::new(base_path)?));
-    let keystore = storage_ctrl.get_keystore(chain)?;
+
+    let storage_ctrl = StorageController::new(base_path)?;
 
     match matches.subcommand() {
-        ("server", Some(sub_m)) => server_cmd(sub_m, storage_ctrl.clone(), chain),
-        ("account", Some(sub_m)) => account_cmd(sub_m, keystore, &env),
-        ("transaction", Some(sub_m)) => transaction_cmd(sub_m, keystore, &env, chain),
+        ("server", Some(sub_m)) => server_cmd(sub_m, storage_ctrl),
+        ("account", Some(sub_m)) => account_cmd(sub_m, storage_ctrl.get_keystore(chain)?, &env),
+        ("transaction", Some(sub_m)) => {
+            transaction_cmd(sub_m, storage_ctrl.get_keystore(chain)?, &env, chain)
+        }
         ("balance", Some(sub_m)) => balance_cmd(sub_m),
         ("mnemonic", Some(_)) => mnemonic_cmd(),
         ("nonce", Some(sub_m)) => nonce_cmd(sub_m),
@@ -66,21 +67,16 @@ pub fn execute(matches: &ArgMatches) -> ExecResult {
 /// * storage - `Keyfile` storage
 /// * chain - chain name
 ///
-fn server_cmd(
-    matches: &ArgMatches,
-    storage_ctrl: Arc<Box<StorageController>>,
-    chain: &str,
-) -> ExecResult {
+fn server_cmd(matches: &ArgMatches, storage_ctrl: StorageController) -> ExecResult {
     info!("Starting Emerald Vault - v{}", emerald::version());
     let host = matches.value_of("host").unwrap_or_default();
     let port = matches.value_of("port").unwrap_or_default();
     let addr = format!("{}:{}", host, port).parse::<SocketAddr>()?;
     let sec_lvl = get_security_lvl(matches)?;
 
-    info!("Chain set to '{}'", chain);
     info!("Security level set to '{}'", sec_lvl);
 
-    emerald::rpc::start(&addr, chain, storage_ctrl, Some(sec_lvl));
+    emerald::rpc::start(&addr, storage_ctrl, Some(sec_lvl));
 
     Ok(())
 }
