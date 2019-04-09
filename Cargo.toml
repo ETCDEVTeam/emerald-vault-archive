@@ -1,9 +1,9 @@
 [package]
 name = "emerald-vault"
-version = "0.25.3"
+version = "0.25.5"
 authors = ["Constantine Kryvomaz <kostiyantynk@gmail.com>"]
 description = "Console utility for secure account management"
-homepage = "http://etcdevteam.com"
+homepage = "https://emeraldwallet.io"
 repository = "https://github.com/ETCDEVTeam/emerald-vault"
 documentation = "https://docs.rs/emerald-vault"
 keywords = ["ethereum-classic", "blockchain", "crypto-wallet", "cold-storage", "cli"]
@@ -27,7 +27,7 @@ hex = "0.2"
 lazy_static = "0.2"
 serde_json = "1.0"
 serde_derive = "1.0"
-emerald-rs = "0.25.4"
+emerald-rs = "0.25.5"
 regex = "0.2"
 hyper = "0.12"
 reqwest = "0.9"
