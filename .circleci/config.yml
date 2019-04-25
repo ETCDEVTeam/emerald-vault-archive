@@ -10,7 +10,7 @@ jobs:
       - run:
           name: Install required software
           command: |
-              curl -sL https://raw.githubusercontent.com/ethereumproject/janus/master/get.sh | bash
+              curl -sL https://raw.githubusercontent.com/ETCDEVTeam/janus/master/get.sh | bash
               curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain stable
               brew install bats
               brew install gpg2
